@@ -10,5 +10,14 @@ module DatabaseValidations
         super "No unique index found with columns: #{self.columns}"
       end
     end
+
+    class UnknownDatabase < Base
+      attr_reader :database
+
+      def initialize(database)
+        @database = database
+        super "Unknown database: #{self.database}"
+      end
+    end
   end
 end

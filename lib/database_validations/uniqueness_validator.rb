@@ -2,22 +2,22 @@
 
 module DatabaseValidations
   module UniquenessValidator
-
-    def save(*args, &block)
-      super
-    rescue ActiveRecord::RecordNotUnique
-      errors.add(:token_id, :taken, value: token_id)
+    def save(*a, &b)
+      super(*a, &b)
+    rescue ActiveRecord::RecordNotUnique => e
+      columns = DatabaseValidations::Adapters.factory(self.class).columns(e.message)
+      field = DatabaseValidations::Helpers.field(self.class, columns)
+      errors.add(field, :taken, value: public_send(field))
       false
     end
 
-    def save!(*args, &block)
-      super
-    rescue ActiveRecord::RecordNotUnique
-      errors.add(:token_id, :taken, value: token_id)
+    def save!(*a, &b)
+      super(*a, &b)
+    rescue ActiveRecord::RecordNotUnique => e
+      columns = DatabaseValidations::Adapters.factory(self.class).columns(e.message)
+      field = DatabaseValidations::Helpers.field(self.class, columns)
+      errors.add(field, :taken, value: public_send(field))
       raise ActiveRecord::RecordInvalid, self
-    end
-
-    def valid?
     end
   end
 
@@ -57,37 +57,14 @@ module DatabaseValidations
     options = attributes.extract_options!
     scope = Array.wrap(options[:scope])
 
-    check_unique_index!(attributes + scope)
+    validates_db_uniqueness.concat attributes.map { |field| options.merge(field: field, columns: [field, scope].flatten.map!(&:to_s).sort!) }
 
-    prepend(Module.new do
+    DatabaseValidations::Helpers.check_unique_index!(self, attributes, scope)
 
-      define_method :save do |*a, &b|
-        super(*a, &b)
-      rescue ActiveRecord::RecordNotUnique
-        errors.add(attributes.first, :taken, value: public_send(attributes.first))
-        false
-      end
-
-      define_method :save! do |*a, &b|
-        super(*a, &b)
-      rescue ActiveRecord::RecordNotUnique
-        errors.add(attributes.first, :taken, value: public_send(attributes.first))
-        raise ActiveRecord::RecordInvalid, self
-      end
-
-      # This is not fine because then it will be triggered before each save/save!
-      # So we need to know when we directly asked about valid? or through save/save!
-      # define_method :valid? do |*a, &b|
-      #   validates_with ActiveRecord::Validations::UniquenessValidator, options.merge(attributes: Array.wrap(args))
-      #   super(*a, &b)
-      # end
-    end)
+    prepend(UniquenessValidator)
   end
 
-  private
-
-  def check_unique_index!(columns)
-    index = connection.indexes(table_name).select(&:unique).find { |index| index.columns.map(&:to_s).sort == columns.map(&:to_s).sort }
-    raise Errors::IndexNotFound.new(columns) unless index
+  def validates_db_uniqueness
+    @validates_db_uniqueness_of ||= []
   end
 end

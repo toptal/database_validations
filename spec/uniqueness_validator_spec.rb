@@ -40,12 +40,14 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
         expect { app_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
       end
 
-      it 'has the same errors' do
+      # Database raise only one unique constraint error per query
+      # That means we can't catch all validations at once if there are more than one
+      it 'has (almost) the same errors' do
         new = db_uniqueness.create(persisted_attrs)
         old = app_uniqueness.create(persisted_attrs)
 
-        expect(new.errors.messages).to eq(old.errors.messages)
-        expect(new.errors.details).to eq(old.errors.details)
+        expect(old.errors.messages).to include(new.errors.messages)
+        expect(old.errors.details).to include(new.errors.details)
       end
     end
 
@@ -55,17 +57,19 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
         expect { app_uniqueness.create!(persisted_attrs) rescue ActiveRecord::RecordInvalid }.not_to change(Entity, :count)
       end
 
-      def catch_error
+      def catch_error_message
         yield
       rescue => e
-        e
+        e.message.tr('Validation failed: ', '')
       end
 
+      # Database raise only one unique constraint error per query
+      # That means we can't catch all validations at once if there are more than one
       it 'raises validation error' do
-        new = catch_error { db_uniqueness.create!(persisted_attrs) }
-        old = catch_error { app_uniqueness.create!(persisted_attrs) }
+        new = catch_error_message { db_uniqueness.create!(persisted_attrs) }
+        old = catch_error_message { app_uniqueness.create!(persisted_attrs) }
 
-        expect(new.message).to eq(old.message)
+        expect(old).to include(new)
       end
     end
   end
@@ -121,7 +125,7 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
         define_table do |t|
           t.string :field_1
           t.string :field_2
-          t.index [:field_1, :field_2], unique: true
+          t.index [:field_2, :field_1], unique: true
         end
       end
 
@@ -129,6 +133,56 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
       let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field_1, scope: :field_2 } }
 
       let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted'} }
+
+      it_behaves_like 'ActiveRecord::Validation'
+    end
+  end
+
+  context 'with multiple attributes passed' do
+    context 'without index' do
+      before do
+        define_table do |t|
+          t.string :field_1
+          t.string :field_2
+          t.index [:field_1], unique: true
+        end
+      end
+
+      it 'raises error with first attribute without index on boot time' do
+        expect do
+          define_class do |klass|
+            klass.validates_db_uniqueness_of :field_1
+            klass.validates_db_uniqueness_of :field_2
+          end
+        end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_2"]'
+      end
+    end
+
+    context 'with indexes' do
+      before do
+        define_table do |t|
+          t.string :field_1
+          t.string :field_2
+          t.index [:field_1], unique: true
+          t.index [:field_2], unique: true
+        end
+      end
+
+      let(:db_uniqueness) do
+        define_class do |klass|
+          klass.validates_db_uniqueness_of :field_1
+          klass.validates_db_uniqueness_of :field_2
+        end
+      end
+
+      let(:app_uniqueness) do
+        define_class do |klass|
+          klass.validates_uniqueness_of :field_1
+          klass.validates_uniqueness_of :field_2
+        end
+      end
+
+      let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted_too'} }
 
       it_behaves_like 'ActiveRecord::Validation'
     end
