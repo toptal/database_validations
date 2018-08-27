@@ -15,21 +15,23 @@ module DatabaseValidations
     end
   end
 
-  def validates_db_uniqueness_of(*attributes)
-    options = attributes.extract_options!
+  module ClassMethods
+    def validates_db_uniqueness_of(*attributes)
+      options = attributes.extract_options!
 
-    validates_db_uniqueness.concat(attributes.map do |field|
-      columns = [field, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
+      validates_db_uniqueness.concat(attributes.map do |field|
+        columns = [field, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
 
-      DatabaseValidations::Helpers.check_unique_index!(self, columns)
+        DatabaseValidations::Helpers.check_unique_index!(self, columns)
 
-      options.merge(field: field, columns: columns)
-    end)
+        options.merge(field: field, columns: columns)
+      end)
 
-    prepend(UniquenessValidator)
-  end
+      prepend(UniquenessValidator)
+    end
 
-  def validates_db_uniqueness
-    @validates_db_uniqueness_of ||= []
+    def validates_db_uniqueness
+      @validates_db_uniqueness_of ||= []
+    end
   end
 end

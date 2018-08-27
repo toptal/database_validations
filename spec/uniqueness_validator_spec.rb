@@ -1,12 +1,9 @@
-require 'active_record'
-
 RSpec.describe DatabaseValidations::UniquenessValidator do
   define_db = lambda do |opts|
     ActiveRecord::Base.establish_connection(opts)
     ActiveRecord::Schema.verbose = false
 
     class Entity < ActiveRecord::Base
-      extend DatabaseValidations
       reset_column_information
     end
   end
