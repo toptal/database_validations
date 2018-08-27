@@ -24,7 +24,7 @@ Or install it yourself as:
 
     $ gem install database_validations
 
-## validate_db_uniqueness_of
+## validates_db_uniqueness_of
 
 Supported databases: `postgresql`, `mysql` and `sqlite`.
 
