@@ -1,12 +1,11 @@
 # DatabaseValidations
 
-ActiveRecord provides validations on app level but this won't guarantee the 
-consistent. In some cases, like `validates_uniqueness_of` it even executes 
-additional SQL query to our database each time we're saving the record what 
-is not very efficient. 
+ActiveRecord provides validations on app level but it won't guarantee the 
+consistent. In some cases, like `validates_uniqueness_of` it executes 
+additional SQL query to the database and that is not very efficient. 
 
-The main goal of the gem is to provide compatibility between DB constraints 
-and ActiveRecord validation with better performance and consistency.
+The main goal of the gem is to provide compatibility between database constraints 
+and ActiveRecord validations with better performance and consistency.
 
 ## Installation
 
@@ -58,7 +57,7 @@ dupe.errors.messages
 
 ### Configuration options
 
-We want to support full compatibility with existing `validates_uniqueness_of` validator. 
+We want to provide full compatibility with existing `validates_uniqueness_of` validator. 
 
 - `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
 - `message`: Specifies a custom error message (default is: "has already been taken").
