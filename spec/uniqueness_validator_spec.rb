@@ -88,6 +88,33 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
       it_behaves_like 'ActiveRecord::Validation'
     end
 
+    context 'when parent class set validation of flow' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+      end
+
+      let(:parent_db_uniqueness) { define_class(Entity) }
+      let(:parent_app_uniqueness) { define_class(Entity) }
+
+      let(:db_uniqueness) { define_class(parent_db_uniqueness) }
+      let(:app_uniqueness) { define_class(parent_app_uniqueness) }
+
+      before do
+        # Initialize validators
+        db_uniqueness.validates_db_uniqueness
+        # Add validator to parent class
+        parent_db_uniqueness.validates_db_uniqueness_of :field
+        parent_app_uniqueness.validates_uniqueness_of :field
+      end
+
+      let(:persisted_attrs) { {field: 'persisted'} }
+
+      it_behaves_like 'ActiveRecord::Validation'
+    end
+
     context 'without scope' do
       context 'without index' do
         before { define_table { |t| t.string :field } }

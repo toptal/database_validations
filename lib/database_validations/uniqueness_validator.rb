@@ -19,7 +19,7 @@ module DatabaseValidations
     def validates_db_uniqueness_of(*attributes)
       options = attributes.extract_options!
 
-      validates_db_uniqueness.concat(attributes.map do |field|
+      class_validates_db_uniqueness.concat(attributes.map do |field|
         columns = [field, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
 
         DatabaseValidations::Helpers.check_unique_index!(self, columns)
@@ -30,9 +30,13 @@ module DatabaseValidations
       prepend(UniquenessValidator)
     end
 
+    def class_validates_db_uniqueness
+      @class_validates_db_uniqueness ||= []
+    end
+
     def validates_db_uniqueness
-      @validates_db_uniqueness_of ||=
-        [(superclass.validates_db_uniqueness if superclass.respond_to?(:validates_db_uniqueness))].compact.flatten
+      derived_validations = superclass.respond_to?(:validates_db_uniqueness) ? superclass.validates_db_uniqueness : []
+      class_validates_db_uniqueness + derived_validations
     end
   end
 end
