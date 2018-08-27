@@ -31,7 +31,8 @@ module DatabaseValidations
     end
 
     def validates_db_uniqueness
-      @validates_db_uniqueness_of ||= []
+      @validates_db_uniqueness_of ||=
+        [(superclass.validates_db_uniqueness if superclass.respond_to?(:validates_db_uniqueness))].compact.flatten
     end
   end
 end

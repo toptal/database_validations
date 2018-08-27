@@ -16,13 +16,13 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
     end
   end
 
-  def define_class
-    Class.new(Entity) do |klass|
+  def define_class(parent = Entity)
+    Class.new(parent) do |klass|
       def klass.model_name
         ActiveModel::Name.new(self, nil, 'temp')
       end
 
-      yield(klass)
+      yield(klass) if block_given?
     end
   end
 
@@ -70,6 +70,22 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
           expect(old).to include(new)
         end
       end
+    end
+
+    context 'when parent class has validation' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+      end
+
+      let(:db_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_uniqueness_of :field }) }
+      let(:app_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field }) }
+
+      let(:persisted_attrs) { {field: 'persisted'} }
+
+      it_behaves_like 'ActiveRecord::Validation'
     end
 
     context 'without scope' do
