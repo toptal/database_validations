@@ -24,6 +24,8 @@ GEM
     i18n (1.1.0)
       concurrent-ruby (~> 1.0)
     minitest (5.11.3)
+    mysql2 (0.5.2)
+    pg (1.1.0)
     rake (10.5.0)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
@@ -49,6 +51,8 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.16)
   database_validations!
+  mysql2
+  pg
   rake (~> 10.0)
   rspec (~> 3.0)
   sqlite3

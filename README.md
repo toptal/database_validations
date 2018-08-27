@@ -26,6 +26,8 @@ Or install it yourself as:
 
 ## validate_db_uniqueness_of
 
+Supported databases: `postgresql`, `mysql` and `sqlite`.
+
 ### Usage
 
 ```ruby
@@ -80,7 +82,11 @@ The method, proc or string should return or evaluate to a `true` or `false` valu
 
 ## Development
 
+You also need to have installed and running `postgresql` and `mysql`. 
+And for each adapter manually create a database called `database_validations_test`. 
+
 After checking out the repo, run `bin/setup` to install dependencies.
+
 Then, run `rake spec` to run the tests. You can also run `bin/console` for 
 an interactive prompt that will allow you to experiment.
 

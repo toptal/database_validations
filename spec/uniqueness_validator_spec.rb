@@ -1,6 +1,16 @@
 require 'active_record'
 
 RSpec.describe DatabaseValidations::UniquenessValidator do
+  define_db = lambda do |opts|
+    ActiveRecord::Base.establish_connection(opts)
+    ActiveRecord::Schema.verbose = false
+
+    class Entity < ActiveRecord::Base
+      extend DatabaseValidations
+      reset_column_information
+    end
+  end
+
   def define_table
     ActiveRecord::Schema.define(:version => 1) do
       create_table :entities do |t|
@@ -19,59 +29,49 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
     end
   end
 
-  shared_examples 'ActiveRecord::Validation' do
-    let(:persisted) { Entity.create(persisted_attrs) }
+  shared_examples 'works as expected' do
+    shared_examples 'ActiveRecord::Validation' do
+      let(:persisted) { Entity.create(persisted_attrs) }
 
-    before { persisted }
+      before { persisted }
 
-    describe 'create/save/update' do
-      it 'does not create' do
-        expect { db_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
-        expect { app_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
+      describe 'create/save/update' do
+        it 'does not create' do
+          expect { db_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
+          expect { app_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
+        end
+
+        # Database raise only one unique constraint error per query
+        # That means we can't catch all validations at once if there are more than one
+        it 'has (almost) the same errors' do
+          new = db_uniqueness.create(persisted_attrs)
+          old = app_uniqueness.create(persisted_attrs)
+
+          expect(old.errors.messages).to include(new.errors.messages)
+          expect(old.errors.details).to include(new.errors.details)
+        end
       end
 
-      # Database raise only one unique constraint error per query
-      # That means we can't catch all validations at once if there are more than one
-      it 'has (almost) the same errors' do
-        new = db_uniqueness.create(persisted_attrs)
-        old = app_uniqueness.create(persisted_attrs)
+      describe 'create!/save!/update!' do
+        it 'does not create' do
+          expect { db_uniqueness.create!(persisted_attrs) rescue ActiveRecord::RecordInvalid }.not_to change(Entity, :count)
+          expect { app_uniqueness.create!(persisted_attrs) rescue ActiveRecord::RecordInvalid }.not_to change(Entity, :count)
+        end
 
-        expect(old.errors.messages).to include(new.errors.messages)
-        expect(old.errors.details).to include(new.errors.details)
-      end
-    end
+        def catch_error_message
+          yield
+        rescue => e
+          e.message.tr('Validation failed: ', '')
+        end
 
-    describe 'create!/save!/update!' do
-      it 'does not create' do
-        expect { db_uniqueness.create!(persisted_attrs) rescue ActiveRecord::RecordInvalid }.not_to change(Entity, :count)
-        expect { app_uniqueness.create!(persisted_attrs) rescue ActiveRecord::RecordInvalid }.not_to change(Entity, :count)
-      end
+        # Database raise only one unique constraint error per query
+        # That means we can't catch all validations at once if there are more than one
+        it 'raises validation error' do
+          new = catch_error_message { db_uniqueness.create!(persisted_attrs) }
+          old = catch_error_message { app_uniqueness.create!(persisted_attrs) }
 
-      def catch_error_message
-        yield
-      rescue => e
-        e.message.tr('Validation failed: ', '')
-      end
-
-      # Database raise only one unique constraint error per query
-      # That means we can't catch all validations at once if there are more than one
-      it 'raises validation error' do
-        new = catch_error_message { db_uniqueness.create!(persisted_attrs) }
-        old = catch_error_message { app_uniqueness.create!(persisted_attrs) }
-
-        expect(old).to include(new)
-      end
-    end
-  end
-
-  describe 'sqlite' do
-    before do
-      ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
-      ActiveRecord::Schema.verbose = false
-
-      class Entity < ActiveRecord::Base
-        extend DatabaseValidations
-        reset_column_information
+          expect(old).to include(new)
+        end
       end
     end
 
@@ -188,5 +188,27 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
         it_behaves_like 'ActiveRecord::Validation'
       end
     end
+  end
+
+  describe 'postgresql' do
+    before { define_db.call(adapter: 'postgresql', database: 'database_validations_test') }
+
+    after { ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true) }
+
+    include_examples 'works as expected'
+  end
+
+  describe 'sqlite3' do
+    before { define_db.call(adapter: 'sqlite3', database: ':memory:') }
+
+    include_examples 'works as expected'
+  end
+
+  describe 'mysql' do
+    before { define_db.call(adapter: 'mysql2', database: 'database_validations_test', username: 'root') }
+
+    after { ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true) }
+
+    include_examples 'works as expected'
   end
 end
