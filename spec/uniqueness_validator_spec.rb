@@ -1,16 +1,6 @@
 require 'active_record'
 
 RSpec.describe DatabaseValidations::UniquenessValidator do
-  before do
-    ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
-    ActiveRecord::Schema.verbose = false
-
-    class Entity < ActiveRecord::Base
-      extend DatabaseValidations
-      reset_column_information
-    end
-  end
-
   def define_table
     ActiveRecord::Schema.define(:version => 1) do
       create_table :entities do |t|
@@ -74,117 +64,129 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
     end
   end
 
-  context 'without scope' do
-    context 'without index' do
-      before { define_table { |t| t.string :field } }
+  describe 'sqlite' do
+    before do
+      ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+      ActiveRecord::Schema.verbose = false
 
-      it 'raises error on boot time' do
-        expect do
-          define_class { |klass| klass.validates_db_uniqueness_of :field }
-        end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field"]'
+      class Entity < ActiveRecord::Base
+        extend DatabaseValidations
+        reset_column_information
       end
     end
 
-    context 'with index' do
-      before do
-        define_table do |t|
-          t.string :field
-          t.index [:field], unique: true
+    context 'without scope' do
+      context 'without index' do
+        before { define_table { |t| t.string :field } }
+
+        it 'raises error on boot time' do
+          expect do
+            define_class { |klass| klass.validates_db_uniqueness_of :field }
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field"]'
         end
       end
 
-      let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field } }
-      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field } }
-
-      let(:persisted_attrs) { {field: 'persisted'} }
-
-      it_behaves_like 'ActiveRecord::Validation'
-    end
-  end
-
-  context 'with scope' do
-    context 'without index' do
-      before do
-        define_table do |t|
-          t.string :field_1
-          t.string :field_2
-        end
-      end
-
-      it 'raises error on boot time' do
-        expect do
-          define_class do |klass|
-            klass.validates_db_uniqueness_of :field_1, scope: :field_2
+      context 'with index' do
+        before do
+          define_table do |t|
+            t.string :field
+            t.index [:field], unique: true
           end
-        end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_1", "field_2"]'
+        end
+
+        let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field } }
+        let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field } }
+
+        let(:persisted_attrs) { {field: 'persisted'} }
+
+        it_behaves_like 'ActiveRecord::Validation'
       end
     end
 
-    context 'with index' do
-      before do
-        define_table do |t|
-          t.string :field_1
-          t.string :field_2
-          t.index [:field_2, :field_1], unique: true
+    context 'with scope' do
+      context 'without index' do
+        before do
+          define_table do |t|
+            t.string :field_1
+            t.string :field_2
+          end
+        end
+
+        it 'raises error on boot time' do
+          expect do
+            define_class do |klass|
+              klass.validates_db_uniqueness_of :field_1, scope: :field_2
+            end
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_1", "field_2"]'
         end
       end
 
-      let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field_1, scope: :field_2 } }
-      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field_1, scope: :field_2 } }
+      context 'with index' do
+        before do
+          define_table do |t|
+            t.string :field_1
+            t.string :field_2
+            t.index [:field_2, :field_1], unique: true
+          end
+        end
 
-      let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted'} }
+        let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field_1, scope: :field_2 } }
+        let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field_1, scope: :field_2 } }
 
-      it_behaves_like 'ActiveRecord::Validation'
+        let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted'} }
+
+        it_behaves_like 'ActiveRecord::Validation'
+      end
     end
-  end
 
-  context 'with multiple attributes passed' do
-    context 'without index' do
-      before do
-        define_table do |t|
-          t.string :field_1
-          t.string :field_2
-          t.index [:field_1], unique: true
+    context 'with multiple attributes passed' do
+      context 'without index' do
+        before do
+          define_table do |t|
+            t.string :field_1
+            t.string :field_2
+            t.index [:field_1], unique: true
+          end
+        end
+
+        it 'raises error with first attribute without index on boot time' do
+          expect do
+            define_class do |klass|
+              klass.validates_db_uniqueness_of :field_1
+              klass.validates_db_uniqueness_of :field_2
+            end
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_2"]'
         end
       end
 
-      it 'raises error with first attribute without index on boot time' do
-        expect do
+      context 'with indexes' do
+        before do
+          define_table do |t|
+            t.string :field_1
+            t.string :field_2
+            t.index [:field_1], unique: true
+            t.index [:field_2], unique: true
+          end
+        end
+
+        let(:db_uniqueness) do
           define_class do |klass|
             klass.validates_db_uniqueness_of :field_1
             klass.validates_db_uniqueness_of :field_2
           end
-        end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_2"]'
-      end
-    end
-
-    context 'with indexes' do
-      before do
-        define_table do |t|
-          t.string :field_1
-          t.string :field_2
-          t.index [:field_1], unique: true
-          t.index [:field_2], unique: true
         end
-      end
 
-      let(:db_uniqueness) do
-        define_class do |klass|
-          klass.validates_db_uniqueness_of :field_1
-          klass.validates_db_uniqueness_of :field_2
+        let(:app_uniqueness) do
+          define_class do |klass|
+            klass.validates_uniqueness_of :field_1
+            klass.validates_uniqueness_of :field_2
+          end
         end
+
+        let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted_too'} }
+
+        it_behaves_like 'ActiveRecord::Validation'
       end
-
-      let(:app_uniqueness) do
-        define_class do |klass|
-          klass.validates_uniqueness_of :field_1
-          klass.validates_uniqueness_of :field_2
-        end
-      end
-
-      let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted_too'} }
-
-      it_behaves_like 'ActiveRecord::Validation'
     end
   end
 end

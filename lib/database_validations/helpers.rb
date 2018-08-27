@@ -2,22 +2,25 @@ module DatabaseValidations
   module Helpers
     module_function
 
-    def check_unique_index!(model, columns, scope)
-      columns.each do |column|
-        index_columns = [column, scope].flatten.map(&:to_s)
-        index = model.connection.indexes(model.table_name).select(&:unique).find { |index| index.columns.map(&:to_s).sort == index_columns.sort }
-        raise Errors::IndexNotFound.new(index_columns) unless index
-      end
+    def check_unique_index!(model, columns)
+      index = model.connection.indexes(model.table_name).select(&:unique).find { |index| index.columns.map(&:to_s).sort == columns }
+      raise Errors::IndexNotFound.new(columns) unless index
     end
 
-    def field(model, columns)
+    def unique_field(model, columns)
       columns.map!(&:to_s).sort!
 
-      validation = model.validates_db_uniqueness.find do |options|
+      validator = model.validates_db_uniqueness.find do |options|
         options[:columns] == columns
       end
 
-      validation[:field] if validation
+      validator[:field] if validator
+    end
+
+    def handle_unique_error(instance, error)
+      columns = DatabaseValidations::Adapters.factory(instance.class).error_columns(error.message)
+      field = DatabaseValidations::Helpers.unique_field(instance.class, columns)
+      instance.errors.add(field, :taken, value: instance.public_send(field))
     end
   end
 end
