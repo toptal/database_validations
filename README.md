@@ -77,7 +77,7 @@ The method, proc or string should return or evaluate to a `true` or `false` valu
 
 ### Benchmark ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 
-#### Saving only duplicates items
+#### Saving only duplicates items ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L56))
 
 ```
 validates_db_uniqueness_of
@@ -86,7 +86,7 @@ validates_uniqueness_of
                           1.500k (±18.3%) i/s -      7.238k in   5.024355s
 ```
 
-#### Saving only unique items
+#### Saving only unique items ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L63))
 
 ```
 validates_db_uniqueness_of
@@ -95,7 +95,7 @@ validates_uniqueness_of
                           2.031k (± 8.3%) i/s -     10.241k in   5.080059s
 ```
 
-#### Each hundredth item is duplicate
+#### Each hundredth item is duplicate ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L70))
 
 ```
 validates_db_uniqueness_of
