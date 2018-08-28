@@ -25,6 +25,28 @@ Or install it yourself as:
 
 ## validates_db_uniqueness_of
 
+Advantages: 
+- Provides true uniqueness on the database level because it handles race conditions cases properly.
+- Check the existence of correct unique index at the boot time.
+- It's faster. See [Benchmark](https://github.com/toptal/database_validations#benchmark-code) section for details.
+
+Disadvantages: 
+- *(will be fixed soon)* `valid?` is not including the check of uniqueness (described in details below).
+- Cannot handle multiple validations at once because database raises only one error for all indexes per query.
+    ```ruby
+    class User < ActiveRecord::Base
+      validates_db_uniqueness_of :email
+      validates_db_uniqueness_of :name
+    end
+  
+    original = User.create(name: 'name', email: 'email@mail.com')
+    dupe = User.create(name: 'name', email: 'email@mail.com')
+    # => false
+    dupe.errors.messages
+    # => {:name=>["has already been taken"]} 
+    ```
+
+
 Supported databases: `postgresql`, `mysql` and `sqlite`.
 
 ### Usage
@@ -43,7 +65,7 @@ User.create!(email: 'email@mail.com')
 # => ActiveRecord::RecordInvalid Validation failed: email has already been taken
 ```
 
-**Note**: keep in mind, we don't check uniqueness validity through `valid?` method.
+**Note (will be fixed soon)**: keep in mind, we don't check uniqueness validity through `valid?` method.
 ```ruby
 original = User.create(email: 'email@mail.com')
 dupe = User.new(email: 'email@mail.com')
@@ -79,32 +101,14 @@ The method, proc or string should return or evaluate to a `true` or `false` valu
 
 ### Benchmark ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 
-#### Saving only duplicates items ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L56))
-
-```
-validates_db_uniqueness_of
-                          1.487k (±10.1%) i/s -      7.425k in   5.053608s
-validates_uniqueness_of
-                          1.500k (±18.3%) i/s -      7.238k in   5.024355s
-```
-
-#### Saving only unique items ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L63))
-
-```
-validates_db_uniqueness_of
-                          3.558k (± 3.5%) i/s -     18.105k in   5.094799s
-validates_uniqueness_of
-                          2.031k (± 8.3%) i/s -     10.241k in   5.080059s
-```
-
-#### Each hundredth item is duplicate ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L70))
-
-```
-validates_db_uniqueness_of
-                          3.499k (± 4.8%) i/s -     17.628k in   5.050887s
-validates_uniqueness_of
-                          2.074k (± 8.6%) i/s -     10.388k in   5.063879s
-```
+| Case                             | Validator                  | SQLite                                     | PostgreSQL                                 | MySQL                                      |
+| -------------------------------- | -------------------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
+| Save duplicate item only         | validates_db_uniqueness_of | 1.605k (± 8.4%) i/s - 7.975k in 5.010751s  | 497.935 (± 4.6%) i/s - 2.499k in 5.029835s | 637.607 (±12.1%) i/s - 3.136k in 5.012077s |
+|                                  | validates_uniqueness_of    | 1.606k (±17.9%) i/s - 7.866k in 5.092134s  | 636.891 (±13.2%) i/s - 3.168k in 5.083220s | 470.443 (±11.5%) i/s - 2.352k in 5.088618s |
+| Save unique item only            | validates_db_uniqueness_of | 3.544k (± 4.5%) i/s - 17.808k in 5.035887s | 885.103 (±30.8%) i/s - 4.004k in 5.066538s | 1.292k  (±15.8%) i/s - 6.424k in 5.108884s |
+|                                  | validates_uniqueness_of    | 1.976k (±10.9%) i/s - 9.917k in 5.081734s  | 475.022 (±25.7%) i/s - 2.223k in 5.044149s | 586.996 (± 5.8%) i/s - 2.964k in 5.066596s |
+| Each hundredth item is duplicate | validates_db_uniqueness_of | 3.330k (± 9.7%) i/s - 16.512k in 5.016920s | 1.055k  (±24.3%) i/s - 4.905k in 5.060765s | 1.408k  (± 5.1%) i/s - 7.038k in 5.011026s |
+|                                  | validates_uniqueness_of    | 1.929k (±10.4%) i/s - 9.633k in 5.055946s  | 587.146 (±11.4%) i/s - 2.925k in 5.060540s | 522.770 (±19.3%) i/s - 2.394k in 5.012263s |
 
 ## Development
 
