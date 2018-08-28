@@ -77,9 +77,9 @@ The method, proc or string should return or evaluate to a `true` or `false` valu
 
 **Note**: only few options are supported now: `scope`.
 
-### Benchmark ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
+### Benchmark ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 
-#### Saving only duplicates items ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L56))
+#### Saving only duplicates items ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L56))
 
 ```
 validates_db_uniqueness_of
@@ -88,7 +88,7 @@ validates_uniqueness_of
                           1.500k (±18.3%) i/s -      7.238k in   5.024355s
 ```
 
-#### Saving only unique items ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L63))
+#### Saving only unique items ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L63))
 
 ```
 validates_db_uniqueness_of
@@ -97,7 +97,7 @@ validates_uniqueness_of
                           2.031k (± 8.3%) i/s -     10.241k in   5.080059s
 ```
 
-#### Each hundredth item is duplicate ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L70))
+#### Each hundredth item is duplicate ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb#L70))
 
 ```
 validates_db_uniqueness_of
@@ -123,7 +123,7 @@ push git commits and tags, and push the `.gem` file to [rubygems.org](https://ru
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/djezzzl/database_validations. 
+[Bug reports](https://github.com/toptal/database_validations/issues) and [pull requests](https://github.com/toptal/database_validations/pulls) are welcome on GitHub. 
 This project is intended to be a safe, welcoming space for collaboration, and contributors are expected 
 to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
@@ -134,4 +134,8 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Code of Conduct
 
 Everyone interacting in the DatabaseValidations project’s codebases, issue trackers, chat rooms and mailing 
-lists is expected to follow the [code of conduct](https://github.com/djezzzl/database_validations/blob/master/CODE_OF_CONDUCT.md).
+lists is expected to follow the [code of conduct](https://github.com/toptal/database_validations/blob/master/CODE_OF_CONDUCT.md).
+
+## Authors
+
+- [Evgeniy Demin](https://github.com/djezzzl)

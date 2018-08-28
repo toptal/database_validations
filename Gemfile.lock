@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     database_validations (0.1.0)
-      activerecord (>= 3.2)
+      activerecord (>= 3.2, < 6)
 
 GEM
   remote: https://rubygems.org/
@@ -50,14 +50,14 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  benchmark-ips
+  benchmark-ips (~> 2.7)
   bundler (~> 1.16)
   database_validations!
-  mysql2
-  pg
+  mysql2 (~> 0.5)
+  pg (~> 1.1)
   rake (~> 10.0)
   rspec (~> 3.0)
-  sqlite3
+  sqlite3 (~> 1.3)
 
 BUNDLED WITH
    1.16.4
