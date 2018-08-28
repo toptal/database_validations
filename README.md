@@ -75,9 +75,34 @@ The method, proc or string should return or evaluate to a `true` or `false` valu
 
 **Note**: only few options are supported now: `scope`.
 
-### Benchmark
+### Benchmark ([code](https://github.com/djezzzl/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 
-<provide a benchmark here>
+#### Saving only duplicates items
+
+```
+validates_db_uniqueness_of
+                          1.487k (±10.1%) i/s -      7.425k in   5.053608s
+validates_uniqueness_of
+                          1.500k (±18.3%) i/s -      7.238k in   5.024355s
+```
+
+#### Saving only unique items
+
+```
+validates_db_uniqueness_of
+                          3.558k (± 3.5%) i/s -     18.105k in   5.094799s
+validates_uniqueness_of
+                          2.031k (± 8.3%) i/s -     10.241k in   5.080059s
+```
+
+#### Each hundredth item is duplicate
+
+```
+validates_db_uniqueness_of
+                          3.499k (± 4.8%) i/s -     17.628k in   5.050887s
+validates_uniqueness_of
+                          2.074k (± 8.6%) i/s -     10.388k in   5.063879s
+```
 
 ## Development
 
