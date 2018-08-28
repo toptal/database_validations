@@ -59,13 +59,15 @@ dupe.errors.messages
 
 We want to provide full compatibility with existing `validates_uniqueness_of` validator. 
 
+This list of options are from `validates_uniqueness_of` validator: 
+
 - `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
 - `message`: Specifies a custom error message (default is: "has already been taken").
 - `conditions`: Specify the conditions to be included as a <tt>WHERE</tt> SQL fragment to 
 limit the uniqueness constraint lookup (e.g. <tt>conditions: -> { where(status: 'active') }</tt>).
-- `case_sensitive`: Looks for an exact match. Ignored by non-text columns (+true+ by default).
-- `allow_nil`: If set to +true+, skips this validation if the attribute is +nil+ (default is +false+).
-- `allow_blank`: If set to +true+, skips this validation if the attribute is blank (default is +false+).
+- `case_sensitive`: Looks for an exact match. Ignored by non-text columns (`true` by default).
+- `allow_nil`: If set to `true`, skips this validation if the attribute is `nil` (default is `false`).
+- `allow_blank`: If set to `true`, skips this validation if the attribute is blank (default is `false`).
 - `if`: Specifies a method, proc or string to call to determine if the validation should occur 
 (e.g. <tt>if: :allow_validation</tt>, or <tt>if: Proc.new { |user| user.signup_step > 2 }</tt>). The method,
 proc or string should return or evaluate to a `true` or `false` value.
@@ -106,7 +108,7 @@ validates_uniqueness_of
 
 ## Development
 
-You also need to have installed and running `postgresql` and `mysql`. 
+You need to have installed and running `postgresql` and `mysql`. 
 And for each adapter manually create a database called `database_validations_test`. 
 
 After checking out the repo, run `bin/setup` to install dependencies.
