@@ -25,13 +25,16 @@ Or install it yourself as:
 
 ## validates_db_uniqueness_of
 
+Supported databases: `postgresql`, `mysql` and `sqlite`.
+
+### Pros and Cons
+
 Advantages: 
 - Provides true uniqueness on the database level because it handles race conditions cases properly.
 - Check the existence of correct unique index at the boot time.
 - It's faster. See [Benchmark](https://github.com/toptal/database_validations#benchmark-code) section for details.
 
 Disadvantages: 
-- *(will be fixed soon)* `valid?` is not including the check of uniqueness (described in details below).
 - Cannot handle multiple validations at once because database raises only one error for all indexes per query.
     ```ruby
     class User < ActiveRecord::Base
@@ -46,8 +49,13 @@ Disadvantages:
     # => {:name=>["has already been taken"]} 
     ```
 
+### How it works?
 
-Supported databases: `postgresql`, `mysql` and `sqlite`.
+We override `save` and `save!` methods where we rescue `ActiveRecord::RecordNotUnique` and add proper errors
+for compatibility.
+
+For `valid?` we use implementation from `validates_uniqueness_of` where we query the database (but with an improvement).
+We do it **only** if the attribute has been changed.
 
 ### Usage
 
@@ -63,18 +71,6 @@ dupe.errors.messages
 # => {:email=>["has already been taken"]}
 User.create!(email: 'email@mail.com')
 # => ActiveRecord::RecordInvalid Validation failed: email has already been taken
-```
-
-**Note (will be fixed soon)**: keep in mind, we don't check uniqueness validity through `valid?` method.
-```ruby
-original = User.create(email: 'email@mail.com')
-dupe = User.new(email: 'email@mail.com')
-dupe.valid?
-# => true
-dupe.save
-# => false 
-dupe.errors.messages
-# => {:email=>["has already been taken"]} 
 ```
 
 ### Configuration options

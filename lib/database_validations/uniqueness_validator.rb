@@ -1,42 +1,71 @@
 module DatabaseValidations
-  module UniquenessValidator
-    def save(*a, &b)
-      super(*a, &b)
+  module DatabaseUniquenessValidator
+    extend ActiveSupport::Concern
+
+    included do
+      alias_method :valid_without_uniqueness?, :valid?
+
+      def valid?(context = nil)
+        output = super(context)
+
+        self.class.validates_db_uniqueness.each do |opts|
+          validates_with(ActiveRecord::Validations::UniquenessValidator, opts) if attribute_changed?(opts[:attributes])
+        end
+
+        errors.empty? && output
+      end
+
+      alias_method :validate, :valid?
+    end
+
+    def save(options = {})
+      super
     rescue ActiveRecord::RecordNotUnique => e
       DatabaseValidations::Helpers.handle_unique_error(self, e)
       false
     end
 
-    def save!(*a, &b)
-      super(*a, &b)
+    def save!(options = {})
+      super
     rescue ActiveRecord::RecordNotUnique => e
       DatabaseValidations::Helpers.handle_unique_error(self, e)
       raise ActiveRecord::RecordInvalid, self
+    end
+
+    private
+
+    def perform_validations(options = {})
+      options[:validate] == false || valid_without_uniqueness?(options[:context])
     end
   end
 
   module ClassMethods
     def validates_db_uniqueness_of(*attributes)
+      @validates_db_uniqueness ||= []
+      @attribute_by_columns ||= {}
+
       options = attributes.extract_options!
 
-      class_validates_db_uniqueness.concat(attributes.map do |field|
-        columns = [field, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
+      @validates_db_uniqueness.concat(attributes.map do |attribute|
+        columns = [attribute, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
 
-        DatabaseValidations::Helpers.check_unique_index!(self, columns)
+        DatabaseValidations::Helpers.raise_if_index_missed!(self, columns)
+        @attribute_by_columns[columns] = attribute
 
-        options.merge(field: field, columns: columns)
+        options.merge(attributes: attribute)
       end)
 
-      prepend(UniquenessValidator)
+      include(DatabaseUniquenessValidator)
     end
 
-    def class_validates_db_uniqueness
-      @class_validates_db_uniqueness ||= []
+    def attribute_by_columns
+      derived = superclass.respond_to?(:attribute_by_columns) ? superclass.attribute_by_columns : {}
+      (@attribute_by_columns || {}).merge(derived)
     end
 
     def validates_db_uniqueness
-      derived_validations = superclass.respond_to?(:validates_db_uniqueness) ? superclass.validates_db_uniqueness : []
-      class_validates_db_uniqueness + derived_validations
+      derived = superclass.respond_to?(:validates_db_uniqueness) ? superclass.validates_db_uniqueness : []
+      (@validates_db_uniqueness || []) + derived
     end
   end
 end

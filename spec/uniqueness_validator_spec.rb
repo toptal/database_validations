@@ -1,4 +1,4 @@
-RSpec.describe DatabaseValidations::UniquenessValidator do
+RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
   define_db = lambda do |opts|
     ActiveRecord::Base.establish_connection(opts)
     ActiveRecord::Schema.verbose = false
@@ -32,6 +32,21 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
 
       before { persisted }
 
+      describe 'valid?' do
+        it 'returns false' do
+          expect(db_uniqueness.new(persisted_attrs).valid?).to eq(false)
+          expect(app_uniqueness.new(persisted_attrs).valid?).to eq(false)
+        end
+
+        it 'has exactly the same errors' do
+          new = db_uniqueness.new(persisted_attrs).tap { |e| e.valid? }
+          old = app_uniqueness.new(persisted_attrs).tap { |e| e.valid? }
+
+          expect(old.errors.messages.sort).to eq(new.errors.messages.sort)
+          expect(old.errors.details.sort).to eq(new.errors.details.sort)
+        end
+      end
+
       describe 'create/save/update' do
         it 'does not create' do
           expect { db_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
@@ -43,6 +58,9 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
         it 'has (almost) the same errors' do
           new = db_uniqueness.create(persisted_attrs)
           old = app_uniqueness.create(persisted_attrs)
+
+          expect(new.errors.messages.size).to be > 0
+          expect(new.errors.details.size).to be > 0
 
           expect(old.errors.messages).to include(new.errors.messages)
           expect(old.errors.details).to include(new.errors.details)
@@ -67,6 +85,7 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
           new = catch_error_message { db_uniqueness.create!(persisted_attrs) }
           old = catch_error_message { app_uniqueness.create!(persisted_attrs) }
 
+          expect(new.size).to be > 0
           expect(old).to include(new)
         end
       end
@@ -80,8 +99,8 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
         end
       end
 
-      let(:db_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_uniqueness_of :field }) }
-      let(:app_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field }) }
+      let(:app_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_uniqueness_of :field }) }
+      let(:db_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field }) }
 
       let(:persisted_attrs) { {field: 'persisted'} }
 
@@ -231,9 +250,10 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
   end
 
   describe 'postgresql' do
-    before { define_db.call(adapter: 'postgresql', database: 'database_validations_test') }
-
-    after { ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true) }
+    before do
+      define_db.call(adapter: 'postgresql', database: 'database_validations_test')
+      ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true)
+    end
 
     include_examples 'works as expected'
   end
@@ -245,9 +265,10 @@ RSpec.describe DatabaseValidations::UniquenessValidator do
   end
 
   describe 'mysql' do
-    before { define_db.call(adapter: 'mysql2', database: 'database_validations_test', username: 'root') }
-
-    after { ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true) }
+    before do
+      define_db.call(adapter: 'mysql2', database: 'database_validations_test', username: 'root')
+      ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true)
+    end
 
     include_examples 'works as expected'
   end
