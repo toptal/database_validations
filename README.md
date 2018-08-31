@@ -98,12 +98,12 @@ The method, proc or string should return or evaluate to a `true` or `false` valu
 
 | Case                             | Validator                  | SQLite                                     | PostgreSQL                                 | MySQL                                      |
 | -------------------------------- | -------------------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| Save duplicate item only         | validates_db_uniqueness_of | 1.605k (± 8.4%) i/s - 7.975k in 5.010751s  | 497.935 (± 4.6%) i/s - 2.499k in 5.029835s | 637.607 (±12.1%) i/s - 3.136k in 5.012077s |
-|                                  | validates_uniqueness_of    | 1.606k (±17.9%) i/s - 7.866k in 5.092134s  | 636.891 (±13.2%) i/s - 3.168k in 5.083220s | 470.443 (±11.5%) i/s - 2.352k in 5.088618s |
-| Save unique item only            | validates_db_uniqueness_of | 3.544k (± 4.5%) i/s - 17.808k in 5.035887s | 885.103 (±30.8%) i/s - 4.004k in 5.066538s | 1.292k  (±15.8%) i/s - 6.424k in 5.108884s |
-|                                  | validates_uniqueness_of    | 1.976k (±10.9%) i/s - 9.917k in 5.081734s  | 475.022 (±25.7%) i/s - 2.223k in 5.044149s | 586.996 (± 5.8%) i/s - 2.964k in 5.066596s |
-| Each hundredth item is duplicate | validates_db_uniqueness_of | 3.330k (± 9.7%) i/s - 16.512k in 5.016920s | 1.055k  (±24.3%) i/s - 4.905k in 5.060765s | 1.408k  (± 5.1%) i/s - 7.038k in 5.011026s |
-|                                  | validates_uniqueness_of    | 1.929k (±10.4%) i/s - 9.633k in 5.055946s  | 587.146 (±11.4%) i/s - 2.925k in 5.060540s | 522.770 (±19.3%) i/s - 2.394k in 5.012263s |
+| Save duplicate item only         | validates_db_uniqueness_of | 1.404k (±14.7%) i/s - 6.912k in 5.043409s  | 508.889 (± 2.8%) i/s - 2.550k in 5.015044s | 649.356 (±11.5%) i/s - 3.283k in 5.153444s |
+|                                  | validates_uniqueness_of    | 1.505k (±14.6%) i/s - 7.448k in 5.075696s  | 637.017 (±14.1%) i/s - 3.128k in 5.043434s | 473.561 (± 9.7%) i/s - 2.352k in 5.021151s |
+| Save unique item only            | validates_db_uniqueness_of | 3.241k (±18.3%) i/s - 15.375k in 5.014244s | 1.345k  (± 5.5%) i/s - 6.834k in 5.096706s | 1.439k  (±12.9%) i/s - 7.100k in 5.033603s |
+|                                  | validates_uniqueness_of    | 2.002k (±10.9%) i/s - 9.900k in 5.018449s  | 667.100 (± 4.8%) i/s - 3.350k in 5.034451s | 606.334 (± 4.9%) i/s - 3.068k in 5.072587s |
+| Each hundredth item is duplicate | validates_db_uniqueness_of | 3.534k (± 5.6%) i/s - 17.748k in 5.039277s | 1.351k  (± 6.5%) i/s - 6.750k in 5.017280s | 1.436k  (±11.6%) i/s - 7.154k in 5.062644s |
+|                                  | validates_uniqueness_of    | 2.121k (± 6.8%) i/s - 10.653k in 5.049739s | 658.199 (± 6.1%) i/s - 3.350k in 5.110176s | 596.024 (± 6.7%) i/s - 2.989k in 5.041497s |
 
 ## Development
 
