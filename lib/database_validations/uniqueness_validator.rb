@@ -9,7 +9,7 @@ module DatabaseValidations
         output = super(context)
 
         self.class.validates_db_uniqueness.each do |opts|
-          validates_with(ActiveRecord::Validations::UniquenessValidator, opts) if attribute_changed?(opts[:attributes])
+          validates_with(ActiveRecord::Validations::UniquenessValidator, opts)
         end
 
         errors.empty? && output

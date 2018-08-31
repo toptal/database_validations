@@ -54,8 +54,7 @@ Disadvantages:
 We override `save` and `save!` methods where we rescue `ActiveRecord::RecordNotUnique` and add proper errors
 for compatibility.
 
-For `valid?` we use implementation from `validates_uniqueness_of` where we query the database (but with an improvement).
-We do it **only** if the attribute has been changed.
+For `valid?` we use implementation from `validates_uniqueness_of` where we query the database.
 
 ### Usage
 
