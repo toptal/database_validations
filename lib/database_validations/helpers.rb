@@ -18,8 +18,12 @@ module DatabaseValidations
                   .map!(&:to_s)
                   .sort!
 
-      attribute = instance.class.attribute_by_columns[columns]
-      instance.errors.add(attribute, :taken, value: instance.public_send(attribute))
+      options = instance.class.validates_db_uniqueness[columns]
+
+      error_options = options.except(:case_sensitive, :scope, :conditions, :attributes)
+      error_options[:value] = instance.public_send(options[:attributes])
+
+      instance.errors.add(options[:attributes], :taken, error_options)
     end
   end
 end

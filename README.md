@@ -76,10 +76,25 @@ User.create!(email: 'email@mail.com')
 
 We want to provide full compatibility with existing `validates_uniqueness_of` validator. 
 
-This list of options are from `validates_uniqueness_of` validator: 
+This list of supported options from `validates_uniqueness_of` validator: 
 
 - `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
 - `message`: Specifies a custom error message (default is: "has already been taken").
+
+**Keep in mind**: Even when we don't support `case_sensitive`, `allow_nil` and `allow_blank` options now, the following:
+
+```ruby
+validates_db_uniqueness_of :email
+```
+
+Is the same by default as following 
+
+```ruby
+validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensitive: true
+``` 
+
+The list of options to add support:
+
 - `conditions`: Specify the conditions to be included as a <tt>WHERE</tt> SQL fragment to 
 limit the uniqueness constraint lookup (e.g. <tt>conditions: -> { where(status: 'active') }</tt>).
 - `case_sensitive`: Looks for an exact match. Ignored by non-text columns (`true` by default).
@@ -91,8 +106,6 @@ proc or string should return or evaluate to a `true` or `false` value.
 - `unless`: Specifies a method, proc or string to call to determine if the validation should not 
 occur (e.g. <tt>unless: :skip_validation</tt>, or <tt>unless: Proc.new { |user| user.signup_step <= 2 }</tt>). 
 The method, proc or string should return or evaluate to a `true` or `false` value.
-
-**Note**: only few options are supported now: `scope`.
 
 ### Benchmark ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 
