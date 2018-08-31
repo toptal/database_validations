@@ -107,6 +107,22 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
       it_behaves_like 'ActiveRecord::Validation'
     end
 
+    context 'when message is provided' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+      end
+
+      let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, message: 'already exists' } }
+      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, message: 'already exists' } }
+
+      let(:persisted_attrs) { {field: 'persisted'} }
+
+      it_behaves_like 'ActiveRecord::Validation'
+    end
+
     context 'when parent class set validation of flow' do
       before do
         define_table do |t|

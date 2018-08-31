@@ -8,8 +8,8 @@ module DatabaseValidations
       def valid?(context = nil)
         output = super(context)
 
-        self.class.validates_db_uniqueness.each do |opts|
-          validates_with(ActiveRecord::Validations::UniquenessValidator, opts)
+        self.class.validates_db_uniqueness.each_value do |opts|
+          validates_with(ActiveRecord::Validations::UniquenessValidator, opts.merge(allow_nil: true))
         end
 
         errors.empty? && output
@@ -41,31 +41,24 @@ module DatabaseValidations
 
   module ClassMethods
     def validates_db_uniqueness_of(*attributes)
-      @validates_db_uniqueness ||= []
-      @attribute_by_columns ||= {}
+      @validates_db_uniqueness ||= {}
 
       options = attributes.extract_options!
 
-      @validates_db_uniqueness.concat(attributes.map do |attribute|
+      attributes.each do |attribute|
         columns = [attribute, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
 
         DatabaseValidations::Helpers.raise_if_index_missed!(self, columns)
-        @attribute_by_columns[columns] = attribute
 
-        options.merge(attributes: attribute)
-      end)
+        @validates_db_uniqueness[columns] = options.merge(attributes: attribute)
+      end
 
       include(DatabaseUniquenessValidator)
     end
 
-    def attribute_by_columns
-      derived = superclass.respond_to?(:attribute_by_columns) ? superclass.attribute_by_columns : {}
-      (@attribute_by_columns || {}).merge(derived)
-    end
-
     def validates_db_uniqueness
-      derived = superclass.respond_to?(:validates_db_uniqueness) ? superclass.validates_db_uniqueness : []
-      (@validates_db_uniqueness || []) + derived
+      derived = superclass.respond_to?(:validates_db_uniqueness) ? superclass.validates_db_uniqueness : {}
+      derived.merge(@validates_db_uniqueness || {})
     end
   end
 end
