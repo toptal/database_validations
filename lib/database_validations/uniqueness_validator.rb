@@ -19,14 +19,14 @@ module DatabaseValidations
     end
 
     def save(options = {})
-      super
+      ActiveRecord::Base.connection.transaction(requires_new: true) { super }
     rescue ActiveRecord::RecordNotUnique => e
       DatabaseValidations::Helpers.handle_unique_error(self, e)
       false
     end
 
     def save!(options = {})
-      super
+      ActiveRecord::Base.connection.transaction(requires_new: true) { super }
     rescue ActiveRecord::RecordNotUnique => e
       DatabaseValidations::Helpers.handle_unique_error(self, e)
       raise ActiveRecord::RecordInvalid, self

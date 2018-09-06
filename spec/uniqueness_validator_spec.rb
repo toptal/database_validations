@@ -45,6 +45,21 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
           expect(old.errors.messages.sort).to eq(new.errors.messages.sort)
           expect(old.errors.details.sort).to eq(new.errors.details.sort)
         end
+
+        context 'when wrapped by transaction' do
+          it 'does not break transaction' do
+            old = app_uniqueness.new(persisted_attrs)
+            new = db_uniqueness.new(persisted_attrs)
+
+            ActiveRecord::Base.connection.transaction do
+              new.valid?
+              old.valid?
+            end
+
+            expect(old.errors.messages.sort).to eq(new.errors.messages.sort)
+            expect(old.errors.details.sort).to eq(new.errors.details.sort)
+          end
+        end
       end
 
       describe 'create/save/update' do
@@ -65,6 +80,24 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
           expect(old.errors.messages).to include(new.errors.messages)
           expect(old.errors.details).to include(new.errors.details)
         end
+
+        context 'when wrapped by transaction' do
+          it 'does not break transaction' do
+            new = db_uniqueness.new(persisted_attrs)
+            old = app_uniqueness.new(persisted_attrs)
+
+            ActiveRecord::Base.connection.transaction do
+              new.save
+              old.save
+            end
+
+            expect(new.errors.messages.size).to be > 0
+            expect(new.errors.details.size).to be > 0
+
+            expect(old.errors.messages).to include(new.errors.messages)
+            expect(old.errors.details).to include(new.errors.details)
+          end
+        end
       end
 
       describe 'create!/save!/update!' do
@@ -75,8 +108,8 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
 
         def catch_error_message
           yield
-        rescue => e
-          e.message.tr('Validation failed: ', '')
+        rescue ActiveRecord::RecordInvalid => e
+          e.message.sub('Validation failed: ', '')
         end
 
         # Database raise only one unique constraint error per query
@@ -87,6 +120,22 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
 
           expect(new.size).to be > 0
           expect(old).to include(new)
+        end
+
+        context 'when wrapped by transaction' do
+          it 'breaks transaction properly' do
+            new = db_uniqueness.new(persisted_attrs)
+            old = app_uniqueness.new(persisted_attrs)
+
+            error_message = catch_error_message do
+              ActiveRecord::Base.connection.transaction do
+                new.save!
+                old.save!
+              end
+            end
+
+            expect(error_message.size).to be > 0
+          end
         end
       end
     end
