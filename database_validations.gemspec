@@ -19,7 +19,7 @@ and ActiveRecord validations with better performance and consistency.}
   spec.license       = "MIT"
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
-  spec.files         = Dir['lib/**'] + %w[README.md LICENSE.txt]
+  spec.files         = Dir['lib/**/*'] + %w[README.md LICENSE.txt]
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activerecord", ">= 3.2", "< 6"
