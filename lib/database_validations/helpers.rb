@@ -3,8 +3,8 @@ module DatabaseValidations
     module_function
 
     def raise_if_index_missed!(model, columns)
-      connection = model.connection rescue return
-      index = connection.indexes(model.table_name)
+      index = model.connection
+                .indexes(model.table_name)
                 .select(&:unique)
                 .find { |index| index.columns.map(&:to_s).sort == columns }
 
