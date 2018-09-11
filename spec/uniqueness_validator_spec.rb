@@ -214,8 +214,6 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
       let(:app_uniqueness) { define_class(parent_app_uniqueness) }
 
       before do
-        # Initialize validators
-        db_uniqueness.validates_db_uniqueness
         # Add validator to parent class
         parent_db_uniqueness.validates_db_uniqueness_of :field
         parent_app_uniqueness.validates_uniqueness_of :field
