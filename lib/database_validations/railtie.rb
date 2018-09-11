@@ -1,6 +1,6 @@
 require 'active_record/railtie'
 
-module StrongMigrations
+module DatabaseValidations
   class Railtie < Rails::Railtie
     rake_tasks do
       load 'tasks/database_validations.rake'
