@@ -31,7 +31,8 @@ Supported databases: `postgresql`, `mysql` and `sqlite`.
 
 Advantages: 
 - Provides true uniqueness on the database level because it handles race conditions cases properly.
-- Check the existence of correct unique index at the boot time.
+- Check the existence of correct unique index at the boot time. Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` 
+if you want to skip it in some cases.
 - It's faster. See [Benchmark](https://github.com/toptal/database_validations#benchmark-code) section for details.
 
 Disadvantages: 
