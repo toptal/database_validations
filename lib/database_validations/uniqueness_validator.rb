@@ -8,7 +8,8 @@ module DatabaseValidations
       def valid?(context = nil)
         output = super(context)
 
-        self.class.validates_db_uniqueness.each_value do |opts|
+
+        DatabaseValidations::Helpers.uniqueness_validators_options(self.class).each_value do |opts|
           validates_with(ActiveRecord::Validations::UniquenessValidator, opts.merge(allow_nil: true))
         end
 
@@ -41,24 +42,19 @@ module DatabaseValidations
 
   module ClassMethods
     def validates_db_uniqueness_of(*attributes)
-      @validates_db_uniqueness ||= {}
+      @validates_db_uniqueness_opts ||= {}
 
       options = attributes.extract_options!
 
       attributes.each do |attribute|
         columns = [attribute, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
 
-        DatabaseValidations::Helpers.raise_if_index_missed!(self, columns)
+        DatabaseValidations::Helpers.raise_if_index_missed!(self, columns) unless ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
 
-        @validates_db_uniqueness[columns] = options.merge(attributes: attribute)
+        @validates_db_uniqueness_opts[columns] = options.merge(attributes: attribute)
       end
 
       include(DatabaseUniquenessValidator)
-    end
-
-    def validates_db_uniqueness
-      derived = superclass.respond_to?(:validates_db_uniqueness) ? superclass.validates_db_uniqueness : {}
-      derived.merge(@validates_db_uniqueness || {})
     end
   end
 end

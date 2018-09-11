@@ -140,6 +140,51 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
       end
     end
 
+    context 'when SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK is provided' do
+      before do
+        define_table do |t|
+          t.string :field
+        end
+      end
+
+      it 'does not raise an error' do
+        ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'
+
+        expect do
+          define_class { |klass| klass.validates_db_uniqueness_of :field }
+        end.not_to raise_error
+
+        ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = nil
+      end
+    end
+
+    context 'when wrapped transaction is rolled back' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+      end
+
+      let(:app_uniqueness) { define_class(Entity) { |klass| klass.validates_uniqueness_of :field } }
+      let(:db_uniqueness) { define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field } }
+
+      it 'does not create rows' do
+        new = db_uniqueness.new(field: '0')
+        old = app_uniqueness.new(field: '1')
+
+        ActiveRecord::Base.connection.transaction do
+          new.save
+          old.save
+          raise 'rollback'
+        end rescue
+
+        expect(Entity.count).to eq(0)
+        expect(new.persisted?).to eq(false)
+        expect(old.persisted?).to eq(false)
+      end
+    end
+
     context 'when parent class has validation' do
       before do
         define_table do |t|
@@ -187,8 +232,6 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
       let(:app_uniqueness) { define_class(parent_app_uniqueness) }
 
       before do
-        # Initialize validators
-        db_uniqueness.validates_db_uniqueness
         # Add validator to parent class
         parent_db_uniqueness.validates_db_uniqueness_of :field
         parent_app_uniqueness.validates_uniqueness_of :field
@@ -206,7 +249,10 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
         it 'raises error on boot time' do
           expect do
             define_class { |klass| klass.validates_db_uniqueness_of :field }
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field"]'
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with columns: ["field"]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
         end
       end
 
@@ -241,7 +287,10 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
             define_class do |klass|
               klass.validates_db_uniqueness_of :field_1, scope: :field_2
             end
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_1", "field_2"]'
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with columns: ["field_1", "field_2"]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
         end
       end
 
@@ -279,7 +328,10 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
               klass.validates_db_uniqueness_of :field_1
               klass.validates_db_uniqueness_of :field_2
             end
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_2"]'
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with columns: ["field_2"]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
         end
       end
 
