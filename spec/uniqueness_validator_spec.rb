@@ -140,6 +140,24 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
       end
     end
 
+    context 'when SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK is provided' do
+      before do
+        define_table do |t|
+          t.string :field
+        end
+      end
+
+      it 'does not raise an error' do
+        ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'
+
+        expect do
+          define_class { |klass| klass.validates_db_uniqueness_of :field }
+        end.not_to raise_error
+
+        ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = nil
+      end
+    end
+
     context 'when wrapped transaction is rolled back' do
       before do
         define_table do |t|
@@ -231,7 +249,10 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
         it 'raises error on boot time' do
           expect do
             define_class { |klass| klass.validates_db_uniqueness_of :field }
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field"]'
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with columns: ["field"]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
         end
       end
 
@@ -266,7 +287,10 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
             define_class do |klass|
               klass.validates_db_uniqueness_of :field_1, scope: :field_2
             end
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_1", "field_2"]'
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with columns: ["field_1", "field_2"]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
         end
       end
 
@@ -304,7 +328,10 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
               klass.validates_db_uniqueness_of :field_1
               klass.validates_db_uniqueness_of :field_2
             end
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound, 'No unique index found with columns: ["field_2"]'
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with columns: ["field_2"]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
         end
       end
 

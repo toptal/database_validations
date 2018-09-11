@@ -7,7 +7,9 @@ module DatabaseValidations
 
       def initialize(columns)
         @columns = columns.map(&:to_s)
-        super "No unique index found with columns: #{self.columns}"
+        super "No unique index found with columns: #{self.columns}. "\
+              "Use ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']=true in case you want to skip the check. "\
+              "For example, when you run migrations."
       end
     end
 

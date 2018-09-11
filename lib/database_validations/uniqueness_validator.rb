@@ -49,7 +49,7 @@ module DatabaseValidations
       attributes.each do |attribute|
         columns = [attribute, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
 
-        DatabaseValidations::Helpers.raise_if_index_missed!(self, columns)
+        DatabaseValidations::Helpers.raise_if_index_missed!(self, columns) unless ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
 
         @validates_db_uniqueness_opts[columns] = options.merge(attributes: attribute)
       end
