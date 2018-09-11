@@ -140,6 +140,33 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
       end
     end
 
+    context 'when wrapped transaction is rolled back' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+      end
+
+      let(:app_uniqueness) { define_class(Entity) { |klass| klass.validates_uniqueness_of :field } }
+      let(:db_uniqueness) { define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field } }
+
+      it 'does not create rows' do
+        new = db_uniqueness.new(field: '0')
+        old = app_uniqueness.new(field: '1')
+
+        ActiveRecord::Base.connection.transaction do
+          new.save
+          old.save
+          raise 'rollback'
+        end rescue
+
+        expect(Entity.count).to eq(0)
+        expect(new.persisted?).to eq(false)
+        expect(old.persisted?).to eq(false)
+      end
+    end
+
     context 'when parent class has validation' do
       before do
         define_table do |t|
