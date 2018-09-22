@@ -276,6 +276,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             define_class { |klass| klass.validates_db_uniqueness_of :field }
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with columns: ["field"]. '\
+                             'Available indexes are: []. '\
                              'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
                              'For example, when you run migrations.'
         end
@@ -314,6 +315,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             end
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with columns: ["field_1", "field_2"]. '\
+                             'Available indexes are: []. '\
                              'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
                              'For example, when you run migrations.'
         end
@@ -355,6 +357,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             end
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with columns: ["field_2"]. '\
+                             'Available indexes are: [columns: ["field_1"]]. '\
                              'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
                              'For example, when you run migrations.'
         end
@@ -398,6 +401,36 @@ RSpec.describe 'validates_db_uniqueness_of' do
     end
 
     include_examples 'works as expected'
+
+    context 'when conditions option is provided' do
+      before do
+        define_table do |t|
+          t.integer :field
+          t.index [:field], unique: true, where: '(field > 1)'
+        end
+      end
+
+      context 'when where clause is different' do
+        it 'raises error' do
+          expect do
+            define_class { |klass| klass.validates_db_uniqueness_of :field, where: '(field < 1)' }
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with columns: ["field"] and where: (field < 1). '\
+                             'Available indexes are: [columns: ["field"] and where: (field > 1)]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
+        end
+      end
+
+      context 'when where clause is the same' do
+        let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, where: '(field > 1)' } }
+        let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, conditions: -> { where('(field > 1)') } } }
+
+        let(:persisted_attrs) { {field: 2} }
+
+        it_behaves_like 'ActiveRecord::Validation'
+      end
+    end
   end
 
   describe 'sqlite3' do

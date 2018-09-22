@@ -12,8 +12,8 @@ module DatabaseValidations
         indexes.find { |index| index.name == index_name }
       end
 
-      def find_index_by_columns(index_columns)
-        indexes.find { |index| index.columns.map(&:to_s).sort == index_columns }
+      def find_index(columns, where)
+        indexes.find { |index| index.columns.map(&:to_s).sort == columns && index.where == where }
       end
 
       def indexes

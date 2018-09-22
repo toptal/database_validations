@@ -77,7 +77,7 @@ User.create!(email: 'email@mail.com')
 
 We want to provide full compatibility with existing `validates_uniqueness_of` validator. 
 
-This list of supported options from `validates_uniqueness_of` validator: 
+List of supported options from `validates_uniqueness_of` validator: 
 
 - `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
 - `message`: Specifies a custom error message (default is: "has already been taken").
@@ -88,16 +88,21 @@ This list of supported options from `validates_uniqueness_of` validator:
 validates_db_uniqueness_of :email
 ```
 
-Is the same by default as following 
+Is the same by default as the following 
 
 ```ruby
 validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensitive: true
 ``` 
 
+List of supported options for `PostgreSQL` only:
+
+- `where`: Specify the conditions to be included as a <tt>WHERE</tt> SQL fragment to 
+limit the uniqueness constraint lookup (e.g. <tt>where: "(status = 'active')"</tt>).
+For backward compatibility, this will be converted automatically 
+to <tt>conditions: -> { where("(status = 'active')") }</tt> for `valid?` method.
+
 The list of options to add support:
 
-- `conditions`: Specify the conditions to be included as a <tt>WHERE</tt> SQL fragment to 
-limit the uniqueness constraint lookup (e.g. <tt>conditions: -> { where(status: 'active') }</tt>).
 - `case_sensitive`: Looks for an exact match. Ignored by non-text columns (`true` by default).
 - `allow_nil`: If set to `true`, skips this validation if the attribute is `nil` (default is `false`).
 - `allow_blank`: If set to `true`, skips this validation if the attribute is blank (default is `false`).

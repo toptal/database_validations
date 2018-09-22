@@ -10,14 +10,18 @@ module DatabaseValidations
     end
 
     def handle_unique_error(instance)
-      error_options = options.except(:case_sensitive, :scope, :conditions, :attributes)
+      error_options = options.except(:case_sensitive, :scope, :conditions, :attributes, :where)
       error_options[:value] = instance.public_send(options[:attributes])
 
       instance.errors.add(options[:attributes], :taken, error_options)
     end
 
     def validates_uniqueness_options
-      options.merge(allow_nil: true, case_sensitive: true, allow_blank: false)
+      where_clause_str = where_clause
+
+      options.except(:where)
+        .merge(allow_nil: true, case_sensitive: true, allow_blank: false)
+        .tap { |opts| opts[:conditions] = -> { where(where_clause_str) } if where_clause }
     end
 
     def key
@@ -26,6 +30,10 @@ module DatabaseValidations
 
     def columns
       @columns ||= Helpers.unify_columns(field, Array.wrap(options[:scope]))
+    end
+
+    def where_clause
+      @where_clause ||= options[:where]
     end
 
     def raise_if_unsupported_options!
@@ -37,7 +45,7 @@ module DatabaseValidations
     end
 
     def raise_if_index_missed!
-      raise Errors::IndexNotFound.new(columns) unless adapter.find_index_by_columns(columns)
+      raise Errors::IndexNotFound.new(columns, where_clause, adapter.indexes) unless adapter.find_index(columns, where_clause)
     end
 
     private
