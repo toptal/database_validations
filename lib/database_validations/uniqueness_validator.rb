@@ -1,5 +1,5 @@
 module DatabaseValidations
-  module DatabaseUniquenessValidator
+  module UniquenessHandlers
     extend ActiveSupport::Concern
 
     included do
@@ -8,9 +8,8 @@ module DatabaseValidations
       def valid?(context = nil)
         output = super(context)
 
-
-        DatabaseValidations::Helpers.uniqueness_validators_options(self.class).each_value do |opts|
-          validates_with(ActiveRecord::Validations::UniquenessValidator, opts.merge(allow_nil: true))
+        Helpers.each_validator(self.class) do |validator|
+          validates_with(ActiveRecord::Validations::UniquenessValidator, validator.validates_uniqueness_options)
         end
 
         errors.empty? && output
@@ -22,14 +21,14 @@ module DatabaseValidations
     def save(options = {})
       ActiveRecord::Base.connection.transaction(requires_new: true) { super }
     rescue ActiveRecord::RecordNotUnique => e
-      DatabaseValidations::Helpers.handle_unique_error(self, e)
+      Helpers.handle_unique_error!(self, e)
       false
     end
 
     def save!(options = {})
       ActiveRecord::Base.connection.transaction(requires_new: true) { super }
     rescue ActiveRecord::RecordNotUnique => e
-      DatabaseValidations::Helpers.handle_unique_error(self, e)
+      Helpers.handle_unique_error!(self, e)
       raise ActiveRecord::RecordInvalid, self
     end
 
@@ -42,19 +41,15 @@ module DatabaseValidations
 
   module ClassMethods
     def validates_db_uniqueness_of(*attributes)
-      @validates_db_uniqueness_opts ||= {}
+      @validates_db_uniqueness_opts ||= DatabaseValidations::UniquenessOptionsStorage.new(self)
 
       options = attributes.extract_options!
 
       attributes.each do |attribute|
-        columns = [attribute, Array.wrap(options[:scope])].flatten!.map!(&:to_s).sort!
-
-        DatabaseValidations::Helpers.raise_if_index_missed!(self, columns) unless ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
-
-        @validates_db_uniqueness_opts[columns] = options.merge(attributes: attribute)
+        @validates_db_uniqueness_opts.push(attribute, options.merge(attributes: attribute))
       end
 
-      include(DatabaseUniquenessValidator)
+      include(DatabaseValidations::UniquenessHandlers)
     end
   end
 end

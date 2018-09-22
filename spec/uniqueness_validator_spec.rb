@@ -1,4 +1,4 @@
-RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
+RSpec.describe 'validates_db_uniqueness_of' do
   define_db = lambda do |opts|
     ActiveRecord::Base.establish_connection(opts)
     ActiveRecord::Schema.verbose = false
@@ -155,6 +155,31 @@ RSpec.describe DatabaseValidations::DatabaseUniquenessValidator do
         end.not_to raise_error
 
         ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = nil
+      end
+    end
+
+    context 'when has not proper validator' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+      end
+
+      let(:klass) { define_class }
+      let(:attributes) { {field: 0} }
+
+      it 'raises unique constrain error' do
+        klass.create(attributes)
+        expect { klass.create(attributes) }.to raise_error ActiveRecord::RecordNotUnique
+      end
+    end
+
+    context 'when has not supported option' do
+      it 'raises error' do
+        expect do
+          define_class { |klass| klass.validates_db_uniqueness_of :field, unsupported_option: true }
+        end.to raise_error DatabaseValidations::Errors::OptionIsNotSupported
       end
     end
 
