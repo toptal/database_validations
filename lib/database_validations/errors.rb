@@ -21,5 +21,16 @@ module DatabaseValidations
         super "Unknown database: #{self.database}"
       end
     end
+
+    class OptionIsNotSupported < Base
+      attr_reader :option, :database, :supported_options
+
+      def initialize(option, database, supported_options)
+        @option = option
+        @database = database
+        @supported_options = supported_options
+        super "Option #{self.option} is not supported for #{self.database}. Supported options are: #{self.supported_options}"
+      end
+    end
   end
 end

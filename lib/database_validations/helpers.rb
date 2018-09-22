@@ -2,39 +2,37 @@ module DatabaseValidations
   module Helpers
     module_function
 
-    def raise_if_index_missed!(model, columns)
-      index = model.connection
-                .indexes(model.table_name)
-                .select(&:unique)
-                .find { |index| index.columns.map(&:to_s).sort == columns }
+    def handle_unique_error!(instance, error)
+      key = generate_key(Adapters.factory(instance.class).error_columns(error.message))
 
-      raise Errors::IndexNotFound.new(columns) unless index
-    end
-
-    def handle_unique_error(instance, error)
-      columns = DatabaseValidations::Adapters
-                  .factory(instance.class)
-                  .error_columns(error.message)
-                  .map!(&:to_s)
-                  .sort!
-
-      options = uniqueness_validators_options(instance.class)[columns]
-
-      error_options = options.except(:case_sensitive, :scope, :conditions, :attributes)
-      error_options[:value] = instance.public_send(options[:attributes])
-
-      instance.errors.add(options[:attributes], :taken, error_options)
-    end
-
-    def uniqueness_validators_options(klass)
-      validators_options = klass.instance_variable_get(:'@validates_db_uniqueness_opts') || {}
-
-      while klass.superclass.respond_to?(:validates_db_uniqueness_of)
-        validators_options.reverse_merge!(klass.superclass.instance_variable_get(:'@validates_db_uniqueness_opts') || {})
-        klass = klass.superclass
+      each_options_storage(instance.class) do |storage|
+        # storage has this then return
+        return storage[key].handle_unique_error(instance) if storage[key]
       end
 
-      validators_options
+      raise error
+    end
+
+    def each_options_storage(klass)
+      while klass.respond_to?(:validates_db_uniqueness_of)
+        storage = klass.instance_variable_get(:'@validates_db_uniqueness_opts')
+        yield(storage) if storage
+        klass = klass.superclass
+      end
+    end
+
+    def each_validator(klass)
+      each_options_storage(klass) do |storage|
+        storage.each_validator { |validator| yield(validator) }
+      end
+    end
+
+    def unify_columns(*columns)
+      columns.flatten.map(&:to_s).sort
+    end
+
+    def generate_key(*columns)
+      unify_columns(columns).join('__')
     end
   end
 end
