@@ -6,7 +6,6 @@ module DatabaseValidations
       key = generate_key(Adapters.factory(instance.class).error_columns(error.message))
 
       each_options_storage(instance.class) do |storage|
-        # storage has this then return
         return storage[key].handle_unique_error(instance) if storage[key]
       end
 
