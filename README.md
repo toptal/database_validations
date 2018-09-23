@@ -81,8 +81,27 @@ List of supported options from `validates_uniqueness_of` validator:
 
 - `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
 - `message`: Specifies a custom error message (default is: "has already been taken").
+- `if`: Specifies a method or proc to call to determine if the validation should occur 
+(e.g. <tt>if: :allow_validation</tt>, or <tt>if: Proc.new { |user| user.signup_step > 2 }</tt>). The method or
+proc should return or evaluate to a `true` or `false` value.
+- `unless`: Specifies a method or proc to call to determine if the validation should not 
+occur (e.g. <tt>unless: :skip_validation</tt>, or <tt>unless: Proc.new { |user| user.signup_step <= 2 }</tt>). 
+The method or proc should return or evaluate to a `true` or `false` value.
 
-**Keep in mind**: Even when we don't support `case_sensitive`, `allow_nil` and `allow_blank` options now, the following:
+**Keep in mind**: Both `if` and `unless` options are used only for `valid?` method and provided only for performance reason. 
+
+```ruby
+class User < ActiveRecord::Base
+  validates_db_uniqueness_of :email, if: -> { email && email_changed? }
+end 
+
+user = User.create(email: 'email@mail.com', field: 'field')
+user.field = 'another'
+
+user.valid? # Will not query the database
+```
+
+**Backward compatibility**: Even when we don't support `case_sensitive`, `allow_nil` and `allow_blank` options now, the following:
 
 ```ruby
 validates_db_uniqueness_of :email
@@ -106,12 +125,6 @@ The list of options to add support:
 - `case_sensitive`: Looks for an exact match. Ignored by non-text columns (`true` by default).
 - `allow_nil`: If set to `true`, skips this validation if the attribute is `nil` (default is `false`).
 - `allow_blank`: If set to `true`, skips this validation if the attribute is blank (default is `false`).
-- `if`: Specifies a method, proc or string to call to determine if the validation should occur 
-(e.g. <tt>if: :allow_validation</tt>, or <tt>if: Proc.new { |user| user.signup_step > 2 }</tt>). The method,
-proc or string should return or evaluate to a `true` or `false` value.
-- `unless`: Specifies a method, proc or string to call to determine if the validation should not 
-occur (e.g. <tt>unless: :skip_validation</tt>, or <tt>unless: Proc.new { |user| user.signup_step <= 2 }</tt>). 
-The method, proc or string should return or evaluate to a `true` or `false` value.
 
 ### Benchmark ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 

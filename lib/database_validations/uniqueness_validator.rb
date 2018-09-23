@@ -9,7 +9,9 @@ module DatabaseValidations
         output = super(context)
 
         Helpers.each_validator(self.class) do |validator|
-          validates_with(ActiveRecord::Validations::UniquenessValidator, validator.validates_uniqueness_options)
+          if validator.if_and_unless_pass?(self)
+            validates_with(ActiveRecord::Validations::UniquenessValidator, validator.validates_uniqueness_options)
+          end
         end
 
         errors.empty? && output

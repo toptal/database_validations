@@ -158,6 +158,183 @@ RSpec.describe 'validates_db_uniqueness_of' do
       end
     end
 
+    shared_examples 'when condition options return false' do
+      describe '#valid?' do
+        it 'skips querying the database' do
+          StringIO.open do |io|
+            klass.logger = Logger.new(io)
+            expect { klass.new(field: 0).valid? }.not_to change(io, :string)
+            klass.logger = nil
+          end
+        end
+      end
+    end
+
+    shared_examples 'when condition options return true' do
+      describe '#valid?' do
+        it 'queries the database' do
+          StringIO.open do |io|
+            klass.logger = Logger.new(io)
+            expect { klass.new(field: 0).valid? }.to change(io, :string)
+            klass.logger = Logger.new(nil)
+          end
+        end
+      end
+    end
+
+    context 'when condition options are passed' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+      end
+
+      context 'when if option is passed' do
+        context 'when if is a symbol' do
+          context 'when method returns false' do
+            let(:klass) do
+              define_class do |klass|
+                klass.validates_db_uniqueness_of :field, if: :skip
+                klass.define_method(:skip) { false }
+              end
+            end
+
+            include_examples 'when condition options return false'
+          end
+
+          context 'when method returns true' do
+            let(:klass) do
+              define_class do |klass|
+                klass.validates_db_uniqueness_of :field, if: :skip
+                klass.define_method(:skip) { true }
+              end
+            end
+
+            include_examples 'when condition options return true'
+          end
+        end
+
+        context 'when if is a proc' do
+          context 'when proc has argument' do
+            context 'when proc returns false' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, if: -> (entity) { entity.nil? }
+                end
+              end
+
+              include_examples 'when condition options return false'
+            end
+
+            context 'when proc returns true' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, if: -> (entity) { !entity.nil? }
+                end
+              end
+
+              include_examples 'when condition options return true'
+            end
+          end
+
+          context 'when proc has no argument' do
+            context 'when proc returns false' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, if: -> { nil? }
+                end
+              end
+
+              include_examples 'when condition options return false'
+            end
+
+            context 'when proc returns true' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, if: -> { !nil? }
+                end
+              end
+
+              include_examples 'when condition options return true'
+            end
+          end
+        end
+      end
+
+      context 'when unless option is passed' do
+        context 'when unless is a symbol' do
+          context 'when method returns true' do
+            let(:klass) do
+              define_class do |klass|
+                klass.validates_db_uniqueness_of :field, unless: :skip
+                klass.define_method(:skip) { true }
+              end
+            end
+
+            include_examples 'when condition options return false'
+          end
+
+          context 'when method returns false' do
+            let(:klass) do
+              define_class do |klass|
+                klass.validates_db_uniqueness_of :field, unless: :skip
+                klass.define_method(:skip) { false }
+              end
+            end
+
+            include_examples 'when condition options return true'
+          end
+        end
+
+        context 'when unless is a proc' do
+          context 'when proc has argument' do
+            context 'when proc returns true' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, unless: -> (entity) { !entity.nil? }
+                end
+              end
+
+              include_examples 'when condition options return false'
+            end
+
+            context 'when proc returns false' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, unless: -> (entity) { entity.nil? }
+                end
+              end
+
+              include_examples 'when condition options return true'
+            end
+          end
+
+          context 'when proc has no argument' do
+            context 'when proc returns true' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, unless: -> { !nil? }
+                end
+              end
+
+              include_examples 'when condition options return false'
+            end
+
+            context 'when proc returns false' do
+              let(:klass) do
+                define_class do |klass|
+                  klass.validates_db_uniqueness_of :field, unless: -> { nil? }
+                end
+              end
+
+              include_examples 'when condition options return true'
+            end
+          end
+        end
+      end
+    end
+
     context 'when has not proper validator' do
       before do
         define_table do |t|

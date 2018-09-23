@@ -1,7 +1,7 @@
 module DatabaseValidations
   module Adapters
     class PostgresqlAdapter < BaseAdapter
-      SUPPORTED_OPTIONS = %i[scope message where].freeze
+      SUPPORTED_OPTIONS = %i[scope message where if unless].freeze
       ADAPTER = :postgresql
 
       def error_columns(error_message)

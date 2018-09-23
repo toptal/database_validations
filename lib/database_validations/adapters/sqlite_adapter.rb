@@ -1,7 +1,7 @@
 module DatabaseValidations
   module Adapters
     class SqliteAdapter < BaseAdapter
-      SUPPORTED_OPTIONS = %i[scope message].freeze
+      SUPPORTED_OPTIONS = %i[scope message if unless].freeze
       ADAPTER = :sqlite
 
       def error_columns(error_message)
