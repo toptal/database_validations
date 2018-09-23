@@ -24,6 +24,11 @@ module DatabaseValidations
         .tap { |opts| opts[:conditions] = -> { where(where_clause_str) } if where_clause }
     end
 
+    def if_and_unless_pass?(instance)
+      (options[:if].nil? || condition_passes?(options[:if], instance)) &&
+        (options[:unless].nil? || !condition_passes?(options[:unless], instance))
+    end
+
     def key
       @key ||= Helpers.generate_key(columns)
     end
@@ -34,6 +39,20 @@ module DatabaseValidations
 
     def where_clause
       @where_clause ||= options[:where]
+    end
+
+    private
+
+    attr_reader :adapter, :field, :options
+
+    def condition_passes?(condition, instance)
+      if condition.is_a?(Symbol)
+        instance.__send__(condition)
+      elsif condition.is_a?(Proc) && condition.arity == 0
+        instance.instance_exec(&condition)
+      else
+        instance.instance_eval(&condition)
+      end
     end
 
     def raise_if_unsupported_options!
@@ -47,10 +66,6 @@ module DatabaseValidations
     def raise_if_index_missed!
       raise Errors::IndexNotFound.new(columns, where_clause, adapter.indexes) unless adapter.find_index(columns, where_clause)
     end
-
-    private
-
-    attr_reader :adapter, :field, :options
   end
 end
 
