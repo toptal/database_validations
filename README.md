@@ -39,8 +39,7 @@ Disadvantages:
 - Cannot handle multiple validations at once because database raises only one error for all indexes per query.
     ```ruby
     class User < ActiveRecord::Base
-      validates_db_uniqueness_of :email
-      validates_db_uniqueness_of :name
+      validates_db_uniqueness_of :email, :name
     end
   
     original = User.create(name: 'name', email: 'email@mail.com')
@@ -82,10 +81,10 @@ List of supported options from `validates_uniqueness_of` validator:
 - `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
 - `message`: Specifies a custom error message (default is: "has already been taken").
 - `if`: Specifies a method or proc to call to determine if the validation should occur 
-(e.g. <tt>if: :allow_validation</tt>, or <tt>if: Proc.new { |user| user.signup_step > 2 }</tt>). The method or
+(e.g. `if: :allow_validation`, or `if: Proc.new { |user| user.signup_step > 2 }`). The method or
 proc should return or evaluate to a `true` or `false` value.
 - `unless`: Specifies a method or proc to call to determine if the validation should not 
-occur (e.g. <tt>unless: :skip_validation</tt>, or <tt>unless: Proc.new { |user| user.signup_step <= 2 }</tt>). 
+occur (e.g. `unless: :skip_validation`, or `unless: Proc.new { |user| user.signup_step <= 2 }`). 
 The method or proc should return or evaluate to a `true` or `false` value.
 
 **Keep in mind**: Both `if` and `unless` options are used only for `valid?` method and provided only for performance reason. 
@@ -115,10 +114,10 @@ validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensit
 
 List of supported options for `PostgreSQL` only:
 
-- `where`: Specify the conditions to be included as a <tt>WHERE</tt> SQL fragment to 
-limit the uniqueness constraint lookup (e.g. <tt>where: "(status = 'active')"</tt>).
+- `where`: Specify the conditions to be included as a `WHERE` SQL fragment to 
+limit the uniqueness constraint lookup (e.g. `where: "(status = 'active')"`).
 For backward compatibility, this will be converted automatically 
-to <tt>conditions: -> { where("(status = 'active')") }</tt> for `valid?` method.
+to `conditions: -> { where("(status = 'active')") }` for `valid?` method.
 
 The list of options to add support:
 
