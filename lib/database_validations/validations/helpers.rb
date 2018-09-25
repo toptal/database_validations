@@ -27,7 +27,7 @@ module DatabaseValidations
     end
 
     def unify_columns(*columns)
-      columns.flatten.map(&:to_s).sort
+      columns.flatten.compact.map(&:to_s).sort
     end
 
     def generate_key(*columns)
