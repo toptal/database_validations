@@ -8,7 +8,7 @@ module DatabaseValidations
     module_function
 
     def factory(model)
-      case (database = model.connection.adapter_name.downcase.to_sym)
+      case (database = model.connection_config[:adapter].downcase.to_sym)
       when SqliteAdapter::ADAPTER then SqliteAdapter.new(model)
       when PostgresqlAdapter::ADAPTER then PostgresqlAdapter.new(model)
       when MysqlAdapter::ADAPTER then MysqlAdapter.new(model)
