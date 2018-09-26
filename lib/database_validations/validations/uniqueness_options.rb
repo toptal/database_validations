@@ -1,5 +1,7 @@
 module DatabaseValidations
   class UniquenessOptions
+    attr_reader :field
+
     def initialize(field, options, adapter)
       @field = field
       @options = options
@@ -34,16 +36,24 @@ module DatabaseValidations
     end
 
     def columns
-      @columns ||= Helpers.unify_columns(field, Array.wrap(options[:scope]))
+      @columns ||= Helpers.unify_columns(field, scope)
     end
 
     def where_clause
       @where_clause ||= options[:where]
     end
 
+    def message
+      @message ||= options[:message]
+    end
+
+    def scope
+      @scope ||= Array.wrap(options[:scope])
+    end
+
     private
 
-    attr_reader :adapter, :field, :options
+    attr_reader :adapter, :options
 
     def condition_passes?(condition, instance)
       if condition.is_a?(Symbol)

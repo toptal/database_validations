@@ -3,7 +3,7 @@ require 'active_record/railtie'
 module DatabaseValidations
   class Railtie < Rails::Railtie
     rake_tasks do
-      load 'tasks/database_validations.rake'
+      load 'database_validations/tasks/database_validations.rake'
 
       Rake.application.in_namespace(:db) do |namespace|
         namespace.tasks.each do |task|

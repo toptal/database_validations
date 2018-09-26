@@ -1,0 +1,1 @@
+require 'database_validations/rspec/uniqueness_validator_matcher'

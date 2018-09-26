@@ -125,6 +125,8 @@ The list of options to add support:
 - `allow_nil`: If set to `true`, skips this validation if the attribute is `nil` (default is `false`).
 - `allow_blank`: If set to `true`, skips this validation if the attribute is blank (default is `false`).
 
+**Note**: For `PosgreSQL`, it is possible to replace these options with combination of other supported options.
+
 ### Benchmark ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 
 | Case                             | Validator                  | SQLite                                     | PostgreSQL                                 | MySQL                                      |
@@ -135,6 +137,26 @@ The list of options to add support:
 |                                  | validates_uniqueness_of    | 2.002k (±10.9%) i/s - 9.900k in 5.018449s  | 667.100 (± 4.8%) i/s - 3.350k in 5.034451s | 606.334 (± 4.9%) i/s - 3.068k in 5.072587s |
 | Each hundredth item is duplicate | validates_db_uniqueness_of | 3.534k (± 5.6%) i/s - 17.748k in 5.039277s | 1.351k  (± 6.5%) i/s - 6.750k in 5.017280s | 1.436k  (±11.6%) i/s - 7.154k in 5.062644s |
 |                                  | validates_uniqueness_of    | 2.121k (± 6.8%) i/s - 10.653k in 5.049739s | 658.199 (± 6.1%) i/s - 3.350k in 5.110176s | 596.024 (± 6.7%) i/s - 2.989k in 5.041497s |
+
+## Testing (RSpec)
+
+Add `require database_validations/rspec/matchers'` to your `spec` file.
+
+### validate_db_uniqueness_of
+
+Example: 
+
+```ruby
+class User < ActiveRecord::Base
+  validates_db_uniqueness_of :field, message: 'duplicate', where: '(some_field IS NULL)', scope: :another_field
+end
+
+describe 'validations' do
+  subject { User }
+  
+  it { is_expected.to validate_db_uniqueness_of(:field).with_message('duplicate').with_where('(some_field IS NULL)').scoped_to(:another_field) }
+end
+```
 
 ## Development
 
