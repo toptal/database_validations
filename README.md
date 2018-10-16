@@ -1,6 +1,7 @@
 # DatabaseValidations
 
 [![Build Status](https://travis-ci.org/toptal/database_validations.svg?branch=master)](https://travis-ci.org/toptal/database_validations)
+[![Gem Version](https://badge.fury.io/rb/database_validations.svg)](https://badge.fury.io/rb/database_validations)
 
 ActiveRecord provides validations on app level but it won't guarantee the 
 consistent. In some cases, like `validates_uniqueness_of` it executes 
