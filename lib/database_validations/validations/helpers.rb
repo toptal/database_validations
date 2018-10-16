@@ -3,10 +3,13 @@ module DatabaseValidations
     module_function
 
     def handle_unique_error!(instance, error)
-      key = generate_key(Adapters.factory(instance.class).error_columns(error.message))
+      adapter = Adapters.factory(instance.class)
+      index_key = adapter.index_name(error.message)
+      column_key = generate_key(adapter.error_columns(error.message))
 
       each_options_storage(instance.class) do |storage|
-        return storage[key].handle_unique_error(instance) if storage[key]
+        return storage[index_key].handle_unique_error(instance) if storage[index_key]
+        return storage[column_key].handle_unique_error(instance) if storage[column_key]
       end
 
       raise error

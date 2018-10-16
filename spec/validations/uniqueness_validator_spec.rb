@@ -569,14 +569,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
     end
   end
 
-  describe 'postgresql' do
-    before do
-      define_db.call(adapter: 'postgresql', database: 'database_validations_test')
-      ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true)
-    end
-
-    include_examples 'works as expected'
-
+  shared_examples 'supports condition option' do
     context 'when conditions option is provided' do
       before do
         define_table do |t|
@@ -608,6 +601,81 @@ RSpec.describe 'validates_db_uniqueness_of' do
     end
   end
 
+  shared_examples 'supports index_name option' do
+    context 'when index_name option is passed' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true, name: :unique_index
+        end
+      end
+
+      context 'when index_name is the same' do
+        it 'works' do
+          klass = define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index }
+          klass.create!(field: 'field')
+          expect { klass.create!(field: 'field') }.to raise_error ActiveRecord::RecordInvalid
+        end
+      end
+
+      context 'when index_name is different' do
+        it 'raises an error' do
+          expect do
+            define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :missing_index }
+          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
+                             'No unique index found with name: "missing_index". '\
+                             'Available indexes are: ["unique_index"]. '\
+                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+                             'For example, when you run migrations.'
+        end
+      end
+    end
+  end
+
+  shared_examples 'supports complex indexes' do
+    context 'with index_name option' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index 'lower(field)', unique: true, name: :unique_index
+        end
+      end
+
+      it 'works' do
+        klass = define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index }
+        klass.create!(field: 'field')
+        expect { klass.create!(field: 'field') }.to raise_error ActiveRecord::RecordInvalid
+      end
+    end
+
+    context 'without index_name option' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index 'lower(field)', unique: true
+        end
+      end
+
+      it 'raises an error' do
+        expect do
+          define_class { |klass| klass.validates_db_uniqueness_of :field }
+        end.to raise_error DatabaseValidations::Errors::IndexNotFound
+      end
+    end
+  end
+
+  describe 'postgresql' do
+    before do
+      define_db.call(adapter: 'postgresql', database: 'database_validations_test')
+      ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true)
+    end
+
+    include_examples 'works as expected'
+    include_examples 'supports condition option'
+    include_examples 'supports index_name option'
+    include_examples 'supports complex indexes'
+  end
+
   describe 'sqlite3' do
     before { define_db.call(adapter: 'sqlite3', database: ':memory:') }
 
@@ -621,5 +689,6 @@ RSpec.describe 'validates_db_uniqueness_of' do
     end
 
     include_examples 'works as expected'
+    include_examples 'supports index_name option'
   end
 end
