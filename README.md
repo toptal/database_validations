@@ -1,5 +1,7 @@
 # DatabaseValidations
 
+[![Build Status](https://travis-ci.org/toptal/database_validations.svg?branch=master)](https://travis-ci.org/toptal/database_validations)
+
 ActiveRecord provides validations on app level but it won't guarantee the 
 consistent. In some cases, like `validates_uniqueness_of` it executes 
 additional SQL query to the database and that is not very efficient. 
@@ -76,18 +78,19 @@ User.create!(email: 'email@mail.com')
 
 We want to provide full compatibility with existing `validates_uniqueness_of` validator. 
 
-List of supported options from `validates_uniqueness_of` validator: 
+| Option name    | PostgreSQL | MySQL | SQLite |
+| -------------- | :--------: | :---: | :----: |
+| scope          | +          | +     | +      |
+| message        | +          | +     | +      |
+| if             | +          | +     | +      |
+| unless         | +          | +     | +      |
+| index_name     | +          | +     | -      |
+| where          | +          | -     | -      |
+| case_sensitive | -          | -     | -      |
+| allow_nil      | -          | -     | -      | 
+| allow_blank    | -          | -     | -      |
 
-- `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
-- `message`: Specifies a custom error message (default is: "has already been taken").
-- `if`: Specifies a method or proc to call to determine if the validation should occur 
-(e.g. `if: :allow_validation`, or `if: Proc.new { |user| user.signup_step > 2 }`). The method or
-proc should return or evaluate to a `true` or `false` value.
-- `unless`: Specifies a method or proc to call to determine if the validation should not 
-occur (e.g. `unless: :skip_validation`, or `unless: Proc.new { |user| user.signup_step <= 2 }`). 
-The method or proc should return or evaluate to a `true` or `false` value.
-
-**Keep in mind**: Both `if` and `unless` options are used only for `valid?` method and provided only for performance reason. 
+**Keep in mind**: Both `if` and `unless` options are used only for `valid?` method and provided only for performance reason.
 
 ```ruby
 class User < ActiveRecord::Base
@@ -112,20 +115,23 @@ Is the same by default as the following
 validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensitive: true
 ``` 
 
-List of supported options for `PostgreSQL` only:
-
+Options descriptions: 
+- `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
+- `message`: Specifies a custom error message (default is: "has already been taken").
+- `if`: Specifies a method or proc to call to determine if the validation should occur 
+(e.g. `if: :allow_validation`, or `if: Proc.new { |user| user.signup_step > 2 }`). The method or
+proc should return or evaluate to a `true` or `false` value.
+- `unless`: Specifies a method or proc to call to determine if the validation should not 
+occur (e.g. `unless: :skip_validation`, or `unless: Proc.new { |user| user.signup_step <= 2 }`). 
+The method or proc should return or evaluate to a `true` or `false` value.
 - `where`: Specify the conditions to be included as a `WHERE` SQL fragment to 
 limit the uniqueness constraint lookup (e.g. `where: "(status = 'active')"`).
 For backward compatibility, this will be converted automatically 
 to `conditions: -> { where("(status = 'active')") }` for `valid?` method.
-
-The list of options to add support:
-
 - `case_sensitive`: Looks for an exact match. Ignored by non-text columns (`true` by default).
 - `allow_nil`: If set to `true`, skips this validation if the attribute is `nil` (default is `false`).
 - `allow_blank`: If set to `true`, skips this validation if the attribute is blank (default is `false`).
-
-**Note**: For `PosgreSQL`, it is possible to replace these options with combination of other supported options.
+- `index_name`: Allows to make explicit connection between validator and index. Used when gem can't automatically find index. 
 
 ### Benchmark ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
 

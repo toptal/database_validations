@@ -8,12 +8,15 @@ module DatabaseValidations
         @model = model
       end
 
+      # @param [String] index_name
       def find_index_by_name(index_name)
         indexes.find { |index| index.name == index_name }
       end
 
+      # @param [Array<String>] columns
+      # @param [String] where
       def find_index(columns, where)
-        indexes.find { |index| index.columns.map(&:to_s).sort == columns && index.where == where }
+        indexes.find { |index| Array.wrap(index.columns).map(&:to_s).sort == columns && index.where == where }
       end
 
       def indexes

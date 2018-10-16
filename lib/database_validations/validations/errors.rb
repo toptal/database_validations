@@ -3,17 +3,23 @@ module DatabaseValidations
     class Base < StandardError; end
 
     class IndexNotFound < Base
-      attr_reader :columns, :where_clause, :available_indexes
+      attr_reader :columns, :where_clause, :index_name, :available_indexes
 
-      def initialize(columns, where_clause, available_indexes)
-        @columns = columns.map(&:to_s)
+      def initialize(columns, where_clause, index_name, available_indexes)
+        @columns = columns
         @where_clause = where_clause
         @available_indexes = available_indexes
+        @index_name = index_name
 
-        super "No unique index found with #{columns_and_where_text(columns, where_clause)}. "\
-              "Available indexes are: [#{self.available_indexes.map { |ind| columns_and_where_text(ind.columns, ind.where) }.join(', ')}]. "\
-              "Use ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']=true in case you want to skip the check. "\
-              "For example, when you run migrations."
+        text = if index_name
+                 "No unique index found with name: \"#{index_name}\". "\
+                 "Available indexes are: #{self.available_indexes.map(&:name)}. "
+               else
+                 "No unique index found with #{columns_and_where_text(columns, where_clause)}. "\
+                 "Available indexes are: [#{self.available_indexes.map { |ind| columns_and_where_text(ind.columns, ind.where) }.join(', ')}]. "
+               end
+
+        super text + "Use ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']=true in case you want to skip the check. For example, when you run migrations."
       end
 
       def columns_and_where_text(columns, where)
