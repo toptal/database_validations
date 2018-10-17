@@ -1,6 +1,6 @@
 # @scope Models
 #
-# Matches when model validate database uniqueness of some field.
+# Matches when model or instance of model validates database uniqueness of some field.
 #
 # Modifiers:
 # * `with_message(message)` -- specifies a message of the error;
@@ -12,6 +12,12 @@
 #
 # ```ruby
 # it { expect(Model).to validate_db_uniqueness_of(:field) }
+# ```
+#
+# is the same as
+#
+#```ruby
+# it { expect(Model.new).to validate_db_uniqueness_of(:field) }
 # ```
 RSpec::Matchers.define :validate_db_uniqueness_of do |field|
   chain(:with_message) do |message|
@@ -30,8 +36,10 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field|
     @index_name = index_name
   end
 
-  match do |model|
+  match do |object|
     @validators = []
+
+    model = object.is_a?(Class) ? object : object.class
 
     DatabaseValidations::Helpers.each_validator(model) do |validator|
       @validators << {

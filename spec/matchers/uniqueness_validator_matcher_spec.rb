@@ -4,6 +4,10 @@ RSpec.describe 'validate_db_uniqueness_of' do
 
   def define_class(parent = ActiveRecord::Base)
     Class.new(parent) do |klass|
+      def klass.table_name
+        :temps
+      end
+
       def klass.model_name
         ActiveModel::Name.new(self, nil, 'temp')
       end
@@ -15,6 +19,12 @@ RSpec.describe 'validate_db_uniqueness_of' do
   around do |example|
     ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
     ActiveRecord::Schema.verbose = false
+
+    ActiveRecord::Schema.define(:version => 1) do
+      create_table :temps do |t|
+        t.string :field
+      end
+    end
 
     ClimateControl.modify SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK: 'true' do
       example.run
@@ -58,5 +68,12 @@ RSpec.describe 'validate_db_uniqueness_of' do
 
     it { is_expected.to validate_db_uniqueness_of(:field).with_index(:unique_index) }
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_index(:another_index) }
+  end
+
+  context 'when instance of model is provided' do
+    subject { define_class { |klass| klass.validates_db_uniqueness_of :field }.new }
+
+    it { is_expected.to validate_db_uniqueness_of(:field) }
+    it { is_expected.not_to validate_db_uniqueness_of(:another_field) }
   end
 end
