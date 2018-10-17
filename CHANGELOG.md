@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.7.2] - 2018-10-17
+- Extend RSpec matcher to accept instance of model
+
 ## [0.7.1] - 2018-10-17
 
 ### Bugs
