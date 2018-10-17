@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    database_validations (0.7.0)
+    database_validations (0.7.1)
       activerecord (>= 3.2, < 6)
 
 GEM
