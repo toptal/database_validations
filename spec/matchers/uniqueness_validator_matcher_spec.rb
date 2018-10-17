@@ -50,4 +50,13 @@ RSpec.describe 'validate_db_uniqueness_of' do
     it { is_expected.to validate_db_uniqueness_of(:field).with_where('another IS NULL') }
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_where('another IS NOT NULL') }
   end
+
+  context 'when index_name option is specified' do
+    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
+
+    subject { define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index } }
+
+    it { is_expected.to validate_db_uniqueness_of(:field).with_index(:unique_index) }
+    it { is_expected.not_to validate_db_uniqueness_of(:field).with_index(:another_index) }
+  end
 end
