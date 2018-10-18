@@ -7,6 +7,7 @@
 # * `scoped_to(scope)` -- specifies a scope for the validator;
 # * `with_where(where)` -- specifies a where condition for the validator;
 # * `with_index(index_name)` -- specifies an index name for the validator;
+# * `case_insensitive` -- specifies case insensitivity for the validator;
 #
 # Example:
 #
@@ -36,6 +37,10 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field|
     @index_name = index_name
   end
 
+  chain(:case_insensitive) do
+    @case_sensitive = false
+  end
+
   match do |object|
     @validators = []
 
@@ -43,15 +48,23 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field|
 
     DatabaseValidations::Helpers.each_validator(model) do |validator|
       @validators << {
-        field:      validator.field,
-        scope:      validator.scope,
-        where:      validator.where_clause,
-        message:    validator.message,
-        index_name: validator.index_name
+        field:          validator.field,
+        scope:          validator.scope,
+        where:          validator.where_clause,
+        message:        validator.message,
+        index_name:     validator.index_name,
+        case_sensitive: validator.case_sensitive
       }
     end
 
-    @validators.include?(field: field, scope: Array.wrap(@scope), where: @where, message: @message, index_name: @index_name)
+    @validators.include?(
+      field: field,
+      scope: Array.wrap(@scope),
+      where: @where,
+      message: @message,
+      index_name: @index_name,
+      case_sensitive: @case_sensitive
+    )
   end
 
   description do
@@ -60,7 +73,8 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field|
     desc += "message: '#{@message}'; " if @message
     desc += "scope: #{@scope}; " if @scope
     desc += "where: '#{@where}'; " if @where
-    desc += "index_name: '#{index_name}'." if @index_name
+    desc += "index_name: '#{@index_name}'; " if @index_name
+    desc += "be case insensitive." if @case_sensitive === false
     desc
   end
 

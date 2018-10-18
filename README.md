@@ -87,11 +87,11 @@ We want to provide full compatibility with existing `validates_uniqueness_of` va
 | unless         | +          | +     | +      |
 | index_name     | +          | +     | -      |
 | where          | +          | -     | -      |
-| case_sensitive | -          | -     | -      |
+| case_sensitive | +          | -     | -      |
 | allow_nil      | -          | -     | -      | 
 | allow_blank    | -          | -     | -      |
 
-**Keep in mind**: Both `if` and `unless` options are used only for `valid?` method and provided only for performance reason.
+**Keep in mind**: `if`, `unless` and `case_sensitive` options are used only for `valid?` method. 
 
 ```ruby
 class User < ActiveRecord::Base
@@ -104,7 +104,7 @@ user.field = 'another'
 user.valid? # Will not query the database
 ```
 
-**Backward compatibility**: Even when we don't support `case_sensitive`, `allow_nil` and `allow_blank` options now, the following:
+**Backward compatibility**: Even when we don't natively support `case_sensitive`, `allow_nil` and `allow_blank` options now, the following:
 
 ```ruby
 validates_db_uniqueness_of :email
@@ -115,6 +115,18 @@ Is the same by default as the following
 ```ruby
 validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensitive: true
 ``` 
+
+Complete `case_sensitive` replacement example (for `PostgreSQL` only):
+
+```ruby
+validates :slug, uniqueness: { case_sensitive: false, scope: :field }
+```
+
+Should be replaced by:
+
+```ruby
+validates_db_uniqueness_of :slug, index_name: :unique_index_with_field_lower_on_slug, case_sensitive: false
+```
 
 Options descriptions: 
 - `scope`: One or more columns by which to limit the scope of the uniqueness constraint.

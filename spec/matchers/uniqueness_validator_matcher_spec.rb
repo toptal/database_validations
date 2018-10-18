@@ -76,4 +76,12 @@ RSpec.describe 'validate_db_uniqueness_of' do
     it { is_expected.to validate_db_uniqueness_of(:field) }
     it { is_expected.not_to validate_db_uniqueness_of(:another_field) }
   end
+
+  context 'when case_sensitive option is specified' do
+    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
+
+    subject { define_class { |klass| klass.validates_db_uniqueness_of :field, case_sensitive: false } }
+
+    it { is_expected.to validate_db_uniqueness_of(:field).case_insensitive }
+  end
 end

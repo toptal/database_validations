@@ -1,6 +1,7 @@
 module DatabaseValidations
   class UniquenessOptions
     CUSTOM_OPTIONS = %i[where index_name].freeze
+    DEFAULT_OPTIONS = {allow_nil: true, case_sensitive: true, allow_blank: false}.freeze
 
     attr_reader :field
 
@@ -24,8 +25,9 @@ module DatabaseValidations
     def validates_uniqueness_options
       where_clause_str = where_clause
 
-      options.except(*CUSTOM_OPTIONS)
-        .merge(allow_nil: true, case_sensitive: true, allow_blank: false)
+      DEFAULT_OPTIONS
+        .merge(options)
+        .except(*CUSTOM_OPTIONS)
         .tap { |opts| opts[:conditions] = -> { where(where_clause_str) } if where_clause }
     end
 
@@ -63,6 +65,11 @@ module DatabaseValidations
     # @return [String|Symbol|nil]
     def index_name
       @index_name ||= options[:index_name]
+    end
+
+    # @return [Boolean|nil]
+    def case_sensitive
+      @case_sensitive ||= options[:case_sensitive]
     end
 
     private
