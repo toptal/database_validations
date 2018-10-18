@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.7.3] - 2018-10-18
+- Add support of `case_sensitive` option for `valid?` for `PostgreSQL`
+
 ## [0.7.2] - 2018-10-17
 - Extend RSpec matcher to accept instance of model
 
@@ -12,4 +15,4 @@
 ## [0.7.0] - 2018-10-16
 
 ### Features
-- Add support of `index_name` option to `PostgreSQL` and `MySQL` databases.
+- Add support of `index_name` option to `PostgreSQL` and `MySQL` databases

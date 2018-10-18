@@ -27,10 +27,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
   end
 
   shared_examples 'works as expected' do
-    shared_examples 'ActiveRecord::Validation' do
+    shared_examples 'ActiveRecord::Validation' do |skip_persisted = false|
       let(:persisted) { Entity.create(persisted_attrs) }
 
-      before { persisted }
+      before { persisted unless skip_persisted }
 
       describe 'valid?' do
         it 'returns false' do
@@ -641,11 +641,18 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
       end
 
+      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, case_sensitive: false} }
+      let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index, case_sensitive: false } }
+
+      let(:persisted_attrs) { {field: 'field'} }
+
+      before { db_uniqueness.create!(field: 'FIELD') }
+
       it 'works' do
-        klass = define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index }
-        klass.create!(field: 'field')
-        expect { klass.create!(field: 'field') }.to raise_error ActiveRecord::RecordInvalid
+        expect { db_uniqueness.create!(field: 'field') }.to raise_error ActiveRecord::RecordInvalid
       end
+
+      it_behaves_like 'ActiveRecord::Validation', true
     end
 
     context 'without index_name option' do
