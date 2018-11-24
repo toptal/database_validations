@@ -12,3 +12,7 @@
 
 # rspec failure tracking
 .rspec_status
+# Example
+example/db/*.sqlite3
+example/tmp
+example/log

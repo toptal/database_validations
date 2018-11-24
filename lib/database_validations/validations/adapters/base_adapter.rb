@@ -23,6 +23,14 @@ module DatabaseValidations
         model.connection.indexes(model.table_name).select(&:unique)
       end
 
+      def foreign_keys
+        model.connection.foreign_keys(model.table_name)
+      end
+
+      def find_foreign_key_by_column(column)
+        model.connection.foreign_key_exists?(model.table_name, column: column)
+      end
+
       # @return [Symbol]
       def adapter_name
         self.class::ADAPTER

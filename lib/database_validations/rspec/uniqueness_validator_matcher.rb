@@ -46,7 +46,7 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field|
 
     model = object.is_a?(Class) ? object : object.class
 
-    DatabaseValidations::Helpers.each_validator(model) do |validator|
+    DatabaseValidations::Helpers.each_uniqueness_validator(model) do |validator|
       @validators << {
         field:          validator.field,
         scope:          validator.scope,
