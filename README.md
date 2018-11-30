@@ -25,21 +25,101 @@ And then execute:
 Or install it yourself as:
 
     $ gem install database_validations
+    
+## Example
+
+Have a look at [example](example) application. 
+
+## Why I should use this gem?
+
+Because it provides faster solutions (see the composed benchmarks below) 
+and ensures consistency of your database when ActiveRecord doesn't. 
+
+## Composed [benchmarks](https://github.com/toptal/database_validations/blob/master/benchmarks/composed_benchmarks.rb)
+
+| Case                                                                  | PostgreSQL                                 | MySQL                                      |
+| --------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------ |
+| Save only valid items (positive case)                                 | 381.818 (± 6.0%) i/s - 1.924k in 5.057491s | 293.304 (± 7.8%) i/s - 1.464k in 5.037224s |
+|                                                                       |  1.003k (±12.3%) i/s - 4.984k in 5.075305s | 1.060k  (± 6.6%) i/s - 5.353k in 5.075530s |
+| Each hundredth item is not valid (closer to life, but still specific) | 405.040 (± 3.0%) i/s - 2.052k in 5.071201s | 300.618 (± 2.0%) i/s - 1.508k in 5.018377s |
+|                                                                       | 1.007k  (±15.5%) i/s - 4.876k in 5.013361s | 1.046k  (± 6.1%) i/s - 5.300k in 5.088503s |
+| Save only invalid items (super worst case / impossible)               | 373.382 (±15.3%) i/s - 1.849k in 5.080908s | 294.326 (± 4.1%) i/s - 1.470k in 5.002983s |
+|                                                                       | 705.731 (±17.1%) i/s - 3.444k in 5.048612s | 552.250 (± 8.0%) i/s - 2.800k in 5.108251s |
+
+*The more you use it, the more you save!* (because default ActiveRecord methods increase the time).
+
+## db_belongs_to
+
+ActiveRecord's `belongs_to` has `optional: false` by default. That means each time you save your record 
+it produces additional queries to check if the relation exists in the database. 
+But it doesn't guarantee that your relation will be there after your request is executed. 
+Here comes in handy `db_belongs_to`, it performs much faster and ensures real existence and has 
+full back-compatibility with `belongs_to`, so it's easy to replace.
+
+Supported databases: `PostgreSQL`, `MySQL`. 
+*Note*: Unfortunately, `SQLite` raises poor error message by which we can't determine which exactly foreign key raises an error.
+
+### Pros and Cons
+
+Advantages:
+- Provides true validation of relation existence because it uses foreign keys constrains.
+- Checks the existence of correct foreign key at the boot time. Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'`
+if you want to skip in in some cases. E.g., when you run migrations.
+- It's much faster. See benchmark section below for details. 
+Spoiler: it's almost two times faster except the almost impossible worst case.
+
+Disadvantages:
+- Cannot handle multiple validations at once because database raises only one error per query.
+
+### How it works?
+
+We override `save` and `save!` methods where we rescue `ActiveRecord::InvalidForeignKey` and add proper errors
+for compatibility.
+
+### Usage
+
+```ruby
+class User < ActiveRecord::Base
+  db_belongs_to :company
+end
+
+user = User.create(company_id: nil)
+# => false
+user.errors.messages
+# => {:company=>["must exist"]} 
+```
+
+### Configuration options
+
+Full compatibility with `belongs_to` except polymorphic association. 
+
+### Benchmark [code](https://github.com/toptal/database_validations/blob/master/benchmarks/db_belongs_to_benchmark.rb)
+
+| Case                                                                      | Relation      | PostgreSQL                                 | MySQL                                      |
+| ------------------------------------------------------------------------- | ------------- | ------------------------------------------ | ------------------------------------------ |
+| Save existing in DB item (positive case)                                  | belongs_to    | 679.869 (±37.4%) i/s - 2.945k in 5.326013s | 628.873 (±18.3%) i/s - 3.009k in 5.057690s |
+|                                                                           | db_belongs_to | 990.386 (±27.0%) i/s - 4.440k in 5.033655s | 1.256k  (±14.8%) i/s - 6.188k in 5.064498s |
+| Save only non-existing* item (super worst case / impossible)              | belongs_to    | 966.079 (±13.6%) i/s - 4.830k in 5.110996s | 714.486 (±10.2%) i/s - 3.588k in 5.085503s |
+|                                                                           | db_belongs_to | 516.709 (±16.8%) i/s - 2.541k in 5.040354s | 498.942 (± 7.8%) i/s - 2.475k in 5.001812s |
+| Each hundredth item is non-existing* (closer to life, but still specific) | belongs_to    | 830.240 (±10.6%) i/s - 4.104k in 5.019347s | 728.572 (±13.7%) i/s - 3.588k in 5.085377s |
+|                                                                           | db_belongs_to | 1.311k  (±19.4%) i/s - 6.222k in 5.040586s | 1.320k  (±11.0%) i/s - 6.600k in 5.073114s |
+
+* Non-existing item is a row with ID = -1
 
 ## validates_db_uniqueness_of
 
-Supported databases: `postgresql`, `mysql` and `sqlite`.
+Supported databases: `PostgreSQL`, `MySQL` and `SQLite`.
 
 ### Pros and Cons
 
 Advantages: 
 - Provides true uniqueness on the database level because it handles race conditions cases properly.
-- Check the existence of correct unique index at the boot time. Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` 
-if you want to skip it in some cases.
-- It's faster. See [Benchmark](https://github.com/toptal/database_validations#benchmark-code) section for details.
+- Checks the existence of correct unique index at the boot time. Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` 
+if you want to skip it in some cases. E.g., when you run migrations.
+- It's faster. See benchmark section below for details.
 
 Disadvantages: 
-- Cannot handle multiple validations at once because database raises only one error for all indexes per query.
+- Cannot handle multiple validations at once because database raises only one error per query.
     ```ruby
     class User < ActiveRecord::Base
       validates_db_uniqueness_of :email, :name
@@ -182,10 +262,7 @@ end
 You need to have installed and running `postgresql` and `mysql`. 
 And for each adapter manually create a database called `database_validations_test`. 
 
-After checking out the repo, run `bin/setup` to install dependencies.
-
-Then, run `rake spec` to run the tests. You can also run `bin/console` for 
-an interactive prompt that will allow you to experiment.
+Then, run `rake spec` to run the tests.
 
 To install this gem onto your local machine, run `bundle exec rake install`. 
 To release a new version, update the version number in `version.rb`, and then 

@@ -39,7 +39,7 @@ module DatabaseValidations
 
     # @return [String]
     def key
-      @key ||= index_name ? index_name.to_s : Helpers.generate_key(columns)
+      @key ||= index_name ? Helpers.generate_key_for_uniqueness_index(index_name) : Helpers.generate_key_for_uniqueness(columns)
     end
 
     # @return [Array<String>]

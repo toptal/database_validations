@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.0] - 30-11-18
+### Features
+- Add `db_belongs_to` 
+
 ## [0.7.3] - 2018-10-18
 ### Features
 - Add support of `case_sensitive` option for `valid?` for `PostgreSQL`

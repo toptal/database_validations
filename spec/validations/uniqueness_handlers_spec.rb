@@ -10,6 +10,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
   def define_table
     ActiveRecord::Schema.define(:version => 1) do
+      drop_table :entities, if_exists: true
       create_table :entities do |t|
         yield(t)
       end
@@ -672,10 +673,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
   end
 
   describe 'postgresql' do
-    before do
-      define_db.call(adapter: 'postgresql', database: 'database_validations_test')
-      ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true)
-    end
+    before { define_db.call(adapter: 'postgresql', database: 'database_validations_test') }
 
     include_examples 'works as expected'
     include_examples 'supports condition option'
@@ -690,10 +688,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
   end
 
   describe 'mysql' do
-    before do
-      define_db.call(adapter: 'mysql2', database: 'database_validations_test', username: 'root')
-      ActiveRecord::Base.connection.drop_table(Entity.table_name, if_exists: true)
-    end
+    before { define_db.call(adapter: 'mysql2', database: 'database_validations_test', username: 'root') }
 
     include_examples 'works as expected'
     include_examples 'supports index_name option'

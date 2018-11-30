@@ -3,21 +3,19 @@ module DatabaseValidations
     extend ActiveSupport::Concern
 
     included do
-      alias_method :valid_without_uniqueness?, :valid?
+      alias_method :validate, :valid?
+    end
 
-      def valid?(context = nil)
-        output = super(context)
+    def valid?(context = nil)
+      output = super(context)
 
-        Helpers.each_validator(self.class) do |validator|
-          if validator.if_and_unless_pass?(self)
-            validates_with(ActiveRecord::Validations::UniquenessValidator, validator.validates_uniqueness_options)
-          end
+      Helpers.each_uniqueness_validator(self.class) do |validator|
+        if validator.if_and_unless_pass?(self)
+          validates_with(ActiveRecord::Validations::UniquenessValidator, validator.validates_uniqueness_options)
         end
-
-        errors.empty? && output
       end
 
-      alias_method :validate, :valid?
+      errors.empty? && output
     end
 
     def save(options = {})
@@ -37,18 +35,19 @@ module DatabaseValidations
     private
 
     def perform_validations(options = {})
-      options[:validate] == false || valid_without_uniqueness?(options[:context])
+      options[:validate] == false || valid_without_database_validations(options[:context])
     end
   end
 
   module ClassMethods
     def validates_db_uniqueness_of(*attributes)
-      @validates_db_uniqueness_opts ||= DatabaseValidations::UniquenessOptionsStorage.new(self)
+      include(DatabaseValidations::ValidWithoutDatabaseValidations)
+      @database_validations_opts ||= DatabaseValidations::OptionsStorage.new(self)
 
       options = attributes.extract_options!
 
       attributes.each do |attribute|
-        @validates_db_uniqueness_opts.push(attribute, options.merge(attributes: attribute))
+        @database_validations_opts.push_uniqueness(attribute, options.merge(attributes: attribute))
       end
 
       include(DatabaseValidations::UniquenessHandlers)

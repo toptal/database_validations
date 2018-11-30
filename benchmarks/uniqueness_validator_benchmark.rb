@@ -1,31 +1,6 @@
 require 'benchmark/ips'
 require 'database_validations'
-
-# ===Setups===
-# Enable and start GC before each job run. Disable GC afterwards.
-class GCSuite
-  def warming(*)
-    run_gc
-  end
-
-  def running(*)
-    run_gc
-  end
-
-  def warmup_stats(*)
-  end
-
-  def add_report(*)
-  end
-
-  private
-
-  def run_gc
-    GC.enable
-    GC.start
-    GC.disable
-  end
-end
+require_relative 'gc_suite'
 
 [
   {
@@ -44,7 +19,7 @@ end
 ].each do |database_configuration|
   ActiveRecord::Base.establish_connection(database_configuration)
   ActiveRecord::Schema.define(version: 1) do
-    drop_table :entities, if_exists: true
+    drop_table :entities, if_exists: true, force: :cascade
 
     create_table :entities do |t|
       t.integer :field
@@ -90,5 +65,10 @@ end
     x.config(suite: suite)
     x.report('validates_db_uniqueness_of') { field +=1; DbValidation.create(field: (field % 100 == 0 ? 0 : field)) }
     x.report('validates_uniqueness_of') { field +=1; AppValidation.create(field: (field % 100 == 0 ? 0 : field)) }
+  end
+
+  # Clear the DB
+  ActiveRecord::Schema.define(version: 1) do
+    drop_table :entities, if_exists: true, force: :cascade
   end
 end

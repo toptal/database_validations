@@ -8,8 +8,12 @@ module DatabaseValidations
         error_message[/unique constraint "([^"]+)"/, 1]
       end
 
-      def error_columns(error_message)
+      def unique_error_columns(error_message)
         find_index_by_name(index_name(error_message)).columns
+      end
+
+      def foreign_key_error_column(error_message)
+        error_message[/Key \(([^)]+)\)/, 1]
       end
     end
   end
