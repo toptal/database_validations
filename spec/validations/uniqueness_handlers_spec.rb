@@ -17,13 +17,13 @@ RSpec.describe 'validates_db_uniqueness_of' do
     end
   end
 
-  def define_class(parent = Entity)
+  def define_class(parent = Entity, &block)
     Class.new(parent) do |klass|
-      def klass.model_name
+      def self.model_name
         ActiveModel::Name.new(self, nil, 'temp')
       end
 
-      yield(klass) if block_given?
+      klass.instance_exec(&block) if block_given?
     end
   end
 
@@ -157,7 +157,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
       it 'does not raise an error' do
         expect do
-          define_class { |klass| klass.validates_db_uniqueness_of :field }
+          define_class { validates_db_uniqueness_of :field }
         end.not_to raise_error
       end
     end
@@ -198,9 +198,9 @@ RSpec.describe 'validates_db_uniqueness_of' do
         context 'when if is a symbol' do
           context 'when method returns false' do
             let(:klass) do
-              define_class do |klass|
-                klass.validates_db_uniqueness_of :field, if: :skip
-                klass.define_method(:skip) { false }
+              define_class do
+                validates_db_uniqueness_of :field, if: :skip
+                define_method(:skip) { false }
               end
             end
 
@@ -209,9 +209,9 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
           context 'when method returns true' do
             let(:klass) do
-              define_class do |klass|
-                klass.validates_db_uniqueness_of :field, if: :skip
-                klass.define_method(:skip) { true }
+              define_class do
+                validates_db_uniqueness_of :field, if: :skip
+                define_method(:skip) { true }
               end
             end
 
@@ -223,8 +223,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
           context 'when proc has argument' do
             context 'when proc returns false' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, if: ->(entity) { entity.nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, if: ->(entity) { entity.nil? }
                 end
               end
 
@@ -233,8 +233,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
             context 'when proc returns true' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, if: ->(entity) { !entity.nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, if: ->(entity) { !entity.nil? }
                 end
               end
 
@@ -245,8 +245,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
           context 'when proc has no argument' do
             context 'when proc returns false' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, if: -> { nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, if: -> { nil? }
                 end
               end
 
@@ -255,8 +255,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
             context 'when proc returns true' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, if: -> { !nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, if: -> { !nil? }
                 end
               end
 
@@ -270,9 +270,9 @@ RSpec.describe 'validates_db_uniqueness_of' do
         context 'when unless is a symbol' do
           context 'when method returns true' do
             let(:klass) do
-              define_class do |klass|
-                klass.validates_db_uniqueness_of :field, unless: :skip
-                klass.define_method(:skip) { true }
+              define_class do
+                validates_db_uniqueness_of :field, unless: :skip
+                define_method(:skip) { true }
               end
             end
 
@@ -281,9 +281,9 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
           context 'when method returns false' do
             let(:klass) do
-              define_class do |klass|
-                klass.validates_db_uniqueness_of :field, unless: :skip
-                klass.define_method(:skip) { false }
+              define_class do
+                validates_db_uniqueness_of :field, unless: :skip
+                define_method(:skip) { false }
               end
             end
 
@@ -295,8 +295,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
           context 'when proc has argument' do
             context 'when proc returns true' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, unless: ->(entity) { !entity.nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, unless: ->(entity) { !entity.nil? }
                 end
               end
 
@@ -305,8 +305,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
             context 'when proc returns false' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, unless: ->(entity) { entity.nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, unless: ->(entity) { entity.nil? }
                 end
               end
 
@@ -317,8 +317,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
           context 'when proc has no argument' do
             context 'when proc returns true' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, unless: -> { !nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, unless: -> { !nil? }
                 end
               end
 
@@ -327,8 +327,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
             context 'when proc returns false' do
               let(:klass) do
-                define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, unless: -> { nil? }
+                define_class do
+                  validates_db_uniqueness_of :field, unless: -> { nil? }
                 end
               end
 
@@ -359,7 +359,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
     context 'when has not supported option' do
       it 'raises error' do
         expect do
-          define_class { |klass| klass.validates_db_uniqueness_of :field, unsupported_option: true }
+          define_class { validates_db_uniqueness_of :field, unsupported_option: true }
         end.to raise_error DatabaseValidations::Errors::OptionIsNotSupported
       end
     end
@@ -372,8 +372,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
       end
 
-      let(:app_uniqueness) { define_class(Entity) { |klass| klass.validates_uniqueness_of :field } }
-      let(:db_uniqueness) { define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field } }
+      let(:app_uniqueness) { define_class(Entity) { validates_uniqueness_of :field } }
+      let(:db_uniqueness) { define_class(Entity) { validates_db_uniqueness_of :field } }
 
       it 'does not create rows' do
         new = db_uniqueness.new(field: '0')
@@ -401,8 +401,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
       end
 
-      let(:app_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_uniqueness_of :field }) }
-      let(:db_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field }) }
+      let(:app_uniqueness) { define_class(define_class(Entity) { validates_uniqueness_of :field }) }
+      let(:db_uniqueness) { define_class(define_class(Entity) { validates_db_uniqueness_of :field }) }
 
       let(:persisted_attrs) { { field: 'persisted' } }
 
@@ -417,8 +417,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
       end
 
-      let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, message: 'already exists' } }
-      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, message: 'already exists' } }
+      let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field, message: 'already exists' } }
+      let(:app_uniqueness) { define_class { validates_uniqueness_of :field, message: 'already exists' } }
 
       let(:persisted_attrs) { { field: 'persisted' } }
 
@@ -456,7 +456,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
         it 'raises error on boot time' do
           expect do
-            define_class { |klass| klass.validates_db_uniqueness_of :field }
+            define_class { validates_db_uniqueness_of :field }
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with columns: ["field"] in table "entities". '\
                              'Available indexes are: []. '\
@@ -473,8 +473,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
           end
         end
 
-        let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field } }
-        let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field } }
+        let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field } }
+        let(:app_uniqueness) { define_class { validates_uniqueness_of :field } }
 
         let(:persisted_attrs) { { field: 'persisted' } }
 
@@ -493,8 +493,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
         it 'raises error on boot time' do
           expect do
-            define_class do |klass|
-              klass.validates_db_uniqueness_of :field_1, scope: :field_2
+            define_class do
+              validates_db_uniqueness_of :field_1, scope: :field_2
             end
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with columns: ["field_1", "field_2"] in table "entities". '\
@@ -513,8 +513,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
           end
         end
 
-        let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field_1, scope: :field_2 } }
-        let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field_1, scope: :field_2 } }
+        let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field_1, scope: :field_2 } }
+        let(:app_uniqueness) { define_class { validates_uniqueness_of :field_1, scope: :field_2 } }
 
         let(:persisted_attrs) { { field_1: 'persisted', field_2: 'persisted' } }
 
@@ -534,9 +534,9 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
         it 'raises error with first attribute without index on boot time' do
           expect do
-            define_class do |klass|
-              klass.validates_db_uniqueness_of :field_1
-              klass.validates_db_uniqueness_of :field_2
+            define_class do
+              validates_db_uniqueness_of :field_1
+              validates_db_uniqueness_of :field_2
             end
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with columns: ["field_2"] in table "entities". '\
@@ -557,16 +557,16 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
 
         let(:db_uniqueness) do
-          define_class do |klass|
-            klass.validates_db_uniqueness_of :field_1
-            klass.validates_db_uniqueness_of :field_2
+          define_class do
+            validates_db_uniqueness_of :field_1
+            validates_db_uniqueness_of :field_2
           end
         end
 
         let(:app_uniqueness) do
-          define_class do |klass|
-            klass.validates_uniqueness_of :field_1
-            klass.validates_uniqueness_of :field_2
+          define_class do
+            validates_uniqueness_of :field_1
+            validates_uniqueness_of :field_2
           end
         end
 
@@ -589,7 +589,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
       context 'when where clause is different' do
         it 'raises error' do
           expect do
-            define_class { |klass| klass.validates_db_uniqueness_of :field, where: '(field < 1)' }
+            define_class { validates_db_uniqueness_of :field, where: '(field < 1)' }
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with columns: ["field"] and where: (field < 1) in table "entities". '\
                              'Available indexes are: [columns: ["field"] and where: (field > 1)]. '\
@@ -599,8 +599,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
       end
 
       context 'when where clause is the same' do
-        let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, where: '(field > 1)' } }
-        let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, conditions: -> { where('(field > 1)') } } }
+        let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field, where: '(field > 1)' } }
+        let(:app_uniqueness) { define_class { validates_uniqueness_of :field, conditions: -> { where('(field > 1)') } } }
 
         let(:persisted_attrs) { { field: 2 } }
 
@@ -620,7 +620,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
       context 'when index_name is the same' do
         it 'works' do
-          klass = define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index }
+          klass = define_class { validates_db_uniqueness_of :field, index_name: :unique_index }
           klass.create!(field: 'field')
           expect { klass.create!(field: 'field') }.to raise_error ActiveRecord::RecordInvalid
         end
@@ -629,7 +629,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
       context 'when index_name is different' do
         it 'raises an error' do
           expect do
-            define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :missing_index }
+            define_class { validates_db_uniqueness_of :field, index_name: :missing_index }
           end.to raise_error DatabaseValidations::Errors::IndexNotFound,
                              'No unique index found with name: "missing_index" in table "entities". '\
                              'Available indexes are: ["unique_index"]. '\
@@ -649,8 +649,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
       end
 
-      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, case_sensitive: false } }
-      let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index, case_sensitive: false } }
+      let(:app_uniqueness) { define_class { validates_uniqueness_of :field, case_sensitive: false } }
+      let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field, index_name: :unique_index, case_sensitive: false } }
 
       let(:persisted_attrs) { { field: 'field' } }
 
@@ -673,7 +673,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
       it 'raises an error' do
         expect do
-          define_class { |klass| klass.validates_db_uniqueness_of :field }
+          define_class { validates_db_uniqueness_of :field }
         end.to raise_error DatabaseValidations::Errors::IndexNotFound
       end
     end
