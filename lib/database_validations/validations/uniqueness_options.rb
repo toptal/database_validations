@@ -79,7 +79,7 @@ module DatabaseValidations
     def condition_passes?(condition, instance)
       if condition.is_a?(Symbol)
         instance.__send__(condition)
-      elsif condition.is_a?(Proc) && condition.arity == 0
+      elsif condition.is_a?(Proc) && condition.arity.zero?
         instance.instance_exec(&condition)
       else
         instance.instance_eval(&condition)
