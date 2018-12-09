@@ -1,4 +1,4 @@
-RSpec.describe 'validates_db_uniqueness_of' do
+RSpec.describe '.validates_db_uniqueness_of' do
   define_db = lambda do |opts|
     ActiveRecord::Base.establish_connection(opts)
     ActiveRecord::Schema.verbose = false
@@ -28,10 +28,30 @@ RSpec.describe 'validates_db_uniqueness_of' do
   end
 
   shared_examples 'works as expected' do
-    shared_examples 'ActiveRecord::Validation' do |skip_persisted = false|
-      let(:persisted) { Entity.create(persisted_attrs) }
+    matcher :raise_index_not_found do |message = nil|
+      COMMON = ' '\
+        'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
+        'For example, when you run migrations.'.freeze
 
-      before { persisted unless skip_persisted }
+      match do |actual|
+        expect { actual.call }
+          .to raise_error(DatabaseValidations::Errors::IndexNotFound, message_matcher(message))
+      end
+
+      def message_matcher(message)
+        if message
+          start_with(message)
+            .and end_with(COMMON)
+        else
+          end_with(COMMON)
+        end
+      end
+
+      supports_block_expectations
+    end
+
+    shared_examples 'ActiveRecord::Validation' do |skip_persisted = false|
+      before { Entity.create(persisted_attrs) unless skip_persisted }
 
       describe 'valid?' do
         it 'returns false' do
@@ -75,8 +95,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
           new = db_uniqueness.create(persisted_attrs)
           old = app_uniqueness.create(persisted_attrs)
 
-          expect(new.errors.messages.size).to be > 0
-          expect(new.errors.details.size).to be > 0
+          expect(new.errors.messages).to be_present
+          expect(new.errors.details).to be_present
 
           expect(old.errors.messages).to include(new.errors.messages)
           expect(old.errors.details).to include(new.errors.details)
@@ -92,8 +112,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
               old.save
             end
 
-            expect(new.errors.messages.size).to be > 0
-            expect(new.errors.details.size).to be > 0
+            expect(new.errors.messages).to be_present
+            expect(new.errors.details).to be_present
 
             expect(old.errors.messages).to include(new.errors.messages)
             expect(old.errors.details).to include(new.errors.details)
@@ -125,7 +145,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
           new = catch_error_message { db_uniqueness.create!(persisted_attrs) }
           old = catch_error_message { app_uniqueness.create!(persisted_attrs) }
 
-          expect(new.size).to be > 0
+          expect(new).to be_present
           expect(old).to include(new)
         end
 
@@ -141,7 +161,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
               end
             end
 
-            expect(error_message.size).to be > 0
+            expect(error_message).to be_present
           end
         end
       end
@@ -386,6 +406,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             raise 'rollback'
           end
         rescue StandardError
+          nil
         end
         expect(Entity.count).to eq(0)
         expect(new.persisted?).to eq(false)
@@ -431,6 +452,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
           t.string :field
           t.index [:field], unique: true
         end
+
+        # Add validator to parent class
+        parent_db_uniqueness.validates_db_uniqueness_of :field
+        parent_app_uniqueness.validates_uniqueness_of :field
       end
 
       let(:parent_db_uniqueness) { define_class(Entity) }
@@ -438,12 +463,6 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
       let(:db_uniqueness) { define_class(parent_db_uniqueness) }
       let(:app_uniqueness) { define_class(parent_app_uniqueness) }
-
-      before do
-        # Add validator to parent class
-        parent_db_uniqueness.validates_db_uniqueness_of :field
-        parent_app_uniqueness.validates_uniqueness_of :field
-      end
 
       let(:persisted_attrs) { { field: 'persisted' } }
 
@@ -457,11 +476,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
         it 'raises error on boot time' do
           expect do
             define_class { validates_db_uniqueness_of :field }
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
-                             'No unique index found with columns: ["field"] in table "entities". '\
-                             'Available indexes are: []. '\
-                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
-                             'For example, when you run migrations.'
+          end.to raise_index_not_found(
+            'No unique index found with columns: ["field"] in table "entities". '\
+            'Available indexes are: [].'
+          )
         end
       end
 
@@ -496,11 +514,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
             define_class do
               validates_db_uniqueness_of :field_1, scope: :field_2
             end
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
-                             'No unique index found with columns: ["field_1", "field_2"] in table "entities". '\
-                             'Available indexes are: []. '\
-                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
-                             'For example, when you run migrations.'
+          end.to raise_index_not_found(
+            'No unique index found with columns: ["field_1", "field_2"] in table "entities". '\
+            'Available indexes are: [].'
+          )
         end
       end
 
@@ -538,11 +555,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
               validates_db_uniqueness_of :field_1
               validates_db_uniqueness_of :field_2
             end
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
-                             'No unique index found with columns: ["field_2"] in table "entities". '\
-                             'Available indexes are: [columns: ["field_1"]]. '\
-                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
-                             'For example, when you run migrations.'
+          end.to raise_index_not_found(
+            'No unique index found with columns: ["field_2"] in table "entities". '\
+            'Available indexes are: [columns: ["field_1"]].'
+          )
         end
       end
 
@@ -590,11 +606,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
         it 'raises error' do
           expect do
             define_class { validates_db_uniqueness_of :field, where: '(field < 1)' }
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
-                             'No unique index found with columns: ["field"] and where: (field < 1) in table "entities". '\
-                             'Available indexes are: [columns: ["field"] and where: (field > 1)]. '\
-                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
-                             'For example, when you run migrations.'
+          end.to raise_index_not_found(
+            'No unique index found with columns: ["field"] and where: (field < 1) in table "entities". '\
+            'Available indexes are: [columns: ["field"] and where: (field > 1)].'
+          )
         end
       end
 
@@ -630,11 +645,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
         it 'raises an error' do
           expect do
             define_class { validates_db_uniqueness_of :field, index_name: :missing_index }
-          end.to raise_error DatabaseValidations::Errors::IndexNotFound,
-                             'No unique index found with name: "missing_index" in table "entities". '\
-                             'Available indexes are: ["unique_index"]. '\
-                             'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
-                             'For example, when you run migrations.'
+          end.to raise_index_not_found(
+            'No unique index found with name: "missing_index" in table "entities". '\
+            'Available indexes are: ["unique_index"].'
+          )
         end
       end
     end
@@ -642,19 +656,19 @@ RSpec.describe 'validates_db_uniqueness_of' do
 
   shared_examples 'supports complex indexes' do
     context 'with index_name option' do
-      before do
-        define_table do |t|
-          t.string :field
-          t.index 'lower(field)', unique: true, name: :unique_index
-        end
-      end
-
       let(:app_uniqueness) { define_class { validates_uniqueness_of :field, case_sensitive: false } }
       let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field, index_name: :unique_index, case_sensitive: false } }
 
       let(:persisted_attrs) { { field: 'field' } }
 
-      before { db_uniqueness.create!(field: 'FIELD') }
+      before do
+        define_table do |t|
+          t.string :field
+          t.index 'lower(field)', unique: true, name: :unique_index
+        end
+
+        db_uniqueness.create!(field: 'FIELD')
+      end
 
       it 'works' do
         expect { db_uniqueness.create!(field: 'field') }.to raise_error ActiveRecord::RecordInvalid
@@ -674,7 +688,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
       it 'raises an error' do
         expect do
           define_class { validates_db_uniqueness_of :field }
-        end.to raise_error DatabaseValidations::Errors::IndexNotFound
+        end.to raise_index_not_found
       end
     end
   end
