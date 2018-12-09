@@ -7,19 +7,19 @@ module DatabaseValidations
     end
 
     class IndexNotFound < Base
-      attr_reader :columns, :where_clause, :index_name, :available_indexes
+      attr_reader :columns, :where_clause, :index_name, :available_indexes, :table_name
 
-      def initialize(columns, where_clause, index_name, available_indexes)
+      def initialize(columns, where_clause, index_name, available_indexes, table_name)
         @columns = columns
         @where_clause = where_clause
         @available_indexes = available_indexes
         @index_name = index_name
 
         text = if index_name
-                 "No unique index found with name: \"#{index_name}\". "\
+                 "No unique index found with name: \"#{index_name}\" in table \"#{table_name}\". "\
                  "Available indexes are: #{self.available_indexes.map(&:name)}. "
                else
-                 "No unique index found with #{columns_and_where_text(columns, where_clause)}. "\
+                 "No unique index found with #{columns_and_where_text(columns, where_clause)} in table \"#{table_name}\". "\
                  "Available indexes are: [#{self.available_indexes.map { |ind| columns_and_where_text(ind.columns, ind.where) }.join(', ')}]. "
                end
 

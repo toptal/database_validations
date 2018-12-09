@@ -97,7 +97,7 @@ module DatabaseValidations
     def raise_if_index_missed!
       unless (index_name && adapter.find_index_by_name(index_name.to_s)) ||
         (!index_name && adapter.find_index(columns, where_clause))
-        raise Errors::IndexNotFound.new(columns, where_clause, index_name, adapter.indexes)
+        raise Errors::IndexNotFound.new(columns, where_clause, index_name, adapter.indexes, adapter.table_name)
       end
     end
   end

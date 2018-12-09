@@ -47,6 +47,11 @@ module DatabaseValidations
         self.class::SUPPORTED_OPTIONS
       end
 
+      # @return [String]
+      def table_name
+        model.table_name
+      end
+
       private
 
       attr_reader :model
