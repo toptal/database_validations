@@ -4,8 +4,7 @@ module DatabaseValidations
       SUPPORTED_OPTIONS = %i[scope message if unless].freeze
       ADAPTER = :sqlite3
 
-      def index_name(_error_message)
-      end
+      def index_name(_error_message); end
 
       def find_foreign_key_by_column(column)
         foreign_keys.find { |foreign_key| foreign_key.column.to_s == column.to_s }

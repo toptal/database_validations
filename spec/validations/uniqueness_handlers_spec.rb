@@ -9,7 +9,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
   end
 
   def define_table
-    ActiveRecord::Schema.define(:version => 1) do
+    ActiveRecord::Schema.define(version: 1) do
       drop_table :entities, if_exists: true
       create_table :entities do |t|
         yield(t)
@@ -40,8 +40,8 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
 
         it 'has exactly the same errors' do
-          new = db_uniqueness.new(persisted_attrs).tap { |e| e.valid? }
-          old = app_uniqueness.new(persisted_attrs).tap { |e| e.valid? }
+          new = db_uniqueness.new(persisted_attrs).tap(&:valid?)
+          old = app_uniqueness.new(persisted_attrs).tap(&:valid?)
 
           expect(old.errors.messages.sort).to eq(new.errors.messages.sort)
           expect(old.errors.details.sort).to eq(new.errors.details.sort)
@@ -102,9 +102,15 @@ RSpec.describe 'validates_db_uniqueness_of' do
       end
 
       describe 'create!/save!/update!' do
+        define_negated_matcher :not_change, :change
+
         it 'does not create' do
-          expect { db_uniqueness.create!(persisted_attrs) rescue ActiveRecord::RecordInvalid }.not_to change(Entity, :count)
-          expect { app_uniqueness.create!(persisted_attrs) rescue ActiveRecord::RecordInvalid }.not_to change(Entity, :count)
+          expect { db_uniqueness.create!(persisted_attrs) }
+            .to raise_error(ActiveRecord::RecordInvalid)
+            .and not_change(Entity, :count)
+          expect { app_uniqueness.create!(persisted_attrs) }
+            .to raise_error(ActiveRecord::RecordInvalid)
+            .and not_change(Entity, :count)
         end
 
         def catch_error_message
@@ -218,7 +224,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             context 'when proc returns false' do
               let(:klass) do
                 define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, if: -> (entity) { entity.nil? }
+                  klass.validates_db_uniqueness_of :field, if: ->(entity) { entity.nil? }
                 end
               end
 
@@ -228,7 +234,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             context 'when proc returns true' do
               let(:klass) do
                 define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, if: -> (entity) { !entity.nil? }
+                  klass.validates_db_uniqueness_of :field, if: ->(entity) { !entity.nil? }
                 end
               end
 
@@ -290,7 +296,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             context 'when proc returns true' do
               let(:klass) do
                 define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, unless: -> (entity) { !entity.nil? }
+                  klass.validates_db_uniqueness_of :field, unless: ->(entity) { !entity.nil? }
                 end
               end
 
@@ -300,7 +306,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
             context 'when proc returns false' do
               let(:klass) do
                 define_class do |klass|
-                  klass.validates_db_uniqueness_of :field, unless: -> (entity) { entity.nil? }
+                  klass.validates_db_uniqueness_of :field, unless: ->(entity) { entity.nil? }
                 end
               end
 
@@ -342,7 +348,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
       end
 
       let(:klass) { define_class }
-      let(:attributes) { {field: 0} }
+      let(:attributes) { { field: 0 } }
 
       it 'raises unique constrain error' do
         klass.create(attributes)
@@ -373,12 +379,14 @@ RSpec.describe 'validates_db_uniqueness_of' do
         new = db_uniqueness.new(field: '0')
         old = app_uniqueness.new(field: '1')
 
-        ActiveRecord::Base.connection.transaction do
-          new.save
-          old.save
-          raise 'rollback'
-        end rescue
-
+        begin
+          ActiveRecord::Base.connection.transaction do
+            new.save
+            old.save
+            raise 'rollback'
+          end
+        rescue StandardError
+        end
         expect(Entity.count).to eq(0)
         expect(new.persisted?).to eq(false)
         expect(old.persisted?).to eq(false)
@@ -396,7 +404,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
       let(:app_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_uniqueness_of :field }) }
       let(:db_uniqueness) { define_class(define_class(Entity) { |klass| klass.validates_db_uniqueness_of :field }) }
 
-      let(:persisted_attrs) { {field: 'persisted'} }
+      let(:persisted_attrs) { { field: 'persisted' } }
 
       it_behaves_like 'ActiveRecord::Validation'
     end
@@ -412,7 +420,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
       let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, message: 'already exists' } }
       let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, message: 'already exists' } }
 
-      let(:persisted_attrs) { {field: 'persisted'} }
+      let(:persisted_attrs) { { field: 'persisted' } }
 
       it_behaves_like 'ActiveRecord::Validation'
     end
@@ -437,7 +445,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
         parent_app_uniqueness.validates_uniqueness_of :field
       end
 
-      let(:persisted_attrs) { {field: 'persisted'} }
+      let(:persisted_attrs) { { field: 'persisted' } }
 
       it_behaves_like 'ActiveRecord::Validation'
     end
@@ -468,7 +476,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
         let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field } }
         let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field } }
 
-        let(:persisted_attrs) { {field: 'persisted'} }
+        let(:persisted_attrs) { { field: 'persisted' } }
 
         it_behaves_like 'ActiveRecord::Validation'
       end
@@ -501,14 +509,14 @@ RSpec.describe 'validates_db_uniqueness_of' do
           define_table do |t|
             t.string :field_1
             t.string :field_2
-            t.index [:field_2, :field_1], unique: true
+            t.index %i[field_2 field_1], unique: true
           end
         end
 
         let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field_1, scope: :field_2 } }
         let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field_1, scope: :field_2 } }
 
-        let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted'} }
+        let(:persisted_attrs) { { field_1: 'persisted', field_2: 'persisted' } }
 
         it_behaves_like 'ActiveRecord::Validation'
       end
@@ -562,7 +570,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
           end
         end
 
-        let(:persisted_attrs) { {field_1: 'persisted', field_2: 'persisted_too'} }
+        let(:persisted_attrs) { { field_1: 'persisted', field_2: 'persisted_too' } }
 
         it_behaves_like 'ActiveRecord::Validation'
       end
@@ -594,7 +602,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
         let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, where: '(field > 1)' } }
         let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, conditions: -> { where('(field > 1)') } } }
 
-        let(:persisted_attrs) { {field: 2} }
+        let(:persisted_attrs) { { field: 2 } }
 
         it_behaves_like 'ActiveRecord::Validation'
       end
@@ -641,10 +649,10 @@ RSpec.describe 'validates_db_uniqueness_of' do
         end
       end
 
-      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, case_sensitive: false} }
+      let(:app_uniqueness) { define_class { |klass| klass.validates_uniqueness_of :field, case_sensitive: false } }
       let(:db_uniqueness) { define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index, case_sensitive: false } }
 
-      let(:persisted_attrs) { {field: 'field'} }
+      let(:persisted_attrs) { { field: 'field' } }
 
       before { db_uniqueness.create!(field: 'FIELD') }
 

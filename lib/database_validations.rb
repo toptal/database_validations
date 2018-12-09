@@ -20,6 +20,4 @@ module DatabaseValidations
   extend ActiveSupport::Concern
 end
 
-if defined?(ActiveRecord::Base)
-  ActiveRecord::Base.include(DatabaseValidations)
-end
+ActiveRecord::Base.include(DatabaseValidations) if defined?(ActiveRecord::Base)

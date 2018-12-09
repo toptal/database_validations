@@ -1,7 +1,6 @@
 require 'database_validations/rspec/matchers'
 
 RSpec.describe 'validate_db_uniqueness_of' do
-
   def define_class(parent = ActiveRecord::Base)
     Class.new(parent) do |klass|
       def klass.table_name
@@ -20,7 +19,7 @@ RSpec.describe 'validate_db_uniqueness_of' do
     ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
     ActiveRecord::Schema.verbose = false
 
-    ActiveRecord::Schema.define(:version => 1) do
+    ActiveRecord::Schema.define(version: 1) do
       create_table :temps do |t|
         t.string :field
       end
@@ -40,7 +39,7 @@ RSpec.describe 'validate_db_uniqueness_of' do
   end
 
   context 'when message option is specified' do
-    subject { define_class { |klass| klass.validates_db_uniqueness_of :field, message: 'duplicated' }}
+    subject { define_class { |klass| klass.validates_db_uniqueness_of :field, message: 'duplicated' } }
 
     it { is_expected.to validate_db_uniqueness_of(:field).with_message('duplicated') }
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_message('wrong') }
@@ -54,18 +53,18 @@ RSpec.describe 'validate_db_uniqueness_of' do
   end
 
   context 'when where option is specified' do
-    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
-
     subject { define_class { |klass| klass.validates_db_uniqueness_of :field, where: 'another IS NULL' } }
+
+    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
 
     it { is_expected.to validate_db_uniqueness_of(:field).with_where('another IS NULL') }
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_where('another IS NOT NULL') }
   end
 
   context 'when index_name option is specified' do
-    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
-
     subject { define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index } }
+
+    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
 
     it { is_expected.to validate_db_uniqueness_of(:field).with_index(:unique_index) }
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_index(:another_index) }
@@ -79,9 +78,9 @@ RSpec.describe 'validate_db_uniqueness_of' do
   end
 
   context 'when case_sensitive option is specified' do
-    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
-
     subject { define_class { |klass| klass.validates_db_uniqueness_of :field, case_sensitive: false } }
+
+    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
 
     it { is_expected.to validate_db_uniqueness_of(:field).case_insensitive }
   end

@@ -17,7 +17,7 @@
 #
 # is the same as
 #
-#```ruby
+# ```ruby
 # it { expect(Model.new).to validate_db_uniqueness_of(:field) }
 # ```
 RSpec::Matchers.define :validate_db_uniqueness_of do |field|
@@ -48,11 +48,11 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field|
 
     DatabaseValidations::Helpers.each_uniqueness_validator(model) do |validator|
       @validators << {
-        field:          validator.field,
-        scope:          validator.scope,
-        where:          validator.where_clause,
-        message:        validator.message,
-        index_name:     validator.index_name,
+        field: validator.field,
+        scope: validator.scope,
+        where: validator.where_clause,
+        message: validator.message,
+        index_name: validator.index_name,
         case_sensitive: validator.case_sensitive
       }
     end
@@ -69,18 +69,18 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field|
 
   description do
     desc = "validate database uniqueness of #{field}. "
-    desc += "With options - " if @message || @scope || @where
+    desc += 'With options - ' if @message || @scope || @where
     desc += "message: '#{@message}'; " if @message
     desc += "scope: #{@scope}; " if @scope
     desc += "where: '#{@where}'; " if @where
     desc += "index_name: '#{@index_name}'; " if @index_name
-    desc += "be case insensitive." if @case_sensitive === false
+    desc += 'be case insensitive.' if @case_sensitive === false
     desc
   end
 
   failure_message do
     <<-TEXT
-      There is no such database uniqueness validator. 
+      There is no such database uniqueness validator.
       Available validators are: #{@validators}.
     TEXT
   end

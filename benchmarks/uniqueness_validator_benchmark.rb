@@ -55,15 +55,15 @@ require_relative 'gc_suite'
   # ===Save unique item===
   Benchmark.ips do |x|
     x.config(suite: suite)
-    x.report('validates_db_uniqueness_of') { field +=1; DbValidation.create(field: field) }
-    x.report('validates_uniqueness_of') { field +=1; AppValidation.create(field: field) }
+    x.report('validates_db_uniqueness_of') { field += 1; DbValidation.create(field: field) }
+    x.report('validates_uniqueness_of') { field += 1; AppValidation.create(field: field) }
   end
 
   # ===Each hundredth item is duplicate===
   Benchmark.ips do |x|
     x.config(suite: suite)
-    x.report('validates_db_uniqueness_of') { field +=1; DbValidation.create(field: (field % 100 == 0 ? 0 : field)) }
-    x.report('validates_uniqueness_of') { field +=1; AppValidation.create(field: (field % 100 == 0 ? 0 : field)) }
+    x.report('validates_db_uniqueness_of') { field += 1; DbValidation.create(field: (field % 100 == 0 ? 0 : field)) }
+    x.report('validates_uniqueness_of') { field += 1; AppValidation.create(field: (field % 100 == 0 ? 0 : field)) }
   end
 
   # Clear the DB

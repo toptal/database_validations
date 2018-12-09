@@ -23,7 +23,7 @@ module DatabaseValidations
     end
 
     def validates_presence_options
-      {attributes: relation, message: :required}
+      { attributes: relation, message: :required }
     end
 
     private
@@ -35,9 +35,7 @@ module DatabaseValidations
     end
 
     def raise_if_unsupported_database!
-      if adapter.adapter_name == :sqlite3
-        raise Errors::UnsupportedDatabase.new(:db_belongs_to, adapter.adapter_name)
-      end
+      raise Errors::UnsupportedDatabase.new(:db_belongs_to, adapter.adapter_name) if adapter.adapter_name == :sqlite3
     end
   end
 end
