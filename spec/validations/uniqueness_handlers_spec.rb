@@ -688,7 +688,7 @@ RSpec.describe 'validates_db_uniqueness_of' do
   end
 
   describe 'mysql' do
-    before { define_db.call(adapter: 'mysql2', database: 'database_validations_test', username: 'root') }
+    before { define_db.call(adapter: 'mysql2', database: 'database_validations_test') }
 
     include_examples 'works as expected'
     include_examples 'supports index_name option'

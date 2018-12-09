@@ -260,7 +260,7 @@ end
 ## Development
 
 You need to have installed and running `postgresql` and `mysql`. 
-And for each adapter manually create a database called `database_validations_test`. 
+And for each adapter manually create a database called `database_validations_test` accessible to your local user. 
 
 Then, run `rake spec` to run the tests.
 

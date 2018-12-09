@@ -13,8 +13,7 @@ require_relative 'gc_suite'
   },
   {
     adapter: 'mysql2',
-    database: 'database_validations_test',
-    username: 'root'
+    database: 'database_validations_test'
   }
 ].each do |database_configuration|
   ActiveRecord::Base.establish_connection(database_configuration)

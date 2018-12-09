@@ -129,7 +129,7 @@ RSpec.describe 'db_belongs_to' do
   end
 
   describe 'mysql' do
-    before(:all) { define_db.call(adapter: 'mysql2', database: 'database_validations_test', username: 'root') }
+    before(:all) { define_db.call(adapter: 'mysql2', database: 'database_validations_test') }
     include_examples 'works as belongs_to'
   end
 end
