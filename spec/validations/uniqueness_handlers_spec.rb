@@ -146,14 +146,13 @@ RSpec.describe 'validates_db_uniqueness_of' do
         define_table do |t|
           t.string :field
         end
+        allow(ENV).to receive(:[]).with('SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK').and_return('true')
       end
 
       it 'does not raise an error' do
-        ClimateControl.modify SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK: 'true' do
-          expect do
-            define_class { |klass| klass.validates_db_uniqueness_of :field }
-          end.not_to raise_error
-        end
+        expect do
+          define_class { |klass| klass.validates_db_uniqueness_of :field }
+        end.not_to raise_error
       end
     end
 

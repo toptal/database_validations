@@ -54,12 +54,17 @@ RSpec.describe 'db_belongs_to' do
   shared_examples 'works as belongs_to' do
     shared_examples 'check foreign key' do
       context 'when SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK is provided' do
+        before do
+          allow(ENV)
+            .to receive(:[])
+            .with('SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK')
+            .and_return('true')
+        end
+
         it 'does not raise an error' do
-          ClimateControl.modify SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK: 'true' do
-            expect do
-              Class.new(BelongsUser) { |klass| klass.db_belongs_to :company }
-            end.not_to raise_error
-          end
+          expect do
+            Class.new(BelongsUser) { |klass| klass.db_belongs_to :company }
+          end.not_to raise_error
         end
       end
 

@@ -1,0 +1,32 @@
+Metrics/LineLength:
+  Max: 140
+  Exclude:
+    - 'benchmarks/*.rb'
+
+Metrics/MethodLength:
+  Max: 15
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*_spec.rb'
+    - 'benchmarks/*.rb'
+
+Style/Documentation:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 6
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
+
+Style/Semicolon:
+  Exclude:
+    - 'benchmarks/*.rb'
+
+Style/NumericPredicate:
+  Exclude:
+    - 'benchmarks/*.rb'

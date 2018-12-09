@@ -7,7 +7,9 @@ rvm:
 services:
   - postgresql
   - mysql
-before_install:
-  - gem install bundler -v 1.16.4
+before_script:
   - mysql -u root -e 'CREATE DATABASE database_validations_test;'
   - psql -U postgres -c 'CREATE DATABASE database_validations_test;'
+script:
+  - bundle exec rspec
+  - bundle exec rubocop

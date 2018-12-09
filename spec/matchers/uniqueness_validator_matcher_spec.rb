@@ -16,7 +16,7 @@ RSpec.describe 'validate_db_uniqueness_of' do
     end
   end
 
-  around do |example|
+  before do
     ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
     ActiveRecord::Schema.verbose = false
 
@@ -26,9 +26,10 @@ RSpec.describe 'validate_db_uniqueness_of' do
       end
     end
 
-    ClimateControl.modify SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK: 'true' do
-      example.run
-    end
+    allow(ENV)
+      .to receive(:[])
+      .with('SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK')
+      .and_return('true')
   end
 
   context 'when only field is provided' do

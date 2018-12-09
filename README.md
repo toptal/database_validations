@@ -264,6 +264,14 @@ And for each adapter manually create a database called `database_validations_tes
 
 Then, run `rake spec` to run the tests.
 
+To check the conformance with the style guides, run:
+
+    rubocop
+
+To run benchmarks, run:
+
+    ruby -I lib benchmarks/composed_benchmarks.rb
+
 To install this gem onto your local machine, run `bundle exec rake install`. 
 To release a new version, update the version number in `version.rb`, and then 
 run `bundle exec rake release`, which will create a git tag for the version, 
