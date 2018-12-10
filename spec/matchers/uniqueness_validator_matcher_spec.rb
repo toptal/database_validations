@@ -55,7 +55,10 @@ RSpec.describe 'validate_db_uniqueness_of' do
   context 'when where option is specified' do
     subject { define_class { |klass| klass.validates_db_uniqueness_of :field, where: 'another IS NULL' } }
 
-    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
+    before do
+      allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter) # rubocop:disable RSpec/AnyInstance
+        .to receive(:support_option?).and_return(true)
+    end
 
     it { is_expected.to validate_db_uniqueness_of(:field).with_where('another IS NULL') }
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_where('another IS NOT NULL') }
@@ -64,10 +67,24 @@ RSpec.describe 'validate_db_uniqueness_of' do
   context 'when index_name option is specified' do
     subject { define_class { |klass| klass.validates_db_uniqueness_of :field, index_name: :unique_index } }
 
-    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
+    before do
+      allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter) # rubocop:disable RSpec/AnyInstance
+        .to receive(:support_option?).and_return(true)
+    end
 
     it { is_expected.to validate_db_uniqueness_of(:field).with_index(:unique_index) }
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_index(:another_index) }
+  end
+
+  context 'when case_sensitive option is specified' do
+    subject { define_class { |klass| klass.validates_db_uniqueness_of :field, case_sensitive: false } }
+
+    before do
+      allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter) # rubocop:disable RSpec/AnyInstance
+        .to receive(:support_option?).and_return(true)
+    end
+
+    it { is_expected.to validate_db_uniqueness_of(:field).case_insensitive }
   end
 
   context 'when instance of model is provided' do
@@ -75,13 +92,5 @@ RSpec.describe 'validate_db_uniqueness_of' do
 
     it { is_expected.to validate_db_uniqueness_of(:field) }
     it { is_expected.not_to validate_db_uniqueness_of(:another_field) }
-  end
-
-  context 'when case_sensitive option is specified' do
-    subject { define_class { |klass| klass.validates_db_uniqueness_of :field, case_sensitive: false } }
-
-    before { allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter).to receive(:support_option?).and_return(true) }
-
-    it { is_expected.to validate_db_uniqueness_of(:field).case_insensitive }
   end
 end
