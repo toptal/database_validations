@@ -20,7 +20,7 @@
 # ```ruby
 # it { expect(Model.new).to validate_db_uniqueness_of(:field) }
 # ```
-RSpec::Matchers.define :validate_db_uniqueness_of do |field|
+RSpec::Matchers.define :validate_db_uniqueness_of do |field| # rubocop:disable Metrics/BlockLength
   chain(:with_message) do |message|
     @message = message
   end
