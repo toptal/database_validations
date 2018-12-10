@@ -19,8 +19,9 @@ module DatabaseValidations
                  "No unique index found with name: \"#{index_name}\" in table \"#{table_name}\". "\
                  "Available indexes are: #{self.available_indexes.map(&:name)}. "
                else
+                 available_indexes = self.available_indexes.map { |ind| columns_and_where_text(ind.columns, ind.where) }.join(', ')
                  "No unique index found with #{columns_and_where_text(columns, where_clause)} in table \"#{table_name}\". "\
-                 "Available indexes are: [#{self.available_indexes.map { |ind| columns_and_where_text(ind.columns, ind.where) }.join(', ')}]. "
+                 "Available indexes are: [#{available_indexes}]. "
                end
 
         super text + env_message

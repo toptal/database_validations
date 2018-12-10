@@ -29,9 +29,7 @@ module DatabaseValidations
     private
 
     def raise_if_foreign_key_missed!
-      unless adapter.find_foreign_key_by_column(column)
-        raise Errors::ForeignKeyNotFound.new(column, adapter.foreign_keys)
-      end
+      raise Errors::ForeignKeyNotFound.new(column, adapter.foreign_keys) unless adapter.find_foreign_key_by_column(column)
     end
 
     def raise_if_unsupported_database!
