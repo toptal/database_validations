@@ -1,6 +1,5 @@
 module DatabaseValidations
   class OptionsStorage
-
     def initialize(klass)
       @adapter = Adapters.factory(klass)
       @storage = {}

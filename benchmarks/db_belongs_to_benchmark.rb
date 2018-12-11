@@ -59,7 +59,7 @@ require_relative 'gc_suite'
   field = 0
   Benchmark.ips do |x|
     x.config(suite: suite)
-    x.report('belongs_to') { field +=1; field % 100 == 0 ? Users1.create(company_id: -1) : Users1.create(company_id: company.id) }
+    x.report('belongs_to') { field += 1; field % 100 == 0 ? Users1.create(company_id: -1) : Users1.create(company_id: company.id) }
     x.report('db_belongs_to') { field += 1; field % 100 == 0 ? Users2.create(company_id: -1) : Users2.create(company_id: company.id) }
   end
 

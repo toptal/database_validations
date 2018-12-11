@@ -23,11 +23,11 @@ RSpec.describe 'db_belongs_to' do
     end
   end
 
-  define_db = lambda do |opts|
-    ActiveRecord::Base.establish_connection(opts)
+  def define_db(connection_options)
+    ActiveRecord::Base.establish_connection(connection_options)
     ActiveRecord::Schema.verbose = false
 
-    ActiveRecord::Schema.define(:version => 1) do
+    ActiveRecord::Schema.define(version: 1) do
       drop_table :belongs_users, if_exists: true, force: :cascade
       drop_table :db_belongs_users, if_exists: true, force: :cascade
       drop_table :companies, if_exists: true, force: :cascade
@@ -54,12 +54,17 @@ RSpec.describe 'db_belongs_to' do
   shared_examples 'works as belongs_to' do
     shared_examples 'check foreign key' do
       context 'when SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK is provided' do
+        before do
+          allow(ENV)
+            .to receive(:[])
+            .with('SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK')
+            .and_return('true')
+        end
+
         it 'does not raise an error' do
-          ClimateControl.modify SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK: 'true' do
-            expect do
-              Class.new(BelongsUser) { |klass| klass.db_belongs_to :company }
-            end.not_to raise_error
-          end
+          expect do
+            Class.new(BelongsUser) { |klass| klass.db_belongs_to :company }
+          end.not_to raise_error
         end
       end
 
@@ -115,13 +120,15 @@ RSpec.describe 'db_belongs_to' do
     include_examples 'check foreign key'
   end
 
+  # rubocop:disable RSpec/BeforeAfterAll
   describe 'postgresql' do
-    before(:all) { define_db.call(adapter: 'postgresql', database: 'database_validations_test') }
+    before(:context) { define_db(adapter: 'postgresql', database: 'database_validations_test') }
+
     include_examples 'works as belongs_to'
   end
 
   describe 'sqlite3' do
-    before(:all) { define_db.call(adapter: 'sqlite3', database: ':memory:') }
+    before(:context) { define_db(adapter: 'sqlite3', database: ':memory:') }
 
     specify do
       expect { db_belongs_to_user_klass }.to raise_error DatabaseValidations::Errors::UnsupportedDatabase
@@ -129,7 +136,9 @@ RSpec.describe 'db_belongs_to' do
   end
 
   describe 'mysql' do
-    before(:all) { define_db.call(adapter: 'mysql2', database: 'database_validations_test') }
+    before(:context) { define_db(adapter: 'mysql2', database: 'database_validations_test') }
+
     include_examples 'works as belongs_to'
   end
+  # rubocop:enable RSpec/BeforeAfterAll
 end

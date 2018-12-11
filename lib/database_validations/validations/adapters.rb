@@ -13,7 +13,7 @@ module DatabaseValidations
       when PostgresqlAdapter::ADAPTER then PostgresqlAdapter.new(model)
       when MysqlAdapter::ADAPTER then MysqlAdapter.new(model)
       else
-        raise Errors::UnknownDatabase.new(database)
+        raise Errors::UnknownDatabase, database
       end
     end
   end

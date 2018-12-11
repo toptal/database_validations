@@ -23,21 +23,17 @@ module DatabaseValidations
     end
 
     def validates_presence_options
-      {attributes: relation, message: :required}
+      { attributes: relation, message: :required }
     end
 
     private
 
     def raise_if_foreign_key_missed!
-      unless adapter.find_foreign_key_by_column(column)
-        raise Errors::ForeignKeyNotFound.new(column, adapter.foreign_keys)
-      end
+      raise Errors::ForeignKeyNotFound.new(column, adapter.foreign_keys) unless adapter.find_foreign_key_by_column(column)
     end
 
     def raise_if_unsupported_database!
-      if adapter.adapter_name == :sqlite3
-        raise Errors::UnsupportedDatabase.new(:db_belongs_to, adapter.adapter_name)
-      end
+      raise Errors::UnsupportedDatabase.new(:db_belongs_to, adapter.adapter_name) if adapter.adapter_name == :sqlite3
     end
   end
 end
