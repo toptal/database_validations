@@ -3,12 +3,10 @@
 [![Build Status](https://travis-ci.org/toptal/database_validations.svg?branch=master)](https://travis-ci.org/toptal/database_validations)
 [![Gem Version](https://badge.fury.io/rb/database_validations.svg)](https://badge.fury.io/rb/database_validations)
 
-ActiveRecord provides validations on app level but it won't guarantee the 
-consistent. In some cases, like `validates_uniqueness_of` it executes 
-additional SQL query to the database and that is not very efficient. 
+DatabaseValidations helps you to keep the database consistency with better performance. 
+Right now, it supports only ActiveRecord.
 
-The main goal of the gem is to provide compatibility between database constraints 
-and ActiveRecord validations with better performance and consistency.
+*The more you use the gem, the more performance increase you have. Try it now!* 
 
 ## Installation
 
@@ -20,61 +18,23 @@ gem 'database_validations'
 
 And then execute:
 
-    $ bundle
+```bash
+bundle
+```
 
 Or install it yourself as:
 
-    $ gem install database_validations
+```bash
+gem install database_validations
+```
     
-## Example
-
-Have a look at [example](example) application. 
-
-## Why I should use this gem?
-
-Because it provides faster solutions (see the composed benchmarks below) 
-and ensures consistency of your database when ActiveRecord doesn't. 
-
-## Composed [benchmarks](https://github.com/toptal/database_validations/blob/master/benchmarks/composed_benchmarks.rb)
-
-| Case                                                                  | PostgreSQL                                 | MySQL                                      |
-| --------------------------------------------------------------------- | ------------------------------------------ | ------------------------------------------ |
-| Save only valid items (positive case)                                 | 381.818 (± 6.0%) i/s - 1.924k in 5.057491s | 293.304 (± 7.8%) i/s - 1.464k in 5.037224s |
-|                                                                       |  1.003k (±12.3%) i/s - 4.984k in 5.075305s | 1.060k  (± 6.6%) i/s - 5.353k in 5.075530s |
-| Each hundredth item is not valid (closer to life, but still specific) | 405.040 (± 3.0%) i/s - 2.052k in 5.071201s | 300.618 (± 2.0%) i/s - 1.508k in 5.018377s |
-|                                                                       | 1.007k  (±15.5%) i/s - 4.876k in 5.013361s | 1.046k  (± 6.1%) i/s - 5.300k in 5.088503s |
-| Save only invalid items (super worst case / impossible)               | 373.382 (±15.3%) i/s - 1.849k in 5.080908s | 294.326 (± 4.1%) i/s - 1.470k in 5.002983s |
-|                                                                       | 705.731 (±17.1%) i/s - 3.444k in 5.048612s | 552.250 (± 8.0%) i/s - 2.800k in 5.108251s |
-
-*The more you use it, the more you save!* (because default ActiveRecord methods increase the time).
+Have a look at [example](example) application for details.
 
 ## db_belongs_to
 
-ActiveRecord's `belongs_to` has `optional: false` by default. That means each time you save your record 
-it produces additional queries to check if the relation exists in the database. 
-But it doesn't guarantee that your relation will be there after your request is executed. 
-Here comes in handy `db_belongs_to`, it performs much faster and ensures real existence and has 
-full back-compatibility with `belongs_to`, so it's easy to replace.
-
-Supported databases: `PostgreSQL`, `MySQL`. 
-*Note*: Unfortunately, `SQLite` raises poor error message by which we can't determine which exactly foreign key raises an error.
-
-### Pros and Cons
-
-Advantages:
-- Provides true validation of relation existence because it uses foreign keys constrains.
-- Checks the existence of correct foreign key at the boot time. Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'`
-if you want to skip in in some cases. E.g., when you run migrations.
-- It's much faster. See benchmark section below for details. 
-Spoiler: it's almost two times faster except the almost impossible worst case.
-
-Disadvantages:
-- Cannot handle multiple validations at once because database raises only one error per query.
-
-### How it works?
-
-We override `save` and `save!` methods where we rescue `ActiveRecord::InvalidForeignKey` and add proper errors
-for compatibility.
+Supported databases are `PostgreSQL` and `MySQL`.  
+**Note**: Unfortunately, `SQLite` raises a poor error message 
+by which we can not determine exact foreign key which raised an error.
 
 ### Usage
 
@@ -89,11 +49,51 @@ user.errors.messages
 # => {:company=>["must exist"]} 
 ```
 
+### Problem
+
+ActiveRecord's `belongs_to` has `optional: false` by default. Unfortunately, this
+approach does not ensure existence of the related object. For example, we can skip 
+validations or remove the related object after we save the object. After that, our
+database becomes inconsistent because we assume the object has his relation but it 
+does not.  
+
+`db_belongs_to` solves the problem using foreign key constraints in the database 
+also providing backward compatibility with nice validations errors.
+
+### Pros and Cons
+
+**Advantages**:
+- Ensures relation existence because it uses foreign keys constraints.
+- Checks the existence of proper foreign key constraint at the boot time.
+Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` if you want to 
+skip it in some cases. (For example, when you run migrations.)
+- It's almost two times faster because it skips unnecessary SQL query. See benchmarks 
+below for details.
+
+**Disadvantages**:
+- Cannot handle multiple database validations at once because database 
+raises only one error per query.
+
 ### Configuration options
 
-Full compatibility with `belongs_to` except polymorphic association. 
+| Option name   | PostgreSQL | MySQL |
+| ------------- | :--------: | :---: |
+| class_name    | +          | +     |
+| foreign_key   | +          | +     |
+| foreign_type  | -          | -     |
+| primary_key   | +          | +     |
+| dependent     | +          | +     |
+| counter_cache | +          | +     |
+| polymorphic   | -          | -     |
+| validate      | +          | +     |
+| autosave      | +          | +     |
+| touch         | +          | +     |
+| inverse_of    | +          | +     |
+| optional      | -          | -     |
+| required      | -          | -     |
+| default       | +          | +     |
 
-### Benchmark [code](https://github.com/toptal/database_validations/blob/master/benchmarks/db_belongs_to_benchmark.rb)
+### Benchmarks ([code](benchmarks/db_belongs_to_benchmark.rb))
 
 | Case                                                                      | Relation      | PostgreSQL                                 | MySQL                                      |
 | ------------------------------------------------------------------------- | ------------- | ------------------------------------------ | ------------------------------------------ |
@@ -108,42 +108,15 @@ Full compatibility with `belongs_to` except polymorphic association.
 
 ## validates_db_uniqueness_of
 
-Supported databases: `PostgreSQL`, `MySQL` and `SQLite`.
-
-### Pros and Cons
-
-Advantages: 
-- Provides true uniqueness on the database level because it handles race conditions cases properly.
-- Checks the existence of correct unique index at the boot time. Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` 
-if you want to skip it in some cases. E.g., when you run migrations.
-- It's faster. See benchmark section below for details.
-
-Disadvantages: 
-- Cannot handle multiple validations at once because database raises only one error per query.
-    ```ruby
-    class User < ActiveRecord::Base
-      validates_db_uniqueness_of :email, :name
-    end
-  
-    original = User.create(name: 'name', email: 'email@mail.com')
-    dupe = User.create(name: 'name', email: 'email@mail.com')
-    # => false
-    dupe.errors.messages
-    # => {:name=>["has already been taken"]} 
-    ```
-
-### How it works?
-
-We override `save` and `save!` methods where we rescue `ActiveRecord::RecordNotUnique` and add proper errors
-for compatibility.
-
-For `valid?` we use implementation from `validates_uniqueness_of` where we query the database.
+Supported databases are `PostgreSQL`, `MySQL` and `SQLite`.
 
 ### Usage
 
 ```ruby
 class User < ActiveRecord::Base
   validates_db_uniqueness_of :email
+  # The same as following:
+  # validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensitive: true  
 end
 
 original = User.create(email: 'email@mail.com')
@@ -155,9 +128,43 @@ User.create!(email: 'email@mail.com')
 # => ActiveRecord::RecordInvalid Validation failed: email has already been taken
 ```
 
-### Configuration options
+Complete `case_sensitive` replacement example (for `PostgreSQL` only):
 
-We want to provide full compatibility with existing `validates_uniqueness_of` validator. 
+```ruby
+validates :slug, uniqueness: { case_sensitive: false, scope: :field }
+```
+
+Should be replaced by:
+
+```ruby
+validates_db_uniqueness_of :slug, index_name: :unique_index, case_sensitive: false, scope: :field
+```
+
+### Problem
+
+Unfortunately, ActiveRecord's `validates_uniqueness_of` approach does not ensure 
+uniqueness. For example, we can skip validations or create two records in parallel 
+queries. After that, our database becomes inconsistent because we assume some uniqueness
+over the table but it has duplicates.  
+
+`validates_db_uniqueness_of` solves the problem using unique index constraints 
+in the database also providing backward compatibility with nice validations errors.
+
+### Pros and Cons
+
+Advantages: 
+- Ensures uniqueness because it uses unique constraints.
+- Checks the existence of proper unique index at the boot time. 
+Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` 
+if you want to skip it in some cases. (For example, when you run migrations.)
+- It's two times faster in average because it skips unnecessary SQL query. See benchmarks 
+below for details.
+
+Disadvantages: 
+- Cannot handle multiple database validations at once because database raises 
+only one error per query.
+
+### Configuration options 
 
 | Option name    | PostgreSQL | MySQL | SQLite |
 | -------------- | :--------: | :---: | :----: |
@@ -169,64 +176,9 @@ We want to provide full compatibility with existing `validates_uniqueness_of` va
 | where          | +          | -     | -      |
 | case_sensitive | +          | -     | -      |
 | allow_nil      | -          | -     | -      | 
-| allow_blank    | -          | -     | -      |
+| allow_blank    | -          | -     | -      | 
 
-**Keep in mind**: `if`, `unless` and `case_sensitive` options are used only for `valid?` method. 
-
-```ruby
-class User < ActiveRecord::Base
-  validates_db_uniqueness_of :email, if: -> { email && email_changed? }
-end 
-
-user = User.create(email: 'email@mail.com', field: 'field')
-user.field = 'another'
-
-user.valid? # Will not query the database
-```
-
-**Backward compatibility**: Even when we don't natively support `case_sensitive`, `allow_nil` and `allow_blank` options now, the following:
-
-```ruby
-validates_db_uniqueness_of :email
-```
-
-Is the same by default as the following 
-
-```ruby
-validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensitive: true
-``` 
-
-Complete `case_sensitive` replacement example (for `PostgreSQL` only):
-
-```ruby
-validates :slug, uniqueness: { case_sensitive: false, scope: :field }
-```
-
-Should be replaced by:
-
-```ruby
-validates_db_uniqueness_of :slug, index_name: :unique_index_with_field_lower_on_slug, case_sensitive: false
-```
-
-Options descriptions: 
-- `scope`: One or more columns by which to limit the scope of the uniqueness constraint.
-- `message`: Specifies a custom error message (default is: "has already been taken").
-- `if`: Specifies a method or proc to call to determine if the validation should occur 
-(e.g. `if: :allow_validation`, or `if: Proc.new { |user| user.signup_step > 2 }`). The method or
-proc should return or evaluate to a `true` or `false` value.
-- `unless`: Specifies a method or proc to call to determine if the validation should not 
-occur (e.g. `unless: :skip_validation`, or `unless: Proc.new { |user| user.signup_step <= 2 }`). 
-The method or proc should return or evaluate to a `true` or `false` value.
-- `where`: Specify the conditions to be included as a `WHERE` SQL fragment to 
-limit the uniqueness constraint lookup (e.g. `where: "(status = 'active')"`).
-For backward compatibility, this will be converted automatically 
-to `conditions: -> { where("(status = 'active')") }` for `valid?` method.
-- `case_sensitive`: Looks for an exact match. Ignored by non-text columns (`true` by default).
-- `allow_nil`: If set to `true`, skips this validation if the attribute is `nil` (default is `false`).
-- `allow_blank`: If set to `true`, skips this validation if the attribute is blank (default is `false`).
-- `index_name`: Allows to make explicit connection between validator and index. Used when gem can't automatically find index. 
-
-### Benchmark ([code](https://github.com/toptal/database_validations/blob/master/benchmarks/uniqueness_validator_benchmark.rb))
+### Benchmark ([code](benchmarks/uniqueness_validator_benchmark.rb))
 
 | Case                             | Validator                  | SQLite                                     | PostgreSQL                                 | MySQL                                      |
 | -------------------------------- | -------------------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
@@ -260,17 +212,21 @@ end
 ## Development
 
 You need to have installed and running `postgresql` and `mysql`. 
-And for each adapter manually create a database called `database_validations_test` accessible to your local user. 
+And for each adapter manually create a database called `database_validations_test` accessible by your local user. 
 
 Then, run `rake spec` to run the tests.
 
 To check the conformance with the style guides, run:
 
-    rubocop
+```bash
+rubocop
+```
 
 To run benchmarks, run:
 
-    ruby -I lib benchmarks/composed_benchmarks.rb
+```bash
+ruby -I lib benchmarks/composed_benchmarks.rb
+```
 
 To install this gem onto your local machine, run `bundle exec rake install`. 
 To release a new version, update the version number in `version.rb`, and then 
@@ -279,9 +235,11 @@ push git commits and tags, and push the `.gem` file to [rubygems.org](https://ru
 
 ## Contributing
 
-[Bug reports](https://github.com/toptal/database_validations/issues) and [pull requests](https://github.com/toptal/database_validations/pulls) are welcome on GitHub. 
-This project is intended to be a safe, welcoming space for collaboration, and contributors are expected 
-to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+[Bug reports](https://github.com/toptal/database_validations/issues) 
+and [pull requests](https://github.com/toptal/database_validations/pulls) are 
+welcome on GitHub. This project is intended to be a safe, welcoming space for 
+collaboration, and contributors are expected to adhere 
+to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
 
@@ -295,3 +253,7 @@ lists is expected to follow the [code of conduct](https://github.com/toptal/data
 ## Authors
 
 - [Evgeniy Demin](https://github.com/djezzzl)
+
+## Contributors
+
+- [Filipp Pirozhkov](https://github.com/pirj)
