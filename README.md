@@ -30,6 +30,34 @@ gem install database_validations
     
 Have a look at [example](example) application for details.
 
+## Benchmark ([code](benchmarks/composed_benchmarks.rb))
+
+Image, you have `User` model defines as
+
+```ruby
+class User < ActiveRecord::Base
+  validates :email, :full_name, uniqueness: true
+
+  belongs_to :company
+  belongs_to :country
+end
+```
+
+and then replace with
+
+```ruby
+class User < ActiveRecord::Base
+  validates_db_uniqueness_of :email, :full_name
+
+  db_belongs_to :company
+  db_belongs_to :country
+end
+```
+
+you will get the following performance improvement:
+
+![](benchmarks/composed.png)
+
 ## db_belongs_to
 
 Supported databases are `PostgreSQL` and `MySQL`.  
@@ -95,16 +123,7 @@ raises only one error per query.
 
 ### Benchmarks ([code](benchmarks/db_belongs_to_benchmark.rb))
 
-| Case                                                                      | Relation      | PostgreSQL                                 | MySQL                                      |
-| ------------------------------------------------------------------------- | ------------- | ------------------------------------------ | ------------------------------------------ |
-| Save existing in DB item (positive case)                                  | belongs_to    | 679.869 (±37.4%) i/s - 2.945k in 5.326013s | 628.873 (±18.3%) i/s - 3.009k in 5.057690s |
-|                                                                           | db_belongs_to | 990.386 (±27.0%) i/s - 4.440k in 5.033655s | 1.256k  (±14.8%) i/s - 6.188k in 5.064498s |
-| Save only non-existing* item (super worst case / impossible)              | belongs_to    | 966.079 (±13.6%) i/s - 4.830k in 5.110996s | 714.486 (±10.2%) i/s - 3.588k in 5.085503s |
-|                                                                           | db_belongs_to | 516.709 (±16.8%) i/s - 2.541k in 5.040354s | 498.942 (± 7.8%) i/s - 2.475k in 5.001812s |
-| Each hundredth item is non-existing* (closer to life, but still specific) | belongs_to    | 830.240 (±10.6%) i/s - 4.104k in 5.019347s | 728.572 (±13.7%) i/s - 3.588k in 5.085377s |
-|                                                                           | db_belongs_to | 1.311k  (±19.4%) i/s - 6.222k in 5.040586s | 1.320k  (±11.0%) i/s - 6.600k in 5.073114s |
-
-* Non-existing item is a row with ID = -1
+![](benchmarks/db_belongs_to.png)
 
 ## validates_db_uniqueness_of
 
@@ -180,14 +199,7 @@ only one error per query.
 
 ### Benchmark ([code](benchmarks/uniqueness_validator_benchmark.rb))
 
-| Case                             | Validator                  | SQLite                                     | PostgreSQL                                 | MySQL                                      |
-| -------------------------------- | -------------------------- | ------------------------------------------ | ------------------------------------------ | ------------------------------------------ |
-| Save duplicate item only         | validates_db_uniqueness_of | 1.404k (±14.7%) i/s - 6.912k in 5.043409s  | 508.889 (± 2.8%) i/s - 2.550k in 5.015044s | 649.356 (±11.5%) i/s - 3.283k in 5.153444s |
-|                                  | validates_uniqueness_of    | 1.505k (±14.6%) i/s - 7.448k in 5.075696s  | 637.017 (±14.1%) i/s - 3.128k in 5.043434s | 473.561 (± 9.7%) i/s - 2.352k in 5.021151s |
-| Save unique item only            | validates_db_uniqueness_of | 3.241k (±18.3%) i/s - 15.375k in 5.014244s | 1.345k  (± 5.5%) i/s - 6.834k in 5.096706s | 1.439k  (±12.9%) i/s - 7.100k in 5.033603s |
-|                                  | validates_uniqueness_of    | 2.002k (±10.9%) i/s - 9.900k in 5.018449s  | 667.100 (± 4.8%) i/s - 3.350k in 5.034451s | 606.334 (± 4.9%) i/s - 3.068k in 5.072587s |
-| Each hundredth item is duplicate | validates_db_uniqueness_of | 3.534k (± 5.6%) i/s - 17.748k in 5.039277s | 1.351k  (± 6.5%) i/s - 6.750k in 5.017280s | 1.436k  (±11.6%) i/s - 7.154k in 5.062644s |
-|                                  | validates_uniqueness_of    | 2.121k (± 6.8%) i/s - 10.653k in 5.049739s | 658.199 (± 6.1%) i/s - 3.350k in 5.110176s | 596.024 (± 6.7%) i/s - 2.989k in 5.041497s |
+![](benchmarks/validates_db_uniqueness_of.png)
 
 ## Testing (RSpec)
 
