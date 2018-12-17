@@ -47,27 +47,19 @@ require_relative 'gc_suite'
   # ===Benchmarks===
   suite = GCSuite.new
   company = Company.create!
-
-  # ===Save using ID===
-  Benchmark.ips do |x|
-    x.config(suite: suite)
-    x.report('belongs_to') { Users1.create(company_id: company.id) }
-    x.report('db_belongs_to') { Users2.create(company_id: company.id) }
-  end
-
-  # ===Each hundredth is not found===
   field = 0
-  Benchmark.ips do |x|
-    x.config(suite: suite)
-    x.report('belongs_to') { field += 1; field % 100 == 0 ? Users1.create(company_id: -1) : Users1.create(company_id: company.id) }
-    x.report('db_belongs_to') { field += 1; field % 100 == 0 ? Users2.create(company_id: -1) : Users2.create(company_id: company.id) }
-  end
 
-  # ===Not found===
   Benchmark.ips do |x|
     x.config(suite: suite)
-    x.report('belongs_to') { Users1.create(company_id: -1) }
-    x.report('db_belongs_to') { Users2.create(company_id: -1) }
+
+    x.report("#{database_configuration[:adapter]} only existing: belongs_to") { Users1.create(company_id: company.id) }
+    x.report("#{database_configuration[:adapter]} only existing: db_belongs_to") { Users2.create(company_id: company.id) }
+
+    x.report("#{database_configuration[:adapter]} each hundredth does not exist: belongs_to") { field += 1; field % 100 == 0 ? Users1.create(company_id: -1) : Users1.create(company_id: company.id) }
+    x.report("#{database_configuration[:adapter]} each hundredth does not exist: db_belongs_to") { field += 1; field % 100 == 0 ? Users2.create(company_id: -1) : Users2.create(company_id: company.id) }
+
+    x.report("#{database_configuration[:adapter]} only missing: belongs_to") { Users1.create(company_id: -1) }
+    x.report("#{database_configuration[:adapter]} only missing: db_belongs_to") { Users2.create(company_id: -1) }
   end
 
   # Clear the DB
