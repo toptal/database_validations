@@ -78,22 +78,15 @@ require_relative 'gc_suite'
   # ===Save only valid===
   Benchmark.ips do |x|
     x.config(suite: suite)
-    x.report('old way') { field += 1; Users1.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
-    x.report('new way') { field += 1; Users2.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
-  end
 
-  # ===Each hundredth is invalid===
-  Benchmark.ips do |x|
-    x.config(suite: suite)
-    x.report('old way') { field += 1; field % 100 == 0 ? Users1.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') : Users1.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
-    x.report('new way') { field += 1; field % 100 == 0 ? Users2.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') : Users2.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
-  end
+    x.report("#{database_configuration[:adapter]} optimistic: without gem") { field += 1; Users1.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
+    x.report("#{database_configuration[:adapter]} optimistic: with gem") { field += 1; Users2.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
 
-  # ===Save only invalid===
-  Benchmark.ips do |x|
-    x.config(suite: suite)
-    x.report('old way') { Users1.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') }
-    x.report('new way') { Users2.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') }
+    x.report("#{database_configuration[:adapter]} realistic: without gem") { field += 1; field % 100 == 0 ? Users1.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') : Users1.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
+    x.report("#{database_configuration[:adapter]} realistic: with gem") { field += 1; field % 100 == 0 ? Users2.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') : Users2.create(company_id: company.id, country_id: country.id, full_name: field.to_s, email: field.to_s) }
+
+    x.report("#{database_configuration[:adapter]} pessimistic: without gem") { Users1.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') }
+    x.report("#{database_configuration[:adapter]} pessimistic: with gem") { Users2.create(company_id: -1, country_id: -1, full_name: 'invalid', email: 'invalid') }
   end
 
   # Clear the DB

@@ -45,25 +45,17 @@ require_relative 'gc_suite'
   field = 0
   Entity.create(field: field)
 
-  # ===Save duplicate item===
   Benchmark.ips do |x|
     x.config(suite: suite)
-    x.report('validates_db_uniqueness_of') { DbValidation.create(field: field) }
-    x.report('validates_uniqueness_of') { AppValidation.create(field: field) }
-  end
 
-  # ===Save unique item===
-  Benchmark.ips do |x|
-    x.config(suite: suite)
-    x.report('validates_db_uniqueness_of') { field += 1; DbValidation.create(field: field) }
-    x.report('validates_uniqueness_of') { field += 1; AppValidation.create(field: field) }
-  end
+    x.report("#{database_configuration[:adapter]} only unique: validates_uniqueness_of") { field += 1; AppValidation.create(field: field) }
+    x.report("#{database_configuration[:adapter]} only unique: validates_db_uniqueness_of") { field += 1; DbValidation.create(field: field) }
 
-  # ===Each hundredth item is duplicate===
-  Benchmark.ips do |x|
-    x.config(suite: suite)
-    x.report('validates_db_uniqueness_of') { field += 1; DbValidation.create(field: (field % 100 == 0 ? 0 : field)) }
-    x.report('validates_uniqueness_of') { field += 1; AppValidation.create(field: (field % 100 == 0 ? 0 : field)) }
+    x.report("#{database_configuration[:adapter]} each hundredth is a duplicate: validates_uniqueness_of") { field += 1; AppValidation.create(field: (field % 100 == 0 ? 0 : field)) }
+    x.report("#{database_configuration[:adapter]} each hundredth is a duplicate: validates_db_uniqueness_of") { field += 1; DbValidation.create(field: (field % 100 == 0 ? 0 : field)) }
+
+    x.report("#{database_configuration[:adapter]} only duplicates: validates_uniqueness_of") { AppValidation.create(field: 0) }
+    x.report("#{database_configuration[:adapter]} only duplicates: validates_db_uniqueness_of") { DbValidation.create(field: 0) }
   end
 
   # Clear the DB
