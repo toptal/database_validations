@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.1] - 09-01-18
+### Features
+- Add RuboCop cop for `db_belongs_to` and `validates_db_uniqueness_of`
+
 ## [0.8.0] - 30-11-18
 ### Features
 - Add `db_belongs_to` 

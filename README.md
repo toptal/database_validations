@@ -223,12 +223,19 @@ end
 
 ## Using with RuboCop
 
-DatabaseValidations provides custom cops for RuboCop to help you consistently apply the improvements. To use them, use
-`rubocop --require database_validations/rubocop/cops` or add to your `.rubocop.yml` file:
+DatabaseValidations provides custom cops for RuboCop to help you consistently apply the improvements. 
+To use all of them, use `rubocop --require database_validations/rubocop/cops` or add to your `.rubocop.yml` file:
 
-```
+```yaml
 require:
   - database_validations/rubocop/cops
+```
+
+Or you case use some specific cop directly:
+```yaml
+require:
+  - database_validations/rubocop/cop/belongs_to
+  - database_validations/rubocop/cop/uniqueness_of
 ```
 
 ## Development
@@ -272,10 +279,8 @@ The gem is available as open source under the terms of the [MIT License](https:/
 Everyone interacting in the DatabaseValidations project’s codebases, issue trackers, chat rooms and mailing 
 lists is expected to follow the [code of conduct](https://github.com/toptal/database_validations/blob/master/CODE_OF_CONDUCT.md).
 
-## Authors
-
-- [Evgeniy Demin](https://github.com/djezzzl)
-
 ## Contributors
 
+- [Evgeniy Demin](https://github.com/djezzzl) (author)
 - [Filipp Pirozhkov](https://github.com/pirj)
+- [Maxim Krizhanovski](https://github.com/Darhazer)
