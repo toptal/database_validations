@@ -221,6 +221,16 @@ describe 'validations' do
 end
 ```
 
+## Using with RuboCop
+
+DatabaseValidations provides custom cops for RuboCop to help you consistently apply the improvements. To use them, use
+`rubocop --require database_validations/rubocop/cops` or add to your `.rubocop.yml` file:
+
+```
+require:
+  - database_validations/rubocop/cops
+```
+
 ## Development
 
 You need to have installed and running `postgresql` and `mysql`. 
