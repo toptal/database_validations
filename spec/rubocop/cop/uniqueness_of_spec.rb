@@ -23,4 +23,11 @@ RSpec.describe RuboCop::Cop::DatabaseValidations::UniquenessOf do # rubocop:disa
                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use `validates_db_uniqueness_of`.
     RUBY
   end
+
+  it 'detects `validates_uniqueness_of`' do
+    expect_offense(<<-RUBY)
+      validates_uniqueness_of :title, :slug
+      ^^^^^^^^^^^^^^^^^^^^^^^ Use `validates_db_uniqueness_of`.
+    RUBY
+  end
 end
