@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.2] - 10-01-18
+### Bugs
+- Fix RuboCop cop for `validates_db_uniqueness_of` to catch `validates_uniqueness_of` definition too. 
+
 ## [0.8.1] - 09-01-18
 ### Features
 - Add RuboCop cop for `db_belongs_to` and `validates_db_uniqueness_of`
