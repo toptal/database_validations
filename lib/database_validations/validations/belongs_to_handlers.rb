@@ -4,12 +4,22 @@ module DatabaseValidations
 
     included do
       alias_method :validate, :valid?
+
+      validate do
+        Helpers.each_belongs_to_presence_validator(self.class) do |validator|
+          next unless validator.column_and_relation_nil_for?(self)
+
+          errors.add(validator.relation, :blank, message: :required)
+        end
+      end
     end
 
     def valid?(context = nil)
       output = super(context)
 
       Helpers.each_belongs_to_presence_validator(self.class) do |validator|
+        next if validator.column_and_relation_nil_for?(self)
+
         validates_with(ActiveRecord::Validations::PresenceValidator, validator.validates_presence_options)
       end
 
@@ -17,8 +27,6 @@ module DatabaseValidations
     end
 
     def save(opts = {})
-      return false unless Helpers.check_foreign_key_missing(self)
-
       ActiveRecord::Base.connection.transaction(requires_new: true) { super }
     rescue ActiveRecord::InvalidForeignKey => e
       Helpers.handle_foreign_key_error!(self, e)
@@ -26,8 +34,6 @@ module DatabaseValidations
     end
 
     def save!(opts = {})
-      raise ActiveRecord::RecordInvalid, self unless Helpers.check_foreign_key_missing(self)
-
       ActiveRecord::Base.connection.transaction(requires_new: true) { super }
     rescue ActiveRecord::InvalidForeignKey => e
       Helpers.handle_foreign_key_error!(self, e)

@@ -26,15 +26,6 @@ module DatabaseValidations
       raise error
     end
 
-    def check_foreign_key_missing(instance)
-      Helpers.each_belongs_to_presence_validator(instance.class) do |validator|
-        if instance.public_send(validator.column).nil? && instance.public_send(validator.relation).nil?
-          instance.errors.add(validator.relation, :blank, message: :required)
-        end
-      end
-      instance.errors.empty?
-    end
-
     def each_options_storage(klass)
       while klass.respond_to?(:validates_db_uniqueness_of)
         storage = klass.instance_variable_get(:'@database_validations_opts')

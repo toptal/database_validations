@@ -78,21 +78,23 @@ RSpec.describe 'db_belongs_to' do
     end
 
     shared_examples 'with company_id provided' do |method, field, company_id|
-      specify do
-        # Hack
-        company_id = Company.create.id if company_id == :existing_id
-        company_id = Company.create if company_id == :existing_company
-        company_id = Company.new if company_id == :built
+      context "#{method} on #{field} with #{company_id}" do
+        specify do
+          # Hack
+          company_id = Company.create.id if company_id == :existing_id
+          company_id = Company.create if company_id == :existing_company
+          company_id = Company.new if company_id == :built
 
-        old = belongs_to_user_klass.new(field => company_id)
-        new = db_belongs_to_user_klass.new(field => company_id)
+          old = belongs_to_user_klass.new(field => company_id)
+          new = db_belongs_to_user_klass.new(field => company_id)
 
-        old_err = rescue_error { old.send(method) }
-        new_err = rescue_error { new.send(method) }
+          old_err = rescue_error { old.send(method) }
+          new_err = rescue_error { new.send(method) }
 
-        expect(new_err).to eq(old_err)
-        expect(new.errors.messages).to eq(old.errors.messages)
-        expect(new.persisted?).to eq(old.persisted?)
+          expect(new_err).to eq(old_err)
+          expect(new.errors.messages).to eq(old.errors.messages)
+          expect(new.persisted?).to eq(old.persisted?)
+        end
       end
     end
 

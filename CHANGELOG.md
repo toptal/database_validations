@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.3] - 05-02-19
+### Bugs
+- Fix bug for `db_belongs_to` when we skip other validations if the relation is missing
+
 ## [0.8.2] - 10-01-18
 ### Bugs
 - Fix RuboCop cop for `validates_db_uniqueness_of` to catch `validates_uniqueness_of` definition too. 
