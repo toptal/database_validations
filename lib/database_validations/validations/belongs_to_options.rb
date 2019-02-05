@@ -16,6 +16,11 @@ module DatabaseValidations
       Helpers.generate_key_for_belongs_to(column)
     end
 
+    # @return [Boolean]
+    def column_and_relation_nil_for?(instance)
+      instance.public_send(column).nil? && instance.public_send(relation).nil?
+    end
+
     def handle_foreign_key_error(instance)
       # Hack to not query the database because we know the result already
       instance.send("#{relation}=", nil)
