@@ -35,7 +35,7 @@ module DatabaseValidations
     private
 
     def perform_validations(options = {})
-      options[:validate] == false || valid_without_database_validations(options[:context])
+      options[:validate] == false || valid_without_database_validations?(options[:context])
     end
   end
 

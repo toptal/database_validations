@@ -78,7 +78,7 @@ RSpec.describe 'db_belongs_to' do
     end
 
     shared_examples 'with company_id provided' do |method, field, company_id|
-      context "#{method} on #{field} with #{company_id}" do
+      context "#{method} on #{field} with #{company_id.inspect}" do
         specify do
           # Hack
           company_id = Company.create.id if company_id == :existing_id

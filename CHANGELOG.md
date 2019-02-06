@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.4] - 06-02-19
+### Bugs
+- Fix a bug for `db_belongs_to`, validation should check `blank?` not `nil?`
+
 ## [0.8.3] - 05-02-19
 ### Bugs
 - Fix bug for `db_belongs_to` when we skip other validations if the relation is missing

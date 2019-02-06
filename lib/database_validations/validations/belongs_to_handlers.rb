@@ -7,7 +7,7 @@ module DatabaseValidations
 
       validate do
         Helpers.each_belongs_to_presence_validator(self.class) do |validator|
-          next unless validator.column_and_relation_nil_for?(self)
+          next unless validator.column_and_relation_blank_for?(self)
 
           errors.add(validator.relation, :blank, message: :required)
         end
@@ -18,7 +18,7 @@ module DatabaseValidations
       output = super(context)
 
       Helpers.each_belongs_to_presence_validator(self.class) do |validator|
-        next if validator.column_and_relation_nil_for?(self)
+        next if validator.column_and_relation_blank_for?(self)
 
         validates_with(ActiveRecord::Validations::PresenceValidator, validator.validates_presence_options)
       end
@@ -43,7 +43,7 @@ module DatabaseValidations
     private
 
     def perform_validations(options = {})
-      options[:validate] == false || valid_without_database_validations(options[:context])
+      options[:validate] == false || valid_without_database_validations?(options[:context])
     end
   end
 

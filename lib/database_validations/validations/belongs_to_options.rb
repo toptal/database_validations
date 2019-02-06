@@ -17,8 +17,8 @@ module DatabaseValidations
     end
 
     # @return [Boolean]
-    def column_and_relation_nil_for?(instance)
-      instance.public_send(column).nil? && instance.public_send(relation).nil?
+    def column_and_relation_blank_for?(instance)
+      instance.public_send(column).blank? && instance.public_send(relation).blank?
     end
 
     def handle_foreign_key_error(instance)
