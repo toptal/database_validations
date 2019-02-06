@@ -7,6 +7,7 @@ require 'database_validations/rails/railtie' if defined?(Rails)
 require 'database_validations/validations/uniqueness_handlers'
 require 'database_validations/validations/uniqueness_options'
 
+require 'database_validations/validations/belongs_to_presence_validator'
 require 'database_validations/validations/belongs_to_handlers'
 require 'database_validations/validations/belongs_to_options'
 

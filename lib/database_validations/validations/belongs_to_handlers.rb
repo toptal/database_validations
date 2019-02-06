@@ -4,14 +4,6 @@ module DatabaseValidations
 
     included do
       alias_method :validate, :valid?
-
-      validate do
-        Helpers.each_belongs_to_presence_validator(self.class) do |validator|
-          next unless validator.column_and_relation_blank_for?(self)
-
-          errors.add(validator.relation, :blank, message: :required)
-        end
-      end
     end
 
     def valid?(context = nil)
@@ -55,6 +47,8 @@ module DatabaseValidations
       belongs_to(name, scope, options.merge(optional: true))
 
       foreign_key = reflections[name.to_s].foreign_key
+
+      validates_with DatabaseValidations::Validations::BelongsToPresenceValidator, column: foreign_key, relation: name
 
       @database_validations_opts.push_belongs_to(foreign_key, name)
 
