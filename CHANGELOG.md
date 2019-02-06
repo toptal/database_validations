@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.5] - 05-02-19
+### Bugs
+- Fix a behavior for 3rd parties such as `simple_form`
+
 ## [0.8.4] - 06-02-19
 ### Bugs
 - Fix a bug for `db_belongs_to`, validation should check `blank?` not `nil?`
