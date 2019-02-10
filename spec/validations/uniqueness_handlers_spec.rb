@@ -3,6 +3,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
     ActiveRecord::Base.establish_connection(opts)
     ActiveRecord::Schema.verbose = false
 
+    clear_database!(opts)
+
     class Entity < ActiveRecord::Base
       reset_column_information
     end
@@ -10,7 +12,6 @@ RSpec.describe '.validates_db_uniqueness_of' do
 
   def define_table
     ActiveRecord::Schema.define(version: 1) do
-      drop_table :entities, if_exists: true
       create_table :entities do |t|
         yield(t)
       end
