@@ -18,17 +18,11 @@ module DatabaseValidations
       errors.empty? && output
     end
 
-    def save(options = {})
+    def create_or_update(*args, &block)
       ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-    rescue ActiveRecord::RecordNotUnique => e
-      Helpers.handle_unique_error!(self, e)
-      false
-    end
+    rescue ActiveRecord::RecordNotUnique => error
+      raise error unless Helpers.handle_unique_error!(self, error)
 
-    def save!(options = {})
-      ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-    rescue ActiveRecord::RecordNotUnique => e
-      Helpers.handle_unique_error!(self, e)
       raise ActiveRecord::RecordInvalid, self
     end
 

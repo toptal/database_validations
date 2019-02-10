@@ -12,7 +12,7 @@ module DatabaseValidations
         return storage[column_key].handle_unique_error(instance) if storage[column_key]
       end
 
-      raise error
+      false
     end
 
     def handle_foreign_key_error!(instance, error)
@@ -23,7 +23,7 @@ module DatabaseValidations
         return storage[column_key].handle_foreign_key_error(instance) if storage[column_key]
       end
 
-      raise error
+      false
     end
 
     def each_options_storage(klass)

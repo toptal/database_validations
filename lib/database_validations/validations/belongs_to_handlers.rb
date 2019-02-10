@@ -18,17 +18,11 @@ module DatabaseValidations
       errors.empty? && output
     end
 
-    def save(opts = {})
+    def create_or_update(*args, &block)
       ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-    rescue ActiveRecord::InvalidForeignKey => e
-      Helpers.handle_foreign_key_error!(self, e)
-      false
-    end
+    rescue ActiveRecord::InvalidForeignKey => error
+      raise error unless Helpers.handle_foreign_key_error!(self, error)
 
-    def save!(opts = {})
-      ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-    rescue ActiveRecord::InvalidForeignKey => e
-      Helpers.handle_foreign_key_error!(self, e)
       raise ActiveRecord::RecordInvalid, self
     end
 
