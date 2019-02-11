@@ -4,7 +4,8 @@ module DatabaseValidations
     DEFAULT_OPTIONS = { allow_nil: true, case_sensitive: true, allow_blank: false }.freeze
 
     def self.validator_options(attributes, options)
-      DEFAULT_OPTIONS.merge(attributes: attributes)
+      DEFAULT_OPTIONS
+        .merge(attributes: attributes)
         .merge(options)
         .except(*CUSTOM_OPTIONS)
         .tap { |opts| opts[:conditions] = -> { where(options[:where]) } if options[:where] }

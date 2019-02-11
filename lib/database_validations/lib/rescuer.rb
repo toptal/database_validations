@@ -16,9 +16,9 @@ module DatabaseValidations
     def create_or_update(*args, &block)
       self._database_validations_fallback = false
       ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-
     rescue ActiveRecord::InvalidForeignKey, ActiveRecord::RecordNotUnique => error
       raise error unless Helpers.handle_error!(self, error)
+
       raise ActiveRecord::RecordInvalid, self
     end
 
