@@ -1,7 +1,7 @@
-require 'database_validations/validations/adapters/base_adapter'
-require 'database_validations/validations/adapters/sqlite_adapter'
-require 'database_validations/validations/adapters/postgresql_adapter'
-require 'database_validations/validations/adapters/mysql_adapter'
+require 'database_validations/lib/adapters/base_adapter'
+require 'database_validations/lib/adapters/sqlite_adapter'
+require 'database_validations/lib/adapters/postgresql_adapter'
+require 'database_validations/lib/adapters/mysql_adapter'
 
 module DatabaseValidations
   module Adapters
