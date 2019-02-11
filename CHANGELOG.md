@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.6] - 11-02-19
+### Improvements
+- Refactor and slight performance improvement
+
 ## [0.8.5] - 05-02-19
 ### Bugs
 - Fix a behavior for 3rd parties such as `simple_form`
