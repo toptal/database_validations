@@ -1,52 +1,20 @@
 module DatabaseValidations
-  module BelongsToHandlers
-    extend ActiveSupport::Concern
-
-    included do
-      alias_method :validate, :valid?
-    end
-
-    def valid?(context = nil)
-      output = super(context)
-
-      Helpers.each_belongs_to_presence_validator(self.class) do |validator|
-        next if validator.column_and_relation_blank_for?(self)
-
-        validates_with(ActiveRecord::Validations::PresenceValidator, validator.validates_presence_options)
-      end
-
-      errors.empty? && output
-    end
-
-    def create_or_update(*args, &block)
-      ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-    rescue ActiveRecord::InvalidForeignKey => error
-      raise error unless Helpers.handle_foreign_key_error!(self, error)
-
-      raise ActiveRecord::RecordInvalid, self
-    end
-
-    private
-
-    def perform_validations(options = {})
-      options[:validate] == false || valid_without_database_validations?(options[:context])
-    end
-  end
-
   module ClassMethods
     def db_belongs_to(name, scope = nil, **options)
-      include(DatabaseValidations::ValidWithoutDatabaseValidations)
+      Helpers.cache_valid_method!(self)
+
       @database_validations_opts ||= DatabaseValidations::OptionsStorage.new(self)
 
       belongs_to(name, scope, options.merge(optional: true))
 
       foreign_key = reflections[name.to_s].foreign_key
 
-      validates_with DatabaseValidations::Validations::BelongsToPresenceValidator, column: foreign_key, relation: name
-
       @database_validations_opts.push_belongs_to(foreign_key, name)
 
-      include(DatabaseValidations::BelongsToHandlers)
+      validates_with DatabaseValidations::DBPresenceValidator,
+                     DatabaseValidations::BelongsToOptions.validator_options(name, foreign_key)
+
+      include(DatabaseValidations::Rescuer)
     end
   end
 end

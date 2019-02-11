@@ -3,6 +3,13 @@ module DatabaseValidations
     CUSTOM_OPTIONS = %i[where index_name].freeze
     DEFAULT_OPTIONS = { allow_nil: true, case_sensitive: true, allow_blank: false }.freeze
 
+    def self.validator_options(attributes, options)
+      DEFAULT_OPTIONS.merge(attributes: attributes)
+        .merge(options)
+        .except(*CUSTOM_OPTIONS)
+        .tap { |opts| opts[:conditions] = -> { where(options[:where]) } if options[:where] }
+    end
+
     attr_reader :field
 
     def initialize(field, options, adapter)
@@ -19,22 +26,6 @@ module DatabaseValidations
       error_options[:value] = instance.public_send(options[:attributes])
 
       instance.errors.add(options[:attributes], :taken, error_options)
-    end
-
-    # @return [Hash<Symbol, Object>]
-    def validates_uniqueness_options
-      where_clause_str = where_clause
-
-      DEFAULT_OPTIONS
-        .merge(options)
-        .except(*CUSTOM_OPTIONS)
-        .tap { |opts| opts[:conditions] = -> { where(where_clause_str) } if where_clause }
-    end
-
-    # @return [Boolean]
-    def if_and_unless_pass?(instance)
-      (options[:if].nil? || condition_passes?(options[:if], instance)) &&
-        (options[:unless].nil? || !condition_passes?(options[:unless], instance))
     end
 
     # @return [String]
@@ -75,16 +66,6 @@ module DatabaseValidations
     private
 
     attr_reader :adapter, :options
-
-    def condition_passes?(condition, instance)
-      if condition.is_a?(Symbol)
-        instance.__send__(condition)
-      elsif condition.is_a?(Proc) && condition.arity.zero?
-        instance.instance_exec(&condition)
-      else
-        instance.instance_eval(&condition)
-      end
-    end
 
     def raise_if_unsupported_options!
       options.except(:attributes).each_key do |option|

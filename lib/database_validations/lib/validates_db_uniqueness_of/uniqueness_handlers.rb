@@ -1,41 +1,8 @@
 module DatabaseValidations
-  module UniquenessHandlers
-    extend ActiveSupport::Concern
-
-    included do
-      alias_method :validate, :valid?
-    end
-
-    def valid?(context = nil)
-      output = super(context)
-
-      Helpers.each_uniqueness_validator(self.class) do |validator|
-        if validator.if_and_unless_pass?(self)
-          validates_with(ActiveRecord::Validations::UniquenessValidator, validator.validates_uniqueness_options)
-        end
-      end
-
-      errors.empty? && output
-    end
-
-    def create_or_update(*args, &block)
-      ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-    rescue ActiveRecord::RecordNotUnique => error
-      raise error unless Helpers.handle_unique_error!(self, error)
-
-      raise ActiveRecord::RecordInvalid, self
-    end
-
-    private
-
-    def perform_validations(options = {})
-      options[:validate] == false || valid_without_database_validations?(options[:context])
-    end
-  end
-
   module ClassMethods
     def validates_db_uniqueness_of(*attributes)
-      include(DatabaseValidations::ValidWithoutDatabaseValidations)
+      Helpers.cache_valid_method!(self)
+
       @database_validations_opts ||= DatabaseValidations::OptionsStorage.new(self)
 
       options = attributes.extract_options!
@@ -44,7 +11,10 @@ module DatabaseValidations
         @database_validations_opts.push_uniqueness(attribute, options.merge(attributes: attribute))
       end
 
-      include(DatabaseValidations::UniquenessHandlers)
+      validates_with DatabaseValidations::DBUniquenessValidator,
+                     DatabaseValidations::UniquenessOptions.validator_options(attributes, options)
+
+      include(DatabaseValidations::Rescuer)
     end
   end
 end
