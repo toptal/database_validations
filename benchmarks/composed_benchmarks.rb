@@ -1,6 +1,7 @@
 require 'benchmark/ips'
 require 'database_validations'
 require_relative 'gc_suite'
+require_relative 'database_cleaner'
 
 [
   {
@@ -13,12 +14,9 @@ require_relative 'gc_suite'
   }
 ].each do |database_configuration|
   ActiveRecord::Base.establish_connection(database_configuration)
-  ActiveRecord::Schema.define(version: 1) do
-    drop_table :users_1, if_exists: true, force: :cascade
-    drop_table :users_2, if_exists: true, force: :cascade
-    drop_table :companies, if_exists: true, force: :cascade
-    drop_table :countries, if_exists: true, force: :cascade
+  clear_database!(database_configuration)
 
+  ActiveRecord::Schema.define(version: 1) do
     create_table :companies
     create_table :countries
 

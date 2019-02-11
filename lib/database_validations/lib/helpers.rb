@@ -2,6 +2,22 @@ module DatabaseValidations
   module Helpers
     module_function
 
+    def cache_valid_method!(klass)
+      return if klass.method_defined?(:valid_without_database_validations?)
+
+      klass.alias_method(:valid_without_database_validations?, :valid?)
+    end
+
+    def handle_error!(instance, error)
+      case error
+      when ActiveRecord::RecordNotUnique
+        handle_unique_error!(instance, error)
+      when ActiveRecord::InvalidForeignKey
+        handle_foreign_key_error!(instance, error)
+      else false
+      end
+    end
+
     def handle_unique_error!(instance, error) # rubocop:disable Metrics/AbcSize
       adapter = Adapters.factory(instance.class)
       index_key = generate_key_for_uniqueness_index(adapter.index_name(error.message))
@@ -12,7 +28,7 @@ module DatabaseValidations
         return storage[column_key].handle_unique_error(instance) if storage[column_key]
       end
 
-      raise error
+      false
     end
 
     def handle_foreign_key_error!(instance, error)
@@ -23,7 +39,7 @@ module DatabaseValidations
         return storage[column_key].handle_foreign_key_error(instance) if storage[column_key]
       end
 
-      raise error
+      false
     end
 
     def each_options_storage(klass)

@@ -27,11 +27,9 @@ RSpec.describe 'db_belongs_to' do
     ActiveRecord::Base.establish_connection(connection_options)
     ActiveRecord::Schema.verbose = false
 
-    ActiveRecord::Schema.define(version: 1) do
-      drop_table :belongs_users, if_exists: true, force: :cascade
-      drop_table :db_belongs_users, if_exists: true, force: :cascade
-      drop_table :companies, if_exists: true, force: :cascade
+    clear_database!(connection_options)
 
+    ActiveRecord::Schema.define(version: 1) do
       create_table :companies
 
       create_table :belongs_users do |t|

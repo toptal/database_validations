@@ -1,5 +1,9 @@
 module DatabaseValidations
   class BelongsToOptions
+    def self.validator_options(association, foreign_key)
+      { attributes: association, foreign_key: foreign_key, message: :required }
+    end
+
     attr_reader :column, :adapter, :relation
 
     def initialize(column, relation, adapter)
@@ -25,10 +29,6 @@ module DatabaseValidations
       # Hack to not query the database because we know the result already
       instance.send("#{relation}=", nil)
       instance.errors.add(relation, :blank, message: :required)
-    end
-
-    def validates_presence_options
-      { attributes: relation, message: :required }
     end
 
     private
