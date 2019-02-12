@@ -9,7 +9,7 @@ module DatabaseValidations
       end
 
       def unique_error_columns(error_message)
-        find_index_by_name(index_name(error_message)).columns
+        error_message[/Key \((.+)\)=/, 1].split(', ')
       end
 
       def foreign_key_error_column(error_message)
