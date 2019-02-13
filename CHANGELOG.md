@@ -1,9 +1,13 @@
 # Changelog
-## [0.8.8] - 13-0-19
+## [0.8.9] - 13-02-19
+### Bugs
+- Hot-fix for `validate_db_uniqueness_of` RSpec matcher
+
+## (removed) [0.8.8] - 13-02-19 
 ### Bugs
 - Hot-fix for `validates_db_uniqueness_of`
 
-## [0.8.7] - 13-02-19
+## (removed) [0.8.7] - 13-02-19
 ### Improvements
 - Refactor and performance improvement
 

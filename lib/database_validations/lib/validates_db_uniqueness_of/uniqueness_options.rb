@@ -11,7 +11,7 @@ module DatabaseValidations
         .tap { |opts| opts[:conditions] = -> { where(options[:where]) } if options[:where] }
     end
 
-    attr_reader :field
+    attr_reader :field, :calculated_index_name
 
     def initialize(field, options, adapter)
       @field = field
@@ -25,7 +25,7 @@ module DatabaseValidations
       index = responsible_index
       raise_if_index_missed!(index)
 
-      @index_name ||= index.name
+      @calculated_index_name = index.name
     end
 
     def handle_unique_error(instance)
@@ -37,7 +37,7 @@ module DatabaseValidations
 
     # @return [String]
     def index_key
-      @index_key ||= Helpers.generate_key_for_uniqueness_index(index_name)
+      @index_key ||= Helpers.generate_key_for_uniqueness_index(index_name || calculated_index_name)
     end
 
     # @return [String]
