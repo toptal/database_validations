@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.8.7] - 13-02-19
+### Improvements
+- Refactor and performance improvement
+
 ## [0.8.6] - 11-02-19
 ### Improvements
 - Refactor and slight performance improvement
