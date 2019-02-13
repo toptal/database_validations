@@ -46,7 +46,7 @@ module DatabaseValidations
 
     def each_options_storage(klass)
       while klass.respond_to?(:validates_db_uniqueness_of)
-        storage = klass.instance_variable_get(:'@database_validations_opts')
+        storage = klass.instance_variable_get(:'@database_validations_storage')
         yield(storage) if storage
         klass = klass.superclass
       end
