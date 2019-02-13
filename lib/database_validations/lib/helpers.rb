@@ -52,18 +52,6 @@ module DatabaseValidations
       end
     end
 
-    def each_uniqueness_validator(klass)
-      each_options_storage(klass) do |storage|
-        storage.each_uniqueness_validator { |validator| yield(validator) }
-      end
-    end
-
-    def each_belongs_to_presence_validator(klass)
-      each_options_storage(klass) do |storage|
-        storage.each_belongs_to_presence_validator { |validator| yield(validator) }
-      end
-    end
-
     def unify_columns(*args)
       args.flatten.compact.map(&:to_s).sort
     end

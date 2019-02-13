@@ -20,12 +20,8 @@ module DatabaseValidations
       storage[key]
     end
 
-    def each_uniqueness_validator
-      storage.values.grep(UniquenessOptions).each { |validator| yield(validator) }
-    end
-
-    def each_belongs_to_presence_validator
-      storage.values.grep(BelongsToOptions).each { |validator| yield(validator) }
+    def options
+      storage.values
     end
 
     private

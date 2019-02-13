@@ -46,15 +46,17 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field| # rubocop:disable M
 
     model = object.is_a?(Class) ? object : object.class
 
-    DatabaseValidations::Helpers.each_uniqueness_validator(model) do |validator|
-      @validators << {
-        field: validator.field,
-        scope: validator.scope,
-        where: validator.where_clause,
-        message: validator.message,
-        index_name: validator.index_name,
-        case_sensitive: validator.case_sensitive
-      }
+    DatabaseValidations::Helpers.each_options_storage(model) do |storage|
+      storage.options.grep(DatabaseValidations::UniquenessOptions).each do |validator|
+        @validators << {
+          field: validator.field,
+          scope: validator.scope,
+          where: validator.where_clause,
+          message: validator.message,
+          index_name: validator.index_name,
+          case_sensitive: validator.case_sensitive
+        }
+      end
     end
 
     @validators.include?(
