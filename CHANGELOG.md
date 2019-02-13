@@ -1,4 +1,7 @@
 # Changelog
+## [0.8.8] - 13-0-19
+### Bugs
+- Hot-fix for `validates_db_uniqueness_of`
 
 ## [0.8.7] - 13-02-19
 ### Improvements

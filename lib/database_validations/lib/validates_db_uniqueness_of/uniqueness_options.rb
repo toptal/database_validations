@@ -20,10 +20,12 @@ module DatabaseValidations
 
       raise_if_unsupported_options!
 
-      index = responsible_index
-      @index_name ||= index.name if index
+      return if ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
 
-      raise_if_index_missed!(index) unless ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
+      index = responsible_index
+      raise_if_index_missed!(index)
+
+      @index_name ||= index.name
     end
 
     def handle_unique_error(instance)
