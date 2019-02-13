@@ -17,12 +17,7 @@ module DatabaseValidations
 
     # @return [String]
     def key
-      Helpers.generate_key_for_belongs_to(column)
-    end
-
-    # @return [Boolean]
-    def column_and_relation_blank_for?(instance)
-      instance.public_send(column).blank? && instance.public_send(relation).blank?
+      @key ||= Helpers.generate_key_for_belongs_to(column)
     end
 
     def handle_foreign_key_error(instance)

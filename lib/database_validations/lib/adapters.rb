@@ -9,9 +9,9 @@ module DatabaseValidations
 
     def factory(model)
       case (database = model.connection_config[:adapter].downcase.to_sym)
-      when SqliteAdapter::ADAPTER then SqliteAdapter.new(model)
-      when PostgresqlAdapter::ADAPTER then PostgresqlAdapter.new(model)
-      when MysqlAdapter::ADAPTER then MysqlAdapter.new(model)
+      when SqliteAdapter::ADAPTER then SqliteAdapter
+      when PostgresqlAdapter::ADAPTER then PostgresqlAdapter
+      when MysqlAdapter::ADAPTER then MysqlAdapter
       else
         raise Errors::UnknownDatabase, database
       end

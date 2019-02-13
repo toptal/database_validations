@@ -1,13 +1,14 @@
 module DatabaseValidations
   class OptionsStorage
     def initialize(klass)
-      @adapter = Adapters.factory(klass)
+      @adapter = Adapters.factory(klass).new(klass)
       @storage = {}
     end
 
     def push_uniqueness(field, options)
       uniqueness_options = UniquenessOptions.new(field, options, adapter)
-      storage[uniqueness_options.key] = uniqueness_options
+      storage[uniqueness_options.index_key] = uniqueness_options
+      storage[uniqueness_options.column_key] = uniqueness_options
     end
 
     def push_belongs_to(field, relation)
@@ -19,12 +20,8 @@ module DatabaseValidations
       storage[key]
     end
 
-    def each_uniqueness_validator
-      storage.values.grep(UniquenessOptions).each { |validator| yield(validator) }
-    end
-
-    def each_belongs_to_presence_validator
-      storage.values.grep(BelongsToOptions).each { |validator| yield(validator) }
+    def options
+      storage.values
     end
 
     private

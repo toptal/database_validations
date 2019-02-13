@@ -3,12 +3,12 @@ module DatabaseValidations
     def validates_db_uniqueness_of(*attributes)
       Helpers.cache_valid_method!(self)
 
-      @database_validations_opts ||= DatabaseValidations::OptionsStorage.new(self)
+      @database_validations_storage ||= DatabaseValidations::OptionsStorage.new(self)
 
       options = attributes.extract_options!
 
       attributes.each do |attribute|
-        @database_validations_opts.push_uniqueness(attribute, options.merge(attributes: attribute))
+        @database_validations_storage.push_uniqueness(attribute, options.merge(attributes: attribute))
       end
 
       validates_with DatabaseValidations::DBUniquenessValidator,

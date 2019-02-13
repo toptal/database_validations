@@ -18,14 +18,16 @@ module DatabaseValidations
       end
     end
 
-    def handle_unique_error!(instance, error) # rubocop:disable Metrics/AbcSize
+    def handle_unique_error!(instance, error)
       adapter = Adapters.factory(instance.class)
-      index_key = generate_key_for_uniqueness_index(adapter.index_name(error.message))
-      column_key = generate_key_for_uniqueness(adapter.unique_error_columns(error.message))
+
+      keys = [
+        generate_key_for_uniqueness_index(adapter.unique_index_name(error.message)),
+        generate_key_for_uniqueness(adapter.unique_error_columns(error.message))
+      ]
 
       each_options_storage(instance.class) do |storage|
-        return storage[index_key].handle_unique_error(instance) if storage[index_key]
-        return storage[column_key].handle_unique_error(instance) if storage[column_key]
+        keys.each { |key| return storage[key].handle_unique_error(instance) if storage[key] }
       end
 
       false
@@ -44,26 +46,18 @@ module DatabaseValidations
 
     def each_options_storage(klass)
       while klass.respond_to?(:validates_db_uniqueness_of)
-        storage = klass.instance_variable_get(:'@database_validations_opts')
+        storage = storage_of(klass)
         yield(storage) if storage
         klass = klass.superclass
       end
     end
 
-    def each_uniqueness_validator(klass)
-      each_options_storage(klass) do |storage|
-        storage.each_uniqueness_validator { |validator| yield(validator) }
-      end
+    def storage_of(klass)
+      klass.instance_variable_get(:'@database_validations_storage')
     end
 
-    def each_belongs_to_presence_validator(klass)
-      each_options_storage(klass) do |storage|
-        storage.each_belongs_to_presence_validator { |validator| yield(validator) }
-      end
-    end
-
-    def unify_columns(*columns)
-      columns.flatten.compact.map(&:to_s).sort
+    def unify_columns(*args)
+      args.flatten.compact.map(&:to_s).sort
     end
 
     def generate_key_for_uniqueness_index(index_name)
@@ -78,8 +72,8 @@ module DatabaseValidations
       generate_key(:belongs_to, column)
     end
 
-    def generate_key(type, *columns)
-      [type, *unify_columns(columns)].join('__')
+    def generate_key(type, *args)
+      [type, *unify_columns(args)].join('__')
     end
   end
 end
