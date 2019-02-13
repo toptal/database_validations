@@ -28,7 +28,7 @@ module DatabaseValidations
       end
 
       def find_foreign_key_by_column(column)
-        model.connection.foreign_key_exists?(model.table_name, column: column)
+        foreign_keys.find { |foreign_key| foreign_key.column.to_s == column.to_s }
       end
 
       # @return [Symbol]

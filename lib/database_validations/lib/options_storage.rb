@@ -1,7 +1,7 @@
 module DatabaseValidations
   class OptionsStorage
     def initialize(klass)
-      @adapter = Adapters.factory(klass)
+      @adapter = Adapters.factory(klass).new(klass)
       @storage = {}
     end
 
@@ -13,8 +13,7 @@ module DatabaseValidations
 
     def push_belongs_to(field, relation)
       belongs_to_options = BelongsToOptions.new(field, relation, adapter)
-      storage[belongs_to_options.index_key] = belongs_to_options
-      storage[belongs_to_options.column_key] = belongs_to_options
+      storage[belongs_to_options.key] = belongs_to_options
     end
 
     def [](key)

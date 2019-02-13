@@ -18,14 +18,16 @@ module DatabaseValidations
       end
     end
 
-    def handle_unique_error!(instance, error) # rubocop:disable Metrics/AbcSize
+    def handle_unique_error!(instance, error)
       adapter = Adapters.factory(instance.class)
-      index_key = generate_key_for_uniqueness_index(adapter.unique_index_name(error.message))
-      column_key = generate_key_for_uniqueness(adapter.unique_error_columns(error.message))
+
+      keys = [
+        generate_key_for_uniqueness_index(adapter.unique_index_name(error.message)),
+        generate_key_for_uniqueness(adapter.unique_error_columns(error.message))
+      ]
 
       each_options_storage(instance.class) do |storage|
-        return storage[index_key].handle_unique_error(instance) if storage[index_key]
-        return storage[column_key].handle_unique_error(instance) if storage[column_key]
+        keys.each { |key| return storage[key].handle_unique_error(instance) if storage[key] }
       end
 
       false
@@ -62,8 +64,8 @@ module DatabaseValidations
       end
     end
 
-    def unify_columns(*columns)
-      columns.flatten.compact.map(&:to_s).sort
+    def unify_columns(*args)
+      args.flatten.compact.map(&:to_s).sort
     end
 
     def generate_key_for_uniqueness_index(index_name)
@@ -78,8 +80,8 @@ module DatabaseValidations
       generate_key(:belongs_to, column)
     end
 
-    def generate_key(type, *columns)
-      [type, *unify_columns(columns)].join('__')
+    def generate_key(type, *args)
+      [type, *unify_columns(args)].join('__')
     end
   end
 end
