@@ -4,7 +4,7 @@ module DatabaseValidations
       SUPPORTED_OPTIONS = %i[scope message where if unless index_name case_sensitive].freeze
       ADAPTER = :postgresql
 
-      def index_name(error_message)
+      def unique_index_name(error_message)
         error_message[/unique constraint "([^"]+)"/, 1]
       end
 

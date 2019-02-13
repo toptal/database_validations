@@ -20,7 +20,7 @@ module DatabaseValidations
 
     def handle_unique_error!(instance, error) # rubocop:disable Metrics/AbcSize
       adapter = Adapters.factory(instance.class)
-      index_key = generate_key_for_uniqueness_index(adapter.index_name(error.message))
+      index_key = generate_key_for_uniqueness_index(adapter.unique_index_name(error.message))
       column_key = generate_key_for_uniqueness(adapter.unique_error_columns(error.message))
 
       each_options_storage(instance.class) do |storage|
