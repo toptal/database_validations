@@ -46,10 +46,14 @@ module DatabaseValidations
 
     def each_options_storage(klass)
       while klass.respond_to?(:validates_db_uniqueness_of)
-        storage = klass.instance_variable_get(:'@database_validations_storage')
+        storage = storage_of(klass)
         yield(storage) if storage
         klass = klass.superclass
       end
+    end
+
+    def storage_of(klass)
+      klass.instance_variable_get(:'@database_validations_storage')
     end
 
     def unify_columns(*args)
