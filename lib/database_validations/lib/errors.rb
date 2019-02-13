@@ -59,7 +59,7 @@ module DatabaseValidations
         @column = column
         @foreign_keys = foreign_keys
 
-        super "No foreign key found with column: \"#{column}\". Founded foreign keys are: #{foreign_keys}. " + env_message
+        super "No foreign key found with column: \"#{column}\". Found foreign keys are: #{foreign_keys}. " + env_message
       end
     end
 
