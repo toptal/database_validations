@@ -1,7 +1,14 @@
 module DatabaseValidations
   class BelongsToOptions
+    VALIDATOR_MESSAGE =
+      if ActiveRecord::VERSION::MAJOR < 5
+        :blank
+      else
+        :required
+      end
+
     def self.validator_options(association, foreign_key)
-      { attributes: association, foreign_key: foreign_key, message: :required }
+      { attributes: association, foreign_key: foreign_key, message: VALIDATOR_MESSAGE }
     end
 
     attr_reader :column, :adapter, :relation
@@ -23,7 +30,7 @@ module DatabaseValidations
     def handle_foreign_key_error(instance)
       # Hack to not query the database because we know the result already
       instance.send("#{relation}=", nil)
-      instance.errors.add(relation, :blank, message: :required)
+      instance.errors.add(relation, :blank, message: VALIDATOR_MESSAGE)
     end
 
     private

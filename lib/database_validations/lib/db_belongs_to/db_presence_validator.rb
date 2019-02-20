@@ -23,7 +23,7 @@ module DatabaseValidations
       else
         return unless record.public_send(foreign_key).blank? && record.public_send(association).blank?
 
-        record.errors.add(association, :blank, message: :required)
+        record.errors.add(association, :blank, message: BelongsToOptions::VALIDATOR_MESSAGE)
       end
     end
   end
