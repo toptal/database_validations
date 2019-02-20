@@ -12,6 +12,7 @@ AllCops:
     - 'database_validations.gemspec'
   Exclude:
     - 'vendor/bundle/**/*'
+    - 'gemfiles/**/*'
 
 Naming/FileName:
   Exclude:
