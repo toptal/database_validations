@@ -32,7 +32,7 @@ matrix:
       gemfile: gemfiles/rails60.gemfile
     - rvm: 2.5.3
       gemfile: gemfiles/rails52.gemfile
-    - rvm: 2.5.3
+    - rvm: 2.4.3
       gemfile: gemfiles/rails42.gemfile
   allow_failures:
     - rvm: 2.6.1
