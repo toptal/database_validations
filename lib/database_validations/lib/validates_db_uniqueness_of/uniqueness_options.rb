@@ -91,8 +91,18 @@ module DatabaseValidations
       index_name ? adapter.find_index_by_name(index_name.to_s) : adapter.find_index(columns, where_clause)
     end
 
+    def index_columns_size(columns)
+      columns.is_a?(Array) ? columns.size : (columns.count(',') + 1)
+    end
+
+    def check_index_options?(index)
+      (columns.size == index_columns_size(index.columns)) && (where_clause.nil? == index.where.nil?)
+    end
+
     def raise_if_index_missed!(index)
-      raise Errors::IndexNotFound.new(columns, where_clause, index_name, adapter.indexes, adapter.table_name) unless index
+      return if index && check_index_options?(index)
+
+      raise Errors::IndexNotFound.new(columns, where_clause, index_name, adapter.indexes, adapter.table_name)
     end
   end
 end

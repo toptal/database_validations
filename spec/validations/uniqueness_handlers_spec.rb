@@ -655,6 +655,68 @@ RSpec.describe '.validates_db_uniqueness_of' do
     end
   end
 
+  shared_examples 'supports index_name with where option' do
+    context 'when index has where option' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.string :another
+          t.index [:field], unique: true, name: :unique_index, where: '(another IS NOT NULL)'
+        end
+      end
+
+      context 'when where option is skipped' do
+        it 'raises an error due valid? is inconsistent with the index' do
+          expect do
+            define_class { validates_db_uniqueness_of :field }
+          end.to raise_index_not_found(
+            'No unique index found with columns: ["field"] in table "entities". '\
+            'Available indexes are: [columns: ["field"] and where: (another IS NOT NULL)].'
+          )
+        end
+      end
+
+      context 'when where option is provided' do
+        it 'does not raise an error' do
+          expect do
+            define_class { validates_db_uniqueness_of :field, where: '(another IS NOT NULL)' }
+          end.not_to raise_error
+        end
+      end
+    end
+  end
+
+  shared_examples 'supports index_name with scope option' do
+    context 'when index uses many columns' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.string :another
+          t.index %i[field another], unique: true, name: :unique_index
+        end
+      end
+
+      context 'when scope option is skipped' do
+        it 'raises an error due valid? is inconsistent with the index' do
+          expect do
+            define_class { validates_db_uniqueness_of :field }
+          end.to raise_index_not_found(
+            'No unique index found with columns: ["field"] in table "entities". '\
+            'Available indexes are: [columns: ["field", "another"]].'
+          )
+        end
+      end
+
+      context 'when scope option is provided' do
+        it 'does not raise an error' do
+          expect do
+            define_class { validates_db_uniqueness_of :field, scope: :another }
+          end.not_to raise_error
+        end
+      end
+    end
+  end
+
   shared_examples 'supports complex indexes' do
     next unless RAILS_5
 
@@ -703,6 +765,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
     include_examples 'supports condition option'
     include_examples 'supports index_name option'
     include_examples 'supports complex indexes'
+    include_examples 'supports index_name with where option'
+    include_examples 'supports index_name with scope option'
   end
 
   describe 'sqlite3' do
@@ -716,5 +780,6 @@ RSpec.describe '.validates_db_uniqueness_of' do
 
     include_examples 'works as expected'
     include_examples 'supports index_name option'
+    include_examples 'supports index_name with scope option'
   end
 end
