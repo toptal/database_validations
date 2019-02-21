@@ -7,12 +7,16 @@
 /spec/reports/
 /tmp/
 
+/Gemfile.lock
+
 # IDEA configurations
 /.idea/
 
 # rspec failure tracking
 .rspec_status
+
 # Example
 example/db/*.sqlite3
 example/tmp
 example/log
+example/Gemfile.lock
