@@ -9,7 +9,11 @@ RSpec.describe 'db_belongs_to' do
         'BelongsToUserTemp'
       end
 
-      klass.belongs_to :company, optional: false
+      if RAILS_5
+        klass.belongs_to :company, optional: false
+      else
+        klass.belongs_to :company, required: true
+      end
     end
   end
 

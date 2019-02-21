@@ -20,15 +20,15 @@ and ActiveRecord validations with better performance and consistency."
   spec.files         = Dir['lib/**/*']
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'activerecord', '>= 3.2', '< 6'
+  spec.add_dependency 'activerecord', '>= 4.2.0'
 
   spec.add_development_dependency 'benchmark-ips', '~> 2.7'
   spec.add_development_dependency 'bundler', '~> 1.16'
-  spec.add_development_dependency 'mysql2', '~> 0.5'
-  spec.add_development_dependency 'pg', '~> 1.1'
+  spec.add_development_dependency 'mysql2'
+  spec.add_development_dependency 'pg'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rubocop', '~> 0.60'
   spec.add_development_dependency 'rubocop-rspec', '~> 1.30'
-  spec.add_development_dependency 'sqlite3', '~> 1.3'
+  spec.add_development_dependency 'sqlite3', '~> 1.3.0'
 end

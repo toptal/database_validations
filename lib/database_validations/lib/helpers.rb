@@ -5,7 +5,7 @@ module DatabaseValidations
     def cache_valid_method!(klass)
       return if klass.method_defined?(:valid_without_database_validations?)
 
-      klass.alias_method(:valid_without_database_validations?, :valid?)
+      klass.__send__(:alias_method, :valid_without_database_validations?, :valid?)
     end
 
     def handle_error!(instance, error)
