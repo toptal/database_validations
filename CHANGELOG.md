@@ -1,4 +1,9 @@
 # Changelog
+## [0.8.10] - 21-02-19
+### Improvements
+- Internal improvements 
+- We raise an error if `scope` or `where` options are missed for the `validates_db_uniqueness_of`
+
 ## [0.8.9] - 13-02-19
 ### Bugs
 - Hot-fix for `validate_db_uniqueness_of` RSpec matcher
