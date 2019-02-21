@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/toptal/database_validations.svg?branch=master)](https://travis-ci.org/toptal/database_validations)
 [![Gem Version](https://badge.fury.io/rb/database_validations.svg)](https://badge.fury.io/rb/database_validations)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a7df40a29c63f7ba518b/maintainability)](https://codeclimate.com/github/toptal/database_validations/maintainability)
 
 DatabaseValidations helps you to keep the database consistency with better performance. 
 Right now, it supports only ActiveRecord.
