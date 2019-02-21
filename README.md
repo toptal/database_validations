@@ -159,6 +159,12 @@ Should be replaced by:
 validates_db_uniqueness_of :slug, index_name: :unique_index, case_sensitive: false, scope: :field
 ```
 
+**Keep in mind**: because `valid?` method uses default validator you should:
+
+- if your index has many fields, provide proper `scope` option
+- if your index has lower function, provide `case_sensitive` option
+- if your index has where condition, provide proper `where` option
+
 ### Problem
 
 Unfortunately, ActiveRecord's `validates_uniqueness_of` approach does not ensure 
