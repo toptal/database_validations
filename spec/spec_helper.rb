@@ -22,4 +22,31 @@ RSpec.configure do |config|
     end
     ActiveRecord::Base.connection.execute 'SET FOREIGN_KEY_CHECKS=1;' if configuration[:adapter] == 'mysql2'
   end
+
+  def postgresql_configuration
+    {
+      adapter: 'postgresql',
+      database: 'database_validations_test',
+      host: ENV['DB_HOST'] || '127.0.0.1',
+      username: ENV['DB_USER'],
+      password: ENV['DB_PASSWORD']
+    }
+  end
+
+  def mysql_configuration
+    {
+      adapter: 'mysql2',
+      database: 'database_validations_test',
+      host: ENV['DB_HOST'] || '127.0.0.1',
+      username: ENV['DB_USER'],
+      password: ENV['DB_PASSWORD']
+    }
+  end
+
+  def sqlite_configuration
+    {
+      adapter: 'sqlite3',
+      database: ':memory:'
+    }
+  end
 end

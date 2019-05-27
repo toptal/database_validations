@@ -16,7 +16,7 @@ RSpec.describe 'validate_db_uniqueness_of' do
   end
 
   before do
-    ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: ':memory:')
+    ActiveRecord::Base.establish_connection(sqlite_configuration)
     ActiveRecord::Schema.verbose = false
 
     ActiveRecord::Schema.define(version: 1) do

@@ -1,0 +1,243 @@
+version: 2.1
+jobs:
+  rails42:
+    parallelism: 3
+    docker:
+      - image: circleci/ruby:2.4
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+          GEMFILE_PATH: gemfiles/rails42.gemfile
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASSWORD: ''
+
+      - image: circleci/postgres:9.6
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: database_validations_test
+          POSTGRES_PASSWORD: ''
+
+      - image: circleci/mysql:5.6
+        environment:
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: database_validations_test
+          MYSQL_USER: root
+
+    steps:
+      - checkout
+
+      - run:
+          name: Which bundler?
+          command: bundle -v
+
+      - run:
+          name: Bundle Install
+          command: bundle install
+
+      - run:
+          name: Wait for PostgreSQL DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 2m
+
+      - run:
+          name: Wait for MySQL DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
+
+      - run:
+          name: Run rspec in parallel
+          command: |
+            bundle exec rspec --profile 10 \
+                              --format RspecJunitFormatter \
+                              --out test_results/rspec.xml \
+                              --format progress \
+                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+
+      - store_test_results:
+          path: test_results
+
+  rails52:
+    parallelism: 3
+    docker:
+      - image: circleci/ruby:2.5
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+          GEMFILE_PATH: gemfiles/rails52.gemfile
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASSWORD: ''
+
+      - image: circleci/postgres:9.6
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: database_validations_test
+          POSTGRES_PASSWORD: ''
+
+      - image: circleci/mysql:5.6
+        environment:
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: database_validations_test
+          MYSQL_USER: root
+
+    steps:
+      - checkout
+
+      - run:
+          name: Which bundler?
+          command: bundle -v
+
+      - run:
+          name: Bundle Install
+          command: bundle install
+
+      - run:
+          name: Wait for PostgreSQL DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 2m
+
+      - run:
+          name: Wait for MySQL DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
+
+      - run:
+          name: Run rspec in parallel
+          command: |
+            bundle exec rspec --profile 10 \
+                              --format RspecJunitFormatter \
+                              --out test_results/rspec.xml \
+                              --format progress \
+                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+
+      - store_test_results:
+          path: test_results
+
+  rails60:
+    parallelism: 3
+    docker:
+      - image: circleci/ruby:2.6
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+          GEMFILE_PATH: gemfiles/rails60.gemfile
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASSWORD: ''
+
+      - image: circleci/postgres:9.6
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: database_validations_test
+          POSTGRES_PASSWORD: ''
+
+      - image: circleci/mysql:5.6
+        environment:
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: database_validations_test
+          MYSQL_USER: root
+
+    steps:
+      - checkout
+
+      - run:
+          name: Which bundler?
+          command: bundle -v
+
+      - run:
+          name: Bundle Install
+          command: bundle install
+
+      - run:
+          name: Wait for PostgreSQL DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 2m
+
+      - run:
+          name: Wait for MySQL DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
+
+      - run:
+          name: Run rspec in parallel
+          command: |
+            bundle exec rspec --profile 10 \
+                              --format RspecJunitFormatter \
+                              --out test_results/rspec.xml \
+                              --format progress \
+                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+
+      - store_test_results:
+          path: test_results
+
+  railsmaster:
+    parallelism: 3
+    docker:
+      - image: circleci/ruby:latest
+        environment:
+          BUNDLE_JOBS: 3
+          BUNDLE_RETRY: 3
+          BUNDLE_PATH: vendor/bundle
+          GEMFILE_PATH: gemfiles/railsmaster.gemfile
+          DB_HOST: 127.0.0.1
+          DB_USER: root
+          DB_PASSWORD: ''
+
+      - image: circleci/postgres:9.6
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: database_validations_test
+          POSTGRES_PASSWORD: ''
+
+      - image: circleci/mysql:5.6
+        environment:
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_DATABASE: database_validations_test
+          MYSQL_USER: root
+
+    steps:
+      - checkout
+
+      - run:
+          name: Which bundler?
+          command: bundle -v
+
+      - run:
+          name: Bundle Install
+          command: bundle install
+
+      - run:
+          name: Wait for PostgreSQL DB
+          command: dockerize -wait tcp://localhost:5432 -timeout 2m
+
+      - run:
+          name: Wait for MySQL DB
+          command: dockerize -wait tcp://localhost:3306 -timeout 2m
+
+      - run:
+          name: Run rspec in parallel
+          command: |
+            bundle exec rspec --profile 10 \
+                              --format RspecJunitFormatter \
+                              --out test_results/rspec.xml \
+                              --format progress \
+                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
+
+      - store_test_results:
+          path: test_results
+
+workflows:
+  version: 2
+  rails42:
+    jobs:
+      - rails42
+      - rails52
+      - rails60
+      # - railsmaster TODO: fix specs
+

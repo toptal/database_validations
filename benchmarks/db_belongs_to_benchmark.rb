@@ -1,18 +1,10 @@
 require 'benchmark/ips'
 require 'database_validations'
+require_relative 'configurations'
 require_relative 'gc_suite'
 require_relative 'database_cleaner'
 
-[
-  {
-    adapter: 'postgresql',
-    database: 'database_validations_test'
-  },
-  {
-    adapter: 'mysql2',
-    database: 'database_validations_test'
-  }
-].each do |database_configuration|
+[postgresql_configuration, mysql_configuration].each do |database_configuration|
   ActiveRecord::Base.establish_connection(database_configuration)
   clear_database!(database_configuration)
   ActiveRecord::Schema.define(version: 1) do

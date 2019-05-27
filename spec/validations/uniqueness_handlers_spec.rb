@@ -759,7 +759,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
   end
 
   describe 'postgresql' do
-    before { define_db.call(adapter: 'postgresql', database: 'database_validations_test') }
+    before { define_db.call(postgresql_configuration) }
 
     include_examples 'works as expected'
     include_examples 'supports condition option'
@@ -770,13 +770,13 @@ RSpec.describe '.validates_db_uniqueness_of' do
   end
 
   describe 'sqlite3' do
-    before { define_db.call(adapter: 'sqlite3', database: ':memory:') }
+    before { define_db.call(sqlite_configuration) }
 
     include_examples 'works as expected'
   end
 
   describe 'mysql' do
-    before { define_db.call(adapter: 'mysql2', database: 'database_validations_test') }
+    before { define_db.call(mysql_configuration) }
 
     include_examples 'works as expected'
     include_examples 'supports index_name option'
