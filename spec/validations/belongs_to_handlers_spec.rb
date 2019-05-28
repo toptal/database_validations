@@ -126,13 +126,13 @@ RSpec.describe 'db_belongs_to' do
 
   # rubocop:disable RSpec/BeforeAfterAll
   describe 'postgresql' do
-    before(:context) { define_db(adapter: 'postgresql', database: 'database_validations_test') }
+    before(:context) { define_db(postgresql_configuration) }
 
     include_examples 'works as belongs_to'
   end
 
   describe 'sqlite3' do
-    before(:context) { define_db(adapter: 'sqlite3', database: ':memory:') }
+    before(:context) { define_db(sqlite_configuration) }
 
     specify do
       expect { db_belongs_to_user_klass }.to raise_error DatabaseValidations::Errors::UnsupportedDatabase
@@ -140,7 +140,7 @@ RSpec.describe 'db_belongs_to' do
   end
 
   describe 'mysql' do
-    before(:context) { define_db(adapter: 'mysql2', database: 'database_validations_test') }
+    before(:context) { define_db(mysql_configuration) }
 
     include_examples 'works as belongs_to'
   end
