@@ -23,7 +23,7 @@ and ActiveRecord validations with better performance and consistency."
   spec.add_dependency 'activerecord', '>= 4.2.0'
 
   spec.add_development_dependency 'benchmark-ips', '~> 2.7'
-  spec.add_development_dependency 'bundler', '~> 1.16'
+  spec.add_development_dependency 'bundler', '~> 2.0'
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'pg'
   spec.add_development_dependency 'rake', '~> 12.3'
