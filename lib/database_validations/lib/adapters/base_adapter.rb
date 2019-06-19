@@ -31,22 +31,6 @@ module DatabaseValidations
         foreign_keys.find { |foreign_key| foreign_key.column.to_s == column.to_s }
       end
 
-      # @return [Symbol]
-      def adapter_name
-        self.class::ADAPTER
-      end
-
-      # @param [Symbol] option_name
-      # @return [Boolean]
-      def support_option?(option_name)
-        supported_options.include?(option_name.to_sym)
-      end
-
-      # @return [Array<Symbol>]
-      def supported_options
-        self.class::SUPPORTED_OPTIONS
-      end
-
       # @return [String]
       def table_name
         model.table_name

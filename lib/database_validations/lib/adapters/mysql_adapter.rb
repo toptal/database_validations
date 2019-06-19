@@ -1,7 +1,6 @@
 module DatabaseValidations
   module Adapters
     class MysqlAdapter < BaseAdapter
-      SUPPORTED_OPTIONS = %i[scope message if unless index_name].freeze
       ADAPTER = :mysql2
 
       class << self

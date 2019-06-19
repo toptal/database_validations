@@ -1,7 +1,6 @@
 module DatabaseValidations
   module Adapters
     class PostgresqlAdapter < BaseAdapter
-      SUPPORTED_OPTIONS = %i[scope message where if unless index_name case_sensitive].freeze
       ADAPTER = :postgresql
 
       class << self

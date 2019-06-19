@@ -1,58 +1,9 @@
 RSpec.describe '.validates_db_uniqueness_of' do
-  define_db = lambda do |opts|
-    ActiveRecord::Base.establish_connection(opts)
-    ActiveRecord::Schema.verbose = false
-
-    clear_database!(opts)
-
-    class Entity < ActiveRecord::Base
-      reset_column_information
-    end
-  end
-
-  def define_table
-    ActiveRecord::Schema.define(version: 1) do
-      create_table :entities do |t|
-        yield(t)
-      end
-    end
-  end
-
-  def define_class(parent = Entity, &block)
-    Class.new(parent) do |klass|
-      def self.model_name
-        ActiveModel::Name.new(self, nil, 'temp')
-      end
-
-      klass.instance_exec(&block) if block_given?
-    end
-  end
+  let(:parent_class) { define_class }
 
   shared_examples 'works as expected' do
-    matcher :raise_index_not_found do |message = nil|
-      COMMON = ' '\
-        'Use ENV[\'SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK\']=true in case you want to skip the check. '\
-        'For example, when you run migrations.'.freeze
-
-      match do |actual|
-        expect { actual.call }
-          .to raise_error(DatabaseValidations::Errors::IndexNotFound, message_matcher(message))
-      end
-
-      def message_matcher(message)
-        if message
-          start_with(message)
-            .and end_with(COMMON)
-        else
-          end_with(COMMON)
-        end
-      end
-
-      supports_block_expectations
-    end
-
     shared_examples 'ActiveRecord::Validation' do |skip_persisted = false|
-      before { Entity.create(persisted_attrs) unless skip_persisted }
+      before { parent_class.create(persisted_attrs) unless skip_persisted }
 
       describe 'valid?' do
         it 'returns false' do
@@ -85,9 +36,14 @@ RSpec.describe '.validates_db_uniqueness_of' do
       end
 
       describe 'create/save/update' do
+        it 'does not make a query for validation' do
+          expect { db_uniqueness.create(persisted_attrs) }.not_to make_database_queries(matching: /SELECT (?!sql)/)
+          expect { app_uniqueness.create(persisted_attrs) }.to make_database_queries(matching: /SELECT (?!sql)/)
+        end
+
         it 'does not create' do
-          expect { db_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
-          expect { app_uniqueness.create(persisted_attrs) }.not_to change(Entity, :count)
+          expect { db_uniqueness.create(persisted_attrs) }.not_to change(parent_class, :count)
+          expect { app_uniqueness.create(persisted_attrs) }.not_to change(parent_class, :count)
         end
 
         # Database raise only one unique constraint error per query
@@ -125,13 +81,18 @@ RSpec.describe '.validates_db_uniqueness_of' do
       describe 'create!/save!/update!' do
         define_negated_matcher :not_change, :change
 
+        it 'does not make a query for validation' do
+          expect { rescue_error { db_uniqueness.create!(persisted_attrs) } }.not_to make_database_queries(matching: /SELECT (?!sql)/)
+          expect { rescue_error { app_uniqueness.create!(persisted_attrs) } }.to make_database_queries(matching: /SELECT (?!sql)/)
+        end
+
         it 'does not create' do
           expect { db_uniqueness.create!(persisted_attrs) }
             .to raise_error(ActiveRecord::RecordInvalid)
-            .and not_change(Entity, :count)
+            .and not_change(parent_class, :count)
           expect { app_uniqueness.create!(persisted_attrs) }
             .to raise_error(ActiveRecord::RecordInvalid)
-            .and not_change(Entity, :count)
+            .and not_change(parent_class, :count)
         end
 
         def catch_error_message
@@ -377,14 +338,6 @@ RSpec.describe '.validates_db_uniqueness_of' do
       end
     end
 
-    context 'when has not supported option' do
-      it 'raises error' do
-        expect do
-          define_class { validates_db_uniqueness_of :field, unsupported_option: true }
-        end.to raise_error DatabaseValidations::Errors::OptionIsNotSupported
-      end
-    end
-
     context 'when wrapped transaction is rolled back' do
       before do
         define_table do |t|
@@ -393,8 +346,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
         end
       end
 
-      let(:app_uniqueness) { define_class(Entity) { validates_uniqueness_of :field } }
-      let(:db_uniqueness) { define_class(Entity) { validates_db_uniqueness_of :field } }
+      let(:app_uniqueness) { define_class(parent_class) { validates_uniqueness_of :field } }
+      let(:db_uniqueness) { define_class(parent_class) { validates_db_uniqueness_of :field } }
 
       it 'does not create rows' do
         new = db_uniqueness.new(field: '0')
@@ -409,7 +362,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
         rescue StandardError
           nil
         end
-        expect(Entity.count).to eq(0)
+        expect(parent_class.count).to eq(0)
         expect(new.persisted?).to eq(false)
         expect(old.persisted?).to eq(false)
       end
@@ -423,8 +376,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
         end
       end
 
-      let(:app_uniqueness) { define_class(define_class(Entity) { validates_uniqueness_of :field }) }
-      let(:db_uniqueness) { define_class(define_class(Entity) { validates_db_uniqueness_of :field }) }
+      let(:app_uniqueness) { define_class(define_class(parent_class) { validates_uniqueness_of :field }) }
+      let(:db_uniqueness) { define_class(define_class(parent_class) { validates_db_uniqueness_of :field }) }
 
       let(:persisted_attrs) { { field: 'persisted' } }
 
@@ -459,8 +412,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
         parent_app_uniqueness.validates_uniqueness_of :field
       end
 
-      let(:parent_db_uniqueness) { define_class(Entity) }
-      let(:parent_app_uniqueness) { define_class(Entity) }
+      let(:parent_db_uniqueness) { define_class(parent_class) }
+      let(:parent_app_uniqueness) { define_class(parent_class) }
 
       let(:db_uniqueness) { define_class(parent_db_uniqueness) }
       let(:app_uniqueness) { define_class(parent_app_uniqueness) }
@@ -592,6 +545,24 @@ RSpec.describe '.validates_db_uniqueness_of' do
         it_behaves_like 'ActiveRecord::Validation'
       end
     end
+
+    context 'when defined through validates' do
+      before do
+        define_table do |t|
+          t.string :field_1
+          t.string :field_2
+          t.index [:field_1], unique: true
+          t.index [:field_2], unique: true
+        end
+      end
+
+      let(:db_uniqueness) { define_class(parent_class) { validates :field_1, :field_2, db_uniqueness: true } }
+      let(:app_uniqueness) { define_class(parent_class) { validates :field_1, :field_2, uniqueness: true } }
+
+      let(:persisted_attrs) { { field_1: 'persisted', field_2: 'persisted_too' } }
+
+      it_behaves_like 'ActiveRecord::Validation'
+    end
   end
 
   shared_examples 'supports condition option' do
@@ -618,9 +589,36 @@ RSpec.describe '.validates_db_uniqueness_of' do
         let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field, where: '(field > 1)' } }
         let(:app_uniqueness) { define_class { validates_uniqueness_of :field, conditions: -> { where('(field > 1)') } } }
 
-        let(:persisted_attrs) { { field: 2 } }
+        context 'when condition should be considered' do
+          let(:persisted_attrs) { { field: 2 } }
 
-        it_behaves_like 'ActiveRecord::Validation'
+          it_behaves_like 'ActiveRecord::Validation'
+        end
+
+        context 'when condition should be ignored' do
+          let(:persisted_attrs) { { field: 0 } }
+
+          describe '#valid?' do
+            it 'works' do
+              expect(db_uniqueness.new(persisted_attrs).valid?).to eq(true)
+              expect(app_uniqueness.new(persisted_attrs).valid?).to eq(true)
+            end
+          end
+
+          describe '#create/save/update' do
+            it 'works' do
+              expect(db_uniqueness.create(persisted_attrs)).to be_persisted
+              expect(app_uniqueness.create(persisted_attrs)).to be_persisted
+            end
+          end
+
+          describe '#create!/save!/update!' do
+            it 'works' do
+              expect { db_uniqueness.create!(persisted_attrs) }.not_to raise_error
+              expect { app_uniqueness.create!(persisted_attrs) }.not_to raise_error
+            end
+          end
+        end
       end
     end
   end
@@ -758,8 +756,16 @@ RSpec.describe '.validates_db_uniqueness_of' do
     end
   end
 
+  shared_examples 'when index_name is passed only one attribute can be provided' do
+    it 'throws an error' do
+      expect do
+        define_class { validates_db_uniqueness_of :field, :another, index_name: :unique_index }
+      end.to raise_error ArgumentError, /When index_name is provided validator can have only one attribute./
+    end
+  end
+
   describe 'postgresql' do
-    before { define_db.call(postgresql_configuration) }
+    before { define_database(postgresql_configuration) }
 
     include_examples 'works as expected'
     include_examples 'supports condition option'
@@ -767,19 +773,22 @@ RSpec.describe '.validates_db_uniqueness_of' do
     include_examples 'supports complex indexes'
     include_examples 'supports index_name with where option'
     include_examples 'supports index_name with scope option'
+    include_examples 'when index_name is passed only one attribute can be provided'
   end
 
   describe 'sqlite3' do
-    before { define_db.call(sqlite_configuration) }
+    before { define_database(sqlite_configuration) }
 
     include_examples 'works as expected'
+    include_examples 'when index_name is passed only one attribute can be provided'
   end
 
   describe 'mysql' do
-    before { define_db.call(mysql_configuration) }
+    before { define_database(mysql_configuration) }
 
     include_examples 'works as expected'
     include_examples 'supports index_name option'
     include_examples 'supports index_name with scope option'
+    include_examples 'when index_name is passed only one attribute can be provided'
   end
 end
