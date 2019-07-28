@@ -48,10 +48,16 @@ and then replace with
 
 ```ruby
 class User < ActiveRecord::Base
-  validates_db_uniqueness_of :email, :full_name
-
+  validates :email, :full_name, db_uniqueness: true
+  # OR 
+  # validates_db_uniqueness_of :email, :full_name
+  
   db_belongs_to :company
   db_belongs_to :country
+  # OR 
+  # belongs_to :company
+  # belongs_to :country
+  # validates :company, :country, db_presence: true   
 end
 ```
 
@@ -134,9 +140,9 @@ Supported databases are `PostgreSQL`, `MySQL` and `SQLite`.
 
 ```ruby
 class User < ActiveRecord::Base
-  validates_db_uniqueness_of :email
+  validates :email, db_uniqueness: true
   # The same as following:
-  # validates_uniqueness_of :email, allow_nil: true, allow_blank: false, case_sensitive: true  
+  # validates :email, uniqueness: {case_sensitive: true, allow_nil: true, allow_blank: false}    
 end
 
 original = User.create(email: 'email@mail.com')
@@ -157,7 +163,7 @@ validates :slug, uniqueness: { case_sensitive: false, scope: :field }
 Should be replaced by:
 
 ```ruby
-validates_db_uniqueness_of :slug, index_name: :unique_index, case_sensitive: false, scope: :field
+validates :slug, db_uniqueness: {index_name: :unique_index, case_sensitive: false, scope: :field}
 ```
 
 **Keep in mind**: because `valid?` method uses default validator you should:

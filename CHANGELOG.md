@@ -1,4 +1,12 @@
 # Changelog
+## [0.9.0] - 28-07-19
+### Improvements
+
+- Change the way of storing database validations
+- Improve performance
+- Refactor
+- New syntax sugar
+
 ## [0.8.10] - 21-02-19
 ### Improvements
 - Internal improvements 
