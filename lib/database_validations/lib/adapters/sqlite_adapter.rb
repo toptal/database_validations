@@ -1,7 +1,6 @@
 module DatabaseValidations
   module Adapters
     class SqliteAdapter < BaseAdapter
-      SUPPORTED_OPTIONS = %i[scope message if unless].freeze
       ADAPTER = :sqlite3
 
       class << self

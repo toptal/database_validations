@@ -1,31 +1,36 @@
 module DatabaseValidations
   module Rescuer
-    extend ActiveSupport::Concern
+    module_function
 
-    included do
-      alias_method :validate, :valid?
+    def handled?(instance, error)
+      Storage.prepare(instance.class) unless Storage.prepared?(instance.class)
+
+      case error
+      when ActiveRecord::RecordNotUnique
+        process(instance, error, for_unique_index: :unique_index_name, for_db_uniqueness: :unique_error_columns)
+      when ActiveRecord::InvalidForeignKey
+        process(instance, error, for_db_presence: :foreign_key_error_column)
+      else false
+      end
     end
 
-    attr_accessor :_database_validations_fallback
+    def process(instance, error, key_types)
+      adapter = Adapters.factory(instance.class)
 
-    def valid?(context = nil)
-      self._database_validations_fallback = true
-      super(context)
-    end
+      keys = key_types.map do |key_generator, error_processor|
+        KeyGenerator.public_send(key_generator, adapter.public_send(error_processor, error.message))
+      end
 
-    def create_or_update(*args, &block)
-      self._database_validations_fallback = false
-      ActiveRecord::Base.connection.transaction(requires_new: true) { super }
-    rescue ActiveRecord::InvalidForeignKey, ActiveRecord::RecordNotUnique => error
-      raise error unless Helpers.handle_error!(self, error)
+      keys.each do |key|
+        attribute_validator = instance._db_validators[key]
 
-      raise ActiveRecord::RecordInvalid, self
-    end
+        if attribute_validator
+          attribute_validator.validator.apply_error(instance, attribute_validator.attribute)
+          return true
+        end
+      end
 
-    private
-
-    def perform_validations(options = {})
-      options[:validate] == false || valid_without_database_validations?(options[:context])
+      false
     end
   end
 end

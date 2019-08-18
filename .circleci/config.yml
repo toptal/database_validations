@@ -255,5 +255,3 @@ workflows:
       - rails42
       - rails52
       - rails60
-      # - railsmaster TODO: fix specs
-

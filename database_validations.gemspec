@@ -2,7 +2,7 @@ lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'database_validations/version'
 
-Gem::Specification.new do |spec|
+Gem::Specification.new do |spec| # rubocop:disable Metrics/BlockLength
   spec.name          = 'database_validations'
   spec.version       = DatabaseValidations::VERSION
   spec.authors       = ['Evgeniy Demin']
@@ -24,6 +24,7 @@ and ActiveRecord validations with better performance and consistency."
 
   spec.add_development_dependency 'benchmark-ips', '~> 2.7'
   spec.add_development_dependency 'bundler', '~> 2.0'
+  spec.add_development_dependency 'db-query-matchers', '>= 0.9'
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'pg'
   spec.add_development_dependency 'rake', '~> 12.3'

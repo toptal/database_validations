@@ -46,18 +46,20 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field| # rubocop:disable M
 
     model = object.is_a?(Class) ? object : object.class
 
-    DatabaseValidations::Helpers.each_options_storage(model) do |storage|
-      storage.options.grep(DatabaseValidations::UniquenessOptions).each do |validator|
+    model.validators.grep(DatabaseValidations::DbUniquenessValidator).each do |validator|
+      validator.attributes.each do |attribute|
         @validators << {
-          field: validator.field,
-          scope: validator.scope,
-          where: validator.where_clause,
-          message: validator.message,
+          field: attribute,
+          scope: Array.wrap(validator.options[:scope]),
+          where: validator.where,
+          message: validator.options[:message],
           index_name: validator.index_name,
-          case_sensitive: validator.case_sensitive
+          case_sensitive: validator.options[:case_sensitive]
         }
       end
     end
+
+    case_sensitive_default = ActiveRecord::VERSION::MAJOR >= 6 ? nil : true
 
     @validators.include?(
       field: field,
@@ -65,7 +67,7 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field| # rubocop:disable M
       where: @where,
       message: @message,
       index_name: @index_name,
-      case_sensitive: @case_sensitive
+      case_sensitive: @case_sensitive.nil? ? case_sensitive_default : @case_sensitive
     )
   end
 

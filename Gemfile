@@ -9,4 +9,4 @@ group :test do
   gem 'rspec_junit_formatter', '~> 0.4.1'
 end
 
-eval(File.read(ENV['GEMFILE_PATH'])) if ENV['GEMFILE_PATH']
+eval(File.read(ENV['GEMFILE_PATH'])) if ENV['GEMFILE_PATH'] # rubocop:disable Security/Eval
