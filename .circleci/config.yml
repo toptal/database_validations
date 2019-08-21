@@ -27,7 +27,7 @@ jobs:
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
-    steps:
+    steps: &steps
       - checkout
 
       - run:
@@ -89,40 +89,7 @@ jobs:
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
-    steps:
-      - checkout
-
-      - run:
-          name: Install bundler
-          command: gem install bundler
-
-      - run:
-          name: Which bundler?
-          command: bundle -v
-
-      - run:
-          name: Bundle Install
-          command: bundle install
-
-      - run:
-          name: Wait for PostgreSQL DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 2m
-
-      - run:
-          name: Wait for MySQL DB
-          command: dockerize -wait tcp://localhost:3306 -timeout 2m
-
-      - run:
-          name: Run rspec in parallel
-          command: |
-            bundle exec rspec --profile 10 \
-                              --format RspecJunitFormatter \
-                              --out test_results/rspec.xml \
-                              --format progress \
-                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
-
-      - store_test_results:
-          path: test_results
+    steps: *steps
 
   rails60:
     parallelism: 3
@@ -151,40 +118,7 @@ jobs:
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
-    steps:
-      - checkout
-
-      - run:
-          name: Install bundler
-          command: gem install bundler
-
-      - run:
-          name: Which bundler?
-          command: bundle -v
-
-      - run:
-          name: Bundle Install
-          command: bundle install
-
-      - run:
-          name: Wait for PostgreSQL DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 2m
-
-      - run:
-          name: Wait for MySQL DB
-          command: dockerize -wait tcp://localhost:3306 -timeout 2m
-
-      - run:
-          name: Run rspec in parallel
-          command: |
-            bundle exec rspec --profile 10 \
-                              --format RspecJunitFormatter \
-                              --out test_results/rspec.xml \
-                              --format progress \
-                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
-
-      - store_test_results:
-          path: test_results
+    steps: *steps
 
   railsmaster:
     parallelism: 3
@@ -213,40 +147,7 @@ jobs:
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
-    steps:
-      - checkout
-
-      - run:
-          name: Install bundler
-          command: gem install bundler
-
-      - run:
-          name: Which bundler?
-          command: bundle -v
-
-      - run:
-          name: Bundle Install
-          command: bundle install
-
-      - run:
-          name: Wait for PostgreSQL DB
-          command: dockerize -wait tcp://localhost:5432 -timeout 2m
-
-      - run:
-          name: Wait for MySQL DB
-          command: dockerize -wait tcp://localhost:3306 -timeout 2m
-
-      - run:
-          name: Run rspec in parallel
-          command: |
-            bundle exec rspec --profile 10 \
-                              --format RspecJunitFormatter \
-                              --out test_results/rspec.xml \
-                              --format progress \
-                              $(circleci tests glob "spec/**/*_spec.rb" | circleci tests split --split-by=timings)
-
-      - store_test_results:
-          path: test_results
+    steps: *steps
 
 workflows:
   version: 2
