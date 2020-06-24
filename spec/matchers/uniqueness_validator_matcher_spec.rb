@@ -56,7 +56,7 @@ RSpec.describe 'validate_db_uniqueness_of' do
     it { is_expected.not_to validate_db_uniqueness_of(:field).with_index(:another_index) }
   end
 
-  context 'when case_sensitive option is specified' do
+  context 'when case_sensitive option is false' do
     subject { define_class { validates_db_uniqueness_of :field, case_sensitive: false } }
 
     before do
@@ -65,6 +65,17 @@ RSpec.describe 'validate_db_uniqueness_of' do
     end
 
     it { is_expected.to validate_db_uniqueness_of(:field).case_insensitive }
+  end
+
+  context 'when case_sensitive option is true' do
+    subject { define_class { validates_db_uniqueness_of :field, case_sensitive: true } }
+
+    before do
+      allow_any_instance_of(DatabaseValidations::Adapters::BaseAdapter) # rubocop:disable RSpec/AnyInstance
+        .to receive(:support_option?).and_return(true)
+    end
+
+    it { is_expected.to validate_db_uniqueness_of(:field).case_sensitive }
   end
 
   context 'when instance of model is provided' do
