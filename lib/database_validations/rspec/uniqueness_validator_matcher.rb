@@ -41,6 +41,10 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field| # rubocop:disable M
     @case_sensitive = false
   end
 
+  chain(:case_sensitive) do
+    @case_sensitive = true
+  end
+
   match do |object|
     @validators = []
 
@@ -79,6 +83,7 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field| # rubocop:disable M
     desc += "where: '#{@where}'; " if @where
     desc += "index_name: '#{@index_name}'; " if @index_name
     desc += 'be case insensitive.' unless @case_sensitive
+    desc += 'be case sensitive.' if @case_sensitive
     desc
   end
 

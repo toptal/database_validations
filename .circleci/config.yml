@@ -11,19 +11,19 @@ jobs:
           GEMFILE_PATH: gemfiles/rails42.gemfile
           DB_HOST: 127.0.0.1
           DB_USER: root
-          DB_PASSWORD: ''
+          DB_PASSWORD: test
 
       - image: circleci/postgres:9.6
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: ''
+          POSTGRES_PASSWORD: test
 
       - image: circleci/mysql:5.6
         environment:
           MYSQL_ROOT_HOST: '%'
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
@@ -73,19 +73,19 @@ jobs:
           GEMFILE_PATH: gemfiles/rails52.gemfile
           DB_HOST: 127.0.0.1
           DB_USER: root
-          DB_PASSWORD: ''
+          DB_PASSWORD: test
 
       - image: circleci/postgres:9.6
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: ''
+          POSTGRES_PASSWORD: test
 
       - image: circleci/mysql:5.6
         environment:
           MYSQL_ROOT_HOST: '%'
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
@@ -102,19 +102,19 @@ jobs:
           GEMFILE_PATH: gemfiles/rails60.gemfile
           DB_HOST: 127.0.0.1
           DB_USER: root
-          DB_PASSWORD: ''
+          DB_PASSWORD: test
 
       - image: circleci/postgres:9.6
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: ''
+          POSTGRES_PASSWORD: test
 
       - image: circleci/mysql:5.6
         environment:
           MYSQL_ROOT_HOST: '%'
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
@@ -131,19 +131,19 @@ jobs:
           GEMFILE_PATH: gemfiles/railsmaster.gemfile
           DB_HOST: 127.0.0.1
           DB_USER: root
-          DB_PASSWORD: ''
+          DB_PASSWORD: test
 
       - image: circleci/postgres:9.6
         environment:
           POSTGRES_USER: root
           POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: ''
+          POSTGRES_PASSWORD: test
 
       - image: circleci/mysql:5.6
         environment:
           MYSQL_ROOT_HOST: '%'
           MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: ''
+          MYSQL_ROOT_PASSWORD: test
           MYSQL_DATABASE: database_validations_test
           MYSQL_USER: root
 
