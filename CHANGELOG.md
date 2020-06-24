@@ -1,4 +1,11 @@
 # Changelog
+
+## [0.9.1] - 24-06-20
+### Improvements
+
+- Fix support of newest MySQL version
+- Add case sensitive option to `validate_db_uniqueness_of` RSpec matcher
+
 ## [0.9.0] - 28-07-19
 ### Improvements
 
