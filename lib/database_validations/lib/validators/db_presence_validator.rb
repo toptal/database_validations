@@ -55,7 +55,7 @@ module DatabaseValidations
         options[:optional] = true
       end
 
-      belongs_to(name, scope, options)
+      belongs_to(name, scope, **options)
 
       validates_with DatabaseValidations::DbPresenceValidator, _merge_attributes([name, message: DatabaseValidations::DbPresenceValidator::REFLECTION_MESSAGE]) # rubocop:disable Metrics/LineLength
     end
