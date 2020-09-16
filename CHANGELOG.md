@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.2] - 16-09-20
+### Improvements
+
+- Fix a warning message from newest Ruby version 
+
 ## [0.9.1] - 24-06-20
 ### Improvements
 
