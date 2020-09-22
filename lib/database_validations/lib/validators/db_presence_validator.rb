@@ -21,6 +21,10 @@ module DatabaseValidations
       Checkers::DbPresenceValidator.validate!(self)
     end
 
+    def perform_db_validation?
+      true
+    end
+
     # TODO: add support of optional db_belongs_to
     def validate(record)
       if record._database_validations_fallback

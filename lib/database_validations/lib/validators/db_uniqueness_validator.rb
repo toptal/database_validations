@@ -1,5 +1,7 @@
 module DatabaseValidations
   class DbUniquenessValidator < ActiveRecord::Validations::UniquenessValidator
+    DEFAULT_MODE = :optimized
+
     attr_reader :index_name, :where, :klass
 
     # Used to make 3rd party libraries work correctly
@@ -19,8 +21,7 @@ module DatabaseValidations
         options[:conditions] = -> { where(condition) }
       end
 
-      @index_name = options.delete(:index_name) if options.key?(:index_name)
-      @where = options.delete(:where) if options.key?(:where)
+      handle_custom_options(options)
 
       super
 
@@ -28,8 +29,12 @@ module DatabaseValidations
       Checkers::DbUniquenessValidator.validate!(self)
     end
 
+    def perform_db_validation?
+      @mode != :standard
+    end
+
     def validate(record)
-      super if record._database_validations_fallback
+      super if perform_query? || record._database_validations_fallback
     end
 
     def apply_error(instance, attribute)
@@ -37,6 +42,18 @@ module DatabaseValidations
       error_options[:value] = instance.public_send(attribute)
 
       instance.errors.add(attribute, :taken, error_options)
+    end
+
+    private
+
+    def handle_custom_options(options)
+      @index_name = options.delete(:index_name) if options.key?(:index_name)
+      @where = options.delete(:where) if options.key?(:where)
+      @mode = (options.delete(:mode).presence || DEFAULT_MODE).to_sym
+    end
+
+    def perform_query?
+      @mode != :optimized
     end
   end
 

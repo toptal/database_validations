@@ -20,3 +20,6 @@ example/db/*.sqlite3
 example/tmp
 example/log
 example/Gemfile.lock
+
+.ruby-version
+.ruby-gemset

@@ -24,13 +24,19 @@ module DatabaseValidations
       keys.each do |key|
         attribute_validator = instance._db_validators[key]
 
-        if attribute_validator
-          attribute_validator.validator.apply_error(instance, attribute_validator.attribute)
-          return true
-        end
+        next unless attribute_validator
+
+        return process_validator(instance, attribute_validator)
       end
 
       false
+    end
+
+    def process_validator(instance, attribute_validator)
+      return false unless attribute_validator.validator.perform_db_validation?
+
+      attribute_validator.validator.apply_error(instance, attribute_validator.attribute)
+      true
     end
   end
 end

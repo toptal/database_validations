@@ -4,10 +4,10 @@
 [![Gem Version](https://badge.fury.io/rb/database_validations.svg)](https://badge.fury.io/rb/database_validations)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a7df40a29c63f7ba518b/maintainability)](https://codeclimate.com/github/toptal/database_validations/maintainability)
 
-DatabaseValidations helps you to keep the database consistency with better performance. 
+DatabaseValidations helps you to keep the database consistency with better performance.
 Right now, it supports only ActiveRecord.
 
-*The more you use the gem, the more performance increase you have. Try it now!* 
+*The more you use the gem, the more performance increase you have. Try it now!*
 
 ## Installation
 
@@ -28,7 +28,7 @@ Or install it yourself as:
 ```bash
 gem install database_validations
 ```
-    
+
 Have a look at [example](example) application for details.
 
 ## Benchmark ([code](benchmarks/composed_benchmarks.rb))
@@ -49,15 +49,15 @@ and then replace with
 ```ruby
 class User < ActiveRecord::Base
   validates :email, :full_name, db_uniqueness: true
-  # OR 
+  # OR
   # validates_db_uniqueness_of :email, :full_name
-  
+
   db_belongs_to :company
   db_belongs_to :country
-  # OR 
+  # OR
   # belongs_to :company
   # belongs_to :country
-  # validates :company, :country, db_presence: true   
+  # validates :company, :country, db_presence: true
 end
 ```
 
@@ -67,8 +67,8 @@ you will get the following performance improvement:
 
 ## db_belongs_to
 
-Supported databases are `PostgreSQL` and `MySQL`.  
-**Note**: Unfortunately, `SQLite` raises a poor error message 
+Supported databases are `PostgreSQL` and `MySQL`.
+**Note**: Unfortunately, `SQLite` raises a poor error message
 by which we can not determine exact foreign key which raised an error.
 
 ### Usage
@@ -81,18 +81,18 @@ end
 user = User.create(company_id: nil)
 # => false
 user.errors.messages
-# => {:company=>["must exist"]} 
+# => {:company=>["must exist"]}
 ```
 
 ### Problem
 
 ActiveRecord's `belongs_to` has `optional: false` by default. Unfortunately, this
-approach does not ensure existence of the related object. For example, we can skip 
+approach does not ensure existence of the related object. For example, we can skip
 validations or remove the related object after we save the object. After that, our
-database becomes inconsistent because we assume the object has his relation but it 
-does not.  
+database becomes inconsistent because we assume the object has his relation but it
+does not.
 
-`db_belongs_to` solves the problem using foreign key constraints in the database 
+`db_belongs_to` solves the problem using foreign key constraints in the database
 also providing backward compatibility with nice validations errors.
 
 ### Pros and Cons
@@ -100,13 +100,13 @@ also providing backward compatibility with nice validations errors.
 **Advantages**:
 - Ensures relation existence because it uses foreign keys constraints.
 - Checks the existence of proper foreign key constraint at the boot time.
-Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` if you want to 
+Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` if you want to
 skip it in some cases. (For example, when you run migrations.)
-- It's almost two times faster because it skips unnecessary SQL query. See benchmarks 
+- It's almost two times faster because it skips unnecessary SQL query. See benchmarks
 below for details.
 
 **Disadvantages**:
-- Cannot handle multiple database validations at once because database 
+- Cannot handle multiple database validations at once because database
 raises only one error per query.
 
 ### Configuration options
@@ -142,7 +142,7 @@ Supported databases are `PostgreSQL`, `MySQL` and `SQLite`.
 class User < ActiveRecord::Base
   validates :email, db_uniqueness: true
   # The same as following:
-  # validates :email, uniqueness: {case_sensitive: true, allow_nil: true, allow_blank: false}    
+  # validates :email, uniqueness: {case_sensitive: true, allow_nil: true, allow_blank: false}
 end
 
 original = User.create(email: 'email@mail.com')
@@ -174,32 +174,28 @@ validates :slug, db_uniqueness: {index_name: :unique_index, case_sensitive: fals
 
 ### Problem
 
-Unfortunately, ActiveRecord's `validates_uniqueness_of` approach does not ensure 
-uniqueness. For example, we can skip validations or create two records in parallel 
+Unfortunately, ActiveRecord's `validates_uniqueness_of` approach does not ensure
+uniqueness. For example, we can skip validations or create two records in parallel
 queries. After that, our database becomes inconsistent because we assume some uniqueness
-over the table but it has duplicates.  
+over the table but it has duplicates.
 
-`validates_db_uniqueness_of` solves the problem using unique index constraints 
+`validates_db_uniqueness_of` solves the problem using unique index constraints
 in the database also providing backward compatibility with nice validations errors.
 
-### Pros and Cons
+### Advantages
 
-Advantages: 
 - Ensures uniqueness because it uses unique constraints.
-- Checks the existence of proper unique index at the boot time. 
-Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` 
+- Checks the existence of proper unique index at the boot time.
+Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'`
 if you want to skip it in some cases. (For example, when you run migrations.)
-- It's two times faster in average because it skips unnecessary SQL query. See benchmarks 
-below for details.
+- It's two times faster in average because it skips unnecessary SQL query. See benchmarks below for details.
+- It has different [modes](#modes) so you can pick up the best for your needs.
 
-Disadvantages: 
-- Cannot handle multiple database validations at once because database raises 
-only one error per query.
-
-### Configuration options 
+### Configuration options
 
 | Option name    | PostgreSQL | MySQL | SQLite |
 | -------------- | :--------: | :---: | :----: |
+| mode           | +          | +     | +      |
 | scope          | +          | +     | +      |
 | message        | +          | +     | +      |
 | if             | +          | +     | +      |
@@ -207,8 +203,16 @@ only one error per query.
 | index_name     | +          | +     | -      |
 | where          | +          | -     | -      |
 | case_sensitive | +          | -     | -      |
-| allow_nil      | -          | -     | -      | 
-| allow_blank    | -          | -     | -      | 
+| allow_nil      | -          | -     | -      |
+| allow_blank    | -          | -     | -      |
+
+### Modes
+
+There are 3 `mode` options:
+
+- `:optimized` - the default one. In this mode it turns DB constraint exceptions into proper validation messages.
+- `:enhanced` - a combination of the standard uniqueness validation and the db uniqueness validation. Runs a query first but also rescues from exception. The preferable mode for user-facing validations.
+- `:standard` - in this mode works pretty much the same way as `validates_uniqueness_of` (except the index existence check).
 
 ### Benchmark ([code](benchmarks/uniqueness_validator_benchmark.rb))
 
@@ -220,7 +224,7 @@ Add `require database_validations/rspec/matchers'` to your `spec` file.
 
 ### validate_db_uniqueness_of
 
-Example: 
+Example:
 
 ```ruby
 class User < ActiveRecord::Base
@@ -229,14 +233,14 @@ end
 
 describe 'validations' do
   subject { User }
-  
+
   it { is_expected.to validate_db_uniqueness_of(:field).with_message('duplicate').with_where('(some_field IS NULL)').scoped_to(:another_field).with_index(:unique_index) }
 end
 ```
 
 ## Using with RuboCop
 
-DatabaseValidations provides custom cops for RuboCop to help you consistently apply the improvements. 
+DatabaseValidations provides custom cops for RuboCop to help you consistently apply the improvements.
 To use all of them, use `rubocop --require database_validations/rubocop/cops` or add to your `.rubocop.yml` file:
 
 ```yaml
@@ -253,8 +257,8 @@ require:
 
 ## Development
 
-You need to have installed and running `postgresql` and `mysql`. 
-And for each adapter manually create a database called `database_validations_test` accessible by your local user. 
+You need to have installed and running `postgresql` and `mysql`.
+And for each adapter manually create a database called `database_validations_test` accessible by your local user.
 
 Then, run `rake spec` to run the tests.
 
@@ -270,17 +274,17 @@ To run benchmarks, run:
 ruby -I lib benchmarks/composed_benchmarks.rb
 ```
 
-To install this gem onto your local machine, run `bundle exec rake install`. 
-To release a new version, update the version number in `version.rb`, and then 
-run `bundle exec rake release`, which will create a git tag for the version, 
+To install this gem onto your local machine, run `bundle exec rake install`.
+To release a new version, update the version number in `version.rb`, and then
+run `bundle exec rake release`, which will create a git tag for the version,
 push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-[Bug reports](https://github.com/toptal/database_validations/issues) 
-and [pull requests](https://github.com/toptal/database_validations/pulls) are 
-welcome on GitHub. This project is intended to be a safe, welcoming space for 
-collaboration, and contributors are expected to adhere 
+[Bug reports](https://github.com/toptal/database_validations/issues)
+and [pull requests](https://github.com/toptal/database_validations/pulls) are
+welcome on GitHub. This project is intended to be a safe, welcoming space for
+collaboration, and contributors are expected to adhere
 to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
 
 ## License
@@ -289,7 +293,7 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct
 
-Everyone interacting in the DatabaseValidations project’s codebases, issue trackers, chat rooms and mailing 
+Everyone interacting in the DatabaseValidations project’s codebases, issue trackers, chat rooms and mailing
 lists is expected to follow the [code of conduct](https://github.com/toptal/database_validations/blob/master/CODE_OF_CONDUCT.md).
 
 ## Contributors
