@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.3] - 24-09-20
+### Improvements
+
+- Add support of different `mode` to `DbUniquenessValidator`. Thanks [Arkadiy Zabazhanov](https://github.com/pyromaniac) for the contribution.
+
 ## [0.9.2] - 16-09-20
 ### Improvements
 
