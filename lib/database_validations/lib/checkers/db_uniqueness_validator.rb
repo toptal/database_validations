@@ -38,8 +38,8 @@ module DatabaseValidations
 
         validator.attributes.map do |attribute|
           columns = KeyGenerator.unify_columns(attribute, validator.options[:scope])
-          index = validator.index_name ? adapter.find_index_by_name(validator.index_name.to_s) : adapter.find_index(columns, validator.where) # rubocop:disable Metrics/LineLength
-          raise Errors::IndexNotFound.new(columns, validator.where, validator.index_name, adapter.indexes, adapter.table_name) unless index && valid_index?(columns, index) # rubocop:disable Metrics/LineLength
+          index = validator.index_name ? adapter.find_unique_index_by_name(validator.index_name.to_s) : adapter.find_unique_index(columns, validator.where) # rubocop:disable Metrics/LineLength
+          raise Errors::IndexNotFound.new(columns, validator.where, validator.index_name, adapter.unique_indexes, adapter.table_name) unless index && valid_index?(columns, index) # rubocop:disable Metrics/LineLength
         end
       end
     end

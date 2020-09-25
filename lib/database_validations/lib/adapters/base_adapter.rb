@@ -9,18 +9,25 @@ module DatabaseValidations
       end
 
       # @param [String] index_name
-      def find_index_by_name(index_name)
-        indexes.find { |index| index.name == index_name }
+      def find_unique_index_by_name(index_name)
+        unique_indexes.find { |index| index.name == index_name }
       end
 
       # @param [Array<String>] columns
       # @param [String] where
-      def find_index(columns, where)
-        indexes.find { |index| Array.wrap(index.columns).map(&:to_s).sort == columns && index.where == where }
+      def find_unique_index(columns, where)
+        unique_indexes.find { |index| Array.wrap(index.columns).map(&:to_s).sort == columns && index.where == where }
       end
 
-      def indexes
-        model.connection.indexes(model.table_name).select(&:unique)
+      def unique_indexes
+        connection = model.connection
+
+        if connection.schema_cache.respond_to?(:indexes)
+          # Rails 6 only
+          connection.schema_cache.indexes(model.table_name).select(&:unique)
+        else
+          connection.indexes(model.table_name).select(&:unique)
+        end
       end
 
       def foreign_keys

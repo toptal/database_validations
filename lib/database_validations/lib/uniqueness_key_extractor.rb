@@ -22,7 +22,7 @@ module DatabaseValidations
       else
         validator.attributes.map do |attribute|
           columns = KeyGenerator.unify_columns(attribute, validator.options[:scope])
-          index = adapter.find_index(columns, validator.where)
+          index = adapter.find_unique_index(columns, validator.where)
           [KeyGenerator.for_unique_index(index.name), attribute]
         end.to_h
       end
