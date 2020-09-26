@@ -3,6 +3,9 @@ RSpec.describe '.validates_db_uniqueness_of' do
 
   shared_examples 'works as expected' do
     shared_examples 'ActiveRecord::Validation' do |skip_persisted: false, query_count: 1|
+      define_negated_matcher :not_change, :change
+      define_negated_matcher :not_make_database_queries, :make_database_queries
+
       before { parent_class.create!(persisted_attrs) unless skip_persisted }
 
       describe 'valid?' do
@@ -45,14 +48,22 @@ RSpec.describe '.validates_db_uniqueness_of' do
       describe 'create/save/update' do
         it 'does not make a query for validation' do
           expect { db_uniqueness.create(persisted_attrs) }
-            .not_to make_database_queries(matching: /SELECT (?!sql)/)
+            .to not_make_database_queries(matching: /SELECT (?!sql)/)
+            .and not_change(parent_class, :count)
           expect { app_uniqueness.create(persisted_attrs) }
             .to make_database_queries(matching: /SELECT (?!sql)/, count: query_count)
+            .and not_change(parent_class, :count)
         end
 
-        it 'does not create' do
-          expect { db_uniqueness.create(persisted_attrs) }.not_to change(parent_class, :count)
-          expect { app_uniqueness.create(persisted_attrs) }.not_to change(parent_class, :count)
+        if RAILS_5
+          it 'respects validate: false' do
+            expect { db_uniqueness.new(persisted_attrs).save(validate: false) }
+              .to raise_error(ActiveRecord::RecordNotUnique)
+              .and not_change(parent_class, :count)
+            expect { app_uniqueness.new(persisted_attrs).save(validate: false) }
+              .to raise_error(ActiveRecord::RecordNotUnique)
+              .and not_change(parent_class, :count)
+          end
         end
 
         # Database raise only one unique constraint error per query
@@ -88,22 +99,27 @@ RSpec.describe '.validates_db_uniqueness_of' do
       end
 
       describe 'create!/save!/update!' do
-        define_negated_matcher :not_change, :change
-
         it 'does not make a query for validation' do
-          expect { rescue_error { db_uniqueness.create!(persisted_attrs) } }
-            .not_to make_database_queries(matching: /SELECT (?!sql)/)
-          expect { rescue_error { app_uniqueness.create!(persisted_attrs) } }
-            .to make_database_queries(matching: /SELECT (?!sql)/, count: query_count)
-        end
-
-        it 'does not create' do
           expect { db_uniqueness.create!(persisted_attrs) }
             .to raise_error(ActiveRecord::RecordInvalid)
+            .and not_make_database_queries(matching: /SELECT (?!sql)/)
             .and not_change(parent_class, :count)
+
           expect { app_uniqueness.create!(persisted_attrs) }
             .to raise_error(ActiveRecord::RecordInvalid)
+            .and make_database_queries(matching: /SELECT (?!sql)/, count: query_count)
             .and not_change(parent_class, :count)
+        end
+
+        if RAILS_5
+          it 'respects validate: false' do
+            expect { db_uniqueness.new(persisted_attrs).save!(validate: false) }
+              .to raise_error(ActiveRecord::RecordNotUnique)
+              .and not_change(parent_class, :count)
+            expect { app_uniqueness.new(persisted_attrs).save!(validate: false) }
+              .to raise_error(ActiveRecord::RecordNotUnique)
+              .and not_change(parent_class, :count)
+          end
         end
 
         def catch_error_message

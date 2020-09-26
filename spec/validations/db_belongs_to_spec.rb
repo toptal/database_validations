@@ -19,6 +19,20 @@ RSpec.describe 'db_belongs_to' do
     end
   end
 
+  let(:belongs_to_user_with_fk_klass) do
+    define_class(DbBelongsUser, :db_belongs_users) do
+      def name
+        'BelongsToUserWithFKTemp'
+      end
+
+      if RAILS_5
+        belongs_to :company, optional: false
+      else
+        belongs_to :company, required: true
+      end
+    end
+  end
+
   let(:db_belongs_to_user_klass) do
     define_class(DbBelongsUser, :db_belongs_users) do
       def name
@@ -89,10 +103,28 @@ RSpec.describe 'db_belongs_to' do
 
     describe 'save' do
       include_examples 'pack', :save
+
+      if RAILS_5
+        it 'respects validate: false' do
+          expect { belongs_to_user_with_fk_klass.new(company_id: -1).save(validate: false) }
+            .to raise_error(ActiveRecord::InvalidForeignKey)
+          expect { db_belongs_to_user_klass.new(company_id: -1).save(validate: false) }
+            .to raise_error(ActiveRecord::InvalidForeignKey)
+        end
+      end
     end
 
     describe 'save!' do
       include_examples 'pack', :save!
+
+      if RAILS_5
+        it 'respects validate: false' do
+          expect { belongs_to_user_with_fk_klass.new(company_id: -1).save!(validate: false) }
+            .to raise_error(ActiveRecord::InvalidForeignKey)
+          expect { db_belongs_to_user_klass.new(company_id: -1).save!(validate: false) }
+            .to raise_error(ActiveRecord::InvalidForeignKey)
+        end
+      end
     end
 
     describe 'check foreign key' do
