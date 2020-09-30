@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.4] - 30-09-20
+### Fixes
+
+- Respect `validate: false` option when using `save/save!` for Rails 5+. Thanks [Arkadiy Zabazhanov](https://github.com/pyromaniac) for the contribution.
+
 ## [0.9.3] - 24-09-20
 ### Improvements
 
