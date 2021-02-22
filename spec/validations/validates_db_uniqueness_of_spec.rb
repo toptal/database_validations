@@ -75,8 +75,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
           expect(new.errors.messages).to be_present
           RAILS_5 && (expect(new.errors.details).to be_present)
 
-          expect(old.errors.messages).to include(new.errors.messages)
-          RAILS_5 && (expect(old.errors.details).to include(new.errors.details))
+          expect(old.errors.messages.to_h).to include(new.errors.messages.to_h)
+          RAILS_5 && (expect(old.errors.details.to_h).to include(new.errors.details.to_h))
         end
 
         context 'when wrapped by transaction' do
@@ -92,8 +92,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
             expect(new.errors.messages).to be_present
             RAILS_5 && (expect(new.errors.details).to be_present)
 
-            expect(old.errors.messages).to include(new.errors.messages)
-            RAILS_5 && (expect(old.errors.details).to include(new.errors.details))
+            expect(old.errors.messages.to_h).to include(new.errors.messages.to_h)
+            RAILS_5 && (expect(old.errors.details.to_h).to include(new.errors.details.to_h))
           end
         end
       end
