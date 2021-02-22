@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.9.5] - Not released yet
+### Fixes
+
+- Remove deprecation warning when `connection_config` is used in Rails 6.1 (Use connection_db_config instead). Thanks [Alfonso Uceda](https://github.com/AlfonsoUceda) for the contribution.
+
 ## [0.9.4] - 30-09-20
 ### Fixes
 

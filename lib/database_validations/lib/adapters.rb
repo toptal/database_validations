@@ -8,7 +8,13 @@ module DatabaseValidations
     module_function
 
     def factory(model)
-      case (database = model.connection_config[:adapter].downcase.to_sym)
+      database = if ActiveRecord.version < Gem::Version.new('6.1.0')
+                   model.connection_config[:adapter].downcase.to_sym
+                 else
+                   model.connection_db_config.adapter.downcase.to_sym
+                 end
+
+      case database
       when SqliteAdapter::ADAPTER then SqliteAdapter
       when PostgresqlAdapter::ADAPTER then PostgresqlAdapter
       when MysqlAdapter::ADAPTER then MysqlAdapter

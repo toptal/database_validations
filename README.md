@@ -306,3 +306,4 @@ lists is expected to follow the [code of conduct](https://github.com/toptal/data
 - [Evgeniy Demin](https://github.com/djezzzl) (author)
 - [Filipp Pirozhkov](https://github.com/pirj)
 - [Maxim Krizhanovski](https://github.com/Darhazer)
+- [Alfonso Uceda](https://github.com/AlfonsoUceda)

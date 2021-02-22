@@ -1,31 +1,41 @@
 version: 2.1
+
+ruby-env: &ruby-env
+  BUNDLE_JOBS: 3
+  BUNDLE_RETRY: 3
+  BUNDLE_PATH: vendor/bundle
+  DB_HOST: 127.0.0.1
+  DB_USER: root
+  DB_PASSWORD: test
+
+postgres-env: &postgres-env
+  POSTGRES_USER: root
+  POSTGRES_DB: database_validations_test
+  POSTGRES_PASSWORD: test
+
+mysql-env: &mysql-env
+  MYSQL_ROOT_HOST: '%'
+  MYSQL_ALLOW_EMPTY_PASSWORD: yes
+  MYSQL_ROOT_PASSWORD: test
+  MYSQL_DATABASE: database_validations_test
+  MYSQL_USER: root
+
 jobs:
   rails42:
     parallelism: 3
     docker:
       - image: circleci/ruby:2.4
         environment:
-          BUNDLE_JOBS: 3
-          BUNDLE_RETRY: 3
-          BUNDLE_PATH: vendor/bundle
+          <<: *ruby-env
           GEMFILE_PATH: gemfiles/rails42.gemfile
-          DB_HOST: 127.0.0.1
-          DB_USER: root
-          DB_PASSWORD: test
 
       - image: circleci/postgres:9.6
         environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: test
+          <<: *postgres-env
 
       - image: circleci/mysql:5.6
         environment:
-          MYSQL_ROOT_HOST: '%'
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: test
-          MYSQL_DATABASE: database_validations_test
-          MYSQL_USER: root
+          <<: *mysql-env
 
     steps: &steps
       - checkout
@@ -67,56 +77,34 @@ jobs:
     docker:
       - image: circleci/ruby:2.5
         environment:
-          BUNDLE_JOBS: 3
-          BUNDLE_RETRY: 3
-          BUNDLE_PATH: vendor/bundle
+          <<: *ruby-env
           GEMFILE_PATH: gemfiles/rails52.gemfile
-          DB_HOST: 127.0.0.1
-          DB_USER: root
-          DB_PASSWORD: test
 
       - image: circleci/postgres:9.6
         environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: test
+          <<: *postgres-env
 
       - image: circleci/mysql:5.6
         environment:
-          MYSQL_ROOT_HOST: '%'
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: test
-          MYSQL_DATABASE: database_validations_test
-          MYSQL_USER: root
+          <<: *mysql-env
 
     steps: *steps
 
-  rails60:
+  rails61:
     parallelism: 3
     docker:
-      - image: circleci/ruby:2.6
+      - image: circleci/ruby:2.7
         environment:
-          BUNDLE_JOBS: 3
-          BUNDLE_RETRY: 3
-          BUNDLE_PATH: vendor/bundle
-          GEMFILE_PATH: gemfiles/rails60.gemfile
-          DB_HOST: 127.0.0.1
-          DB_USER: root
-          DB_PASSWORD: test
+          <<: *ruby-env
+          GEMFILE_PATH: gemfiles/rails61.gemfile
 
       - image: circleci/postgres:9.6
         environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: test
+          <<: *postgres-env
 
       - image: circleci/mysql:5.6
         environment:
-          MYSQL_ROOT_HOST: '%'
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: test
-          MYSQL_DATABASE: database_validations_test
-          MYSQL_USER: root
+          <<: *mysql-env
 
     steps: *steps
 
@@ -125,27 +113,16 @@ jobs:
     docker:
       - image: circleci/ruby:latest
         environment:
-          BUNDLE_JOBS: 3
-          BUNDLE_RETRY: 3
-          BUNDLE_PATH: vendor/bundle
+          <<: *ruby-env
           GEMFILE_PATH: gemfiles/railsmaster.gemfile
-          DB_HOST: 127.0.0.1
-          DB_USER: root
-          DB_PASSWORD: test
 
       - image: circleci/postgres:9.6
         environment:
-          POSTGRES_USER: root
-          POSTGRES_DB: database_validations_test
-          POSTGRES_PASSWORD: test
+          <<: *postgres-env
 
       - image: circleci/mysql:5.6
         environment:
-          MYSQL_ROOT_HOST: '%'
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_ROOT_PASSWORD: test
-          MYSQL_DATABASE: database_validations_test
-          MYSQL_USER: root
+          <<: *mysql-env
 
     steps: *steps
 
@@ -155,4 +132,4 @@ workflows:
     jobs:
       - rails42
       - rails52
-      - rails60
+      - rails61
