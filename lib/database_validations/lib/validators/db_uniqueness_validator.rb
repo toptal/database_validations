@@ -41,7 +41,7 @@ module DatabaseValidations
       error_options = options.except(:case_sensitive, :scope, :conditions)
       error_options[:value] = instance.public_send(attribute)
 
-      instance.errors.add(attribute, :taken, error_options)
+      instance.errors.add(attribute, :taken, **error_options)
     end
 
     private
