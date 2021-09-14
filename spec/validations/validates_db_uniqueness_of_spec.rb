@@ -176,6 +176,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
         it 'skips querying the database' do
           StringIO.open do |io|
             klass.logger = Logger.new(io)
+            klass.logger.level = Logger::DEBUG
             expect { klass.new(field: 0).valid? }.not_to change(io, :string)
             klass.logger = nil
           end
@@ -188,6 +189,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
         it 'queries the database' do
           StringIO.open do |io|
             klass.logger = Logger.new(io)
+            klass.logger.level = Logger::DEBUG
             expect { klass.new(field: 0).valid? }.to change(io, :string)
             klass.logger = Logger.new(nil)
           end
