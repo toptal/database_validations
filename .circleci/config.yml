@@ -15,10 +15,8 @@ postgres-env: &postgres-env
 
 mysql-env: &mysql-env
   MYSQL_ROOT_HOST: '%'
-  MYSQL_ALLOW_EMPTY_PASSWORD: yes
   MYSQL_ROOT_PASSWORD: test
   MYSQL_DATABASE: database_validations_test
-  MYSQL_USER: root
 
 jobs:
   rails42:
