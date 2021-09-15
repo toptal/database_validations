@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.1]
+### Fixes
+
+- Add support of Ruby 3. Thanks [John Duff](https://github.com/jduff) for the contribution.
+
 ## [1.0.0]
 ### Fixes
 
