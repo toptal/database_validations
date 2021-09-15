@@ -131,3 +131,4 @@ workflows:
       - rails42
       - rails52
       - rails61
+      - railsmaster
