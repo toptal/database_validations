@@ -33,7 +33,7 @@ Have a look at [example](example) application for details.
 
 ## Benchmark ([code](benchmarks/composed_benchmarks.rb))
 
-Image, you have `User` model defines as
+Imagine, you have `User` model defines as
 
 ```ruby
 class User < ActiveRecord::Base
