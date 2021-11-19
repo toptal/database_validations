@@ -15,21 +15,16 @@ module DatabaseValidations
 
     def create_or_update(*args, &block)
       options = args.extract_options!
-
-      if options[:validate] == false
-        super
-      else
-        rescue_from_database_exceptions { super }
-      end
+      rescue_from_database_exceptions(options[:validate]) { super }
     end
 
     private
 
-    def rescue_from_database_exceptions(&block)
+    def rescue_from_database_exceptions(validate, &block)
       self._database_validations_fallback = false
       self.class.connection.transaction(requires_new: true, &block)
     rescue ActiveRecord::InvalidForeignKey, ActiveRecord::RecordNotUnique => e
-      raise e unless Rescuer.handled?(self, e)
+      raise e unless Rescuer.handled?(self, e, validate)
 
       raise ActiveRecord::RecordInvalid, self
     end
