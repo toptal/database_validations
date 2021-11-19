@@ -20,6 +20,7 @@ example/db/*.sqlite3
 example/tmp
 example/log
 example/Gemfile.lock
+example/config/database.yml
 
 .ruby-version
 .ruby-gemset
