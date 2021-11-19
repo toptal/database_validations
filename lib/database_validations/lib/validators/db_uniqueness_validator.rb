@@ -29,8 +29,8 @@ module DatabaseValidations
       Checkers::DbUniquenessValidator.validate!(self)
     end
 
-    def perform_db_validation?
-      @mode != :standard
+    def perform_rescue?(validate)
+      (validate != false && @mode != :standard) || @rescue == :always
     end
 
     def validate(record)
@@ -50,6 +50,7 @@ module DatabaseValidations
       @index_name = options.delete(:index_name) if options.key?(:index_name)
       @where = options.delete(:where) if options.key?(:where)
       @mode = (options.delete(:mode).presence || DEFAULT_MODE).to_sym
+      @rescue = (options.delete(:rescue).presence || :default).to_sym
     end
 
     def perform_query?

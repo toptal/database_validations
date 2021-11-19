@@ -411,6 +411,30 @@ RSpec.describe '.validates_db_uniqueness_of' do
       it_behaves_like 'ActiveRecord::Validation'
     end
 
+    context 'when in rescue always' do
+      before do
+        define_table do |t|
+          t.string :field
+          t.index [:field], unique: true
+        end
+
+        parent_class.create!(persisted_attrs)
+      end
+
+      let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field, rescue: :always } }
+      let(:app_uniqueness) { define_class { validates_uniqueness_of :field } }
+
+      let(:persisted_attrs) { { field: 'persisted' } }
+
+      it 'rescues the error' do
+        expect { db_uniqueness.new(persisted_attrs).save!(validate: false) }
+          .to raise_error(ActiveRecord::RecordInvalid)
+
+        expect { app_uniqueness.new(persisted_attrs).save!(validate: false) }
+          .to raise_error(ActiveRecord::RecordNotUnique)
+      end
+    end
+
     context 'when in enhanced mode' do
       before do
         define_table do |t|
@@ -842,17 +866,17 @@ RSpec.describe '.validates_db_uniqueness_of' do
     end
   end
 
-  # describe 'postgresql' do
-  #   before { define_database(postgresql_configuration) }
-  #
-  #   include_examples 'works as expected'
-  #   include_examples 'supports condition option'
-  #   include_examples 'supports index_name option'
-  #   include_examples 'supports complex indexes'
-  #   include_examples 'supports index_name with where option'
-  #   include_examples 'supports index_name with scope option'
-  #   include_examples 'when index_name is passed only one attribute can be provided'
-  # end
+  describe 'postgresql' do
+    before { define_database(postgresql_configuration) }
+
+    include_examples 'works as expected'
+    include_examples 'supports condition option'
+    include_examples 'supports index_name option'
+    include_examples 'supports complex indexes'
+    include_examples 'supports index_name with where option'
+    include_examples 'supports index_name with scope option'
+    include_examples 'when index_name is passed only one attribute can be provided'
+  end
 
   describe 'sqlite3' do
     before { define_database(sqlite_configuration) }
@@ -861,12 +885,12 @@ RSpec.describe '.validates_db_uniqueness_of' do
     include_examples 'when index_name is passed only one attribute can be provided'
   end
 
-  # describe 'mysql' do
-  #   before { define_database(mysql_configuration) }
-  #
-  #   include_examples 'works as expected'
-  #   include_examples 'supports index_name option'
-  #   include_examples 'supports index_name with scope option'
-  #   include_examples 'when index_name is passed only one attribute can be provided'
-  # end
+  describe 'mysql' do
+    before { define_database(mysql_configuration) }
+
+    include_examples 'works as expected'
+    include_examples 'supports index_name option'
+    include_examples 'supports index_name with scope option'
+    include_examples 'when index_name is passed only one attribute can be provided'
+  end
 end

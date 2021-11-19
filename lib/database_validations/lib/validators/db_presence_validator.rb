@@ -21,8 +21,8 @@ module DatabaseValidations
       Checkers::DbPresenceValidator.validate!(self)
     end
 
-    def perform_db_validation?
-      true
+    def perform_rescue?(validate)
+      validate != false
     end
 
     # TODO: add support of optional db_belongs_to
