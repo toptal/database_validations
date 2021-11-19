@@ -3,7 +3,6 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   timeout: 5000
   database: database_validations_test
-  port: 5434
 
 development:
   <<: *default
