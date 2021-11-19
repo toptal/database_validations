@@ -1,5 +1,8 @@
 # Changelog
 
+## [1.1.0]
+### Improvements
+
 - Add `rescue: :default|:always` option to `DbUniquenessValidator`.
 
 ## [1.0.1]
