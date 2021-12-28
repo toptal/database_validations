@@ -6,6 +6,28 @@ module DatabaseValidations
       alias_method :validate, :valid?
     end
 
+    class_methods do
+      def create_or_find_by!(attributes, &block)
+        super
+      rescue ActiveRecord::RecordInvalid => e
+        rescue_create_or_find_by_uniqueness_exception(e, attributes)
+      end
+
+      def create_or_find_by(attributes, &block)
+        super
+      rescue ActiveRecord::RecordInvalid => e
+        rescue_create_or_find_by_uniqueness_exception(e, attributes)
+      end
+
+      private
+
+      def rescue_create_or_find_by_uniqueness_exception(err, attributes)
+        raise err unless err.cause&.is_a?(ActiveRecord::RecordNotUnique)
+
+        find_by!(attributes)
+      end
+    end
+
     attr_accessor :_database_validations_fallback
 
     def valid?(context = nil)

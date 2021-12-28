@@ -154,6 +154,19 @@ RSpec.describe '.validates_db_uniqueness_of' do
           end
         end
       end
+
+      describe 'create_or_find_by' do
+        # Database raise only one unique constraint error per query
+        # That means we can't catch all validations at once if there are more than one
+        it 'raises validation error' do
+          db_result = db_uniqueness.create_or_find_by!(persisted_attrs)
+          app_result = app_uniqueness.create_or_find_by!(persisted_attrs)
+
+          expect(db_result).to be_present
+          expect(app_result).to be_present
+        end
+
+      end
     end
 
     context 'when SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK is provided' do
