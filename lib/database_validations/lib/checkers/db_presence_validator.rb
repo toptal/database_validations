@@ -14,14 +14,14 @@ module DatabaseValidations
       end
 
       def validate!
-        validate_foreign_keys! unless ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
+        return if ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
+
+        validate_foreign_keys! unless validator.klass.abstract_class?
       end
 
       private
 
-      def validate_foreign_keys! # rubocop:disable Metrics/AbcSize
-        adapter = Adapters::BaseAdapter.new(validator.klass)
-
+      def validate_foreign_keys!(adapter = Adapters::BaseAdapter.new(validator.klass))
         validator.attributes.each do |attribute|
           reflection = validator.klass._reflect_on_association(attribute)
 
