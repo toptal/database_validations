@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.1] - 14-03-2022
+### Improvements
+
+- Skip checking of foreign keys and unique indexes presence for abstract classes.
+
 ## [1.1.0] - 19-11-2021
 ### Improvements
 

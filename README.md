@@ -106,7 +106,7 @@ also providing backward compatibility with nice validations errors.
 - Ensures relation existence because it uses foreign keys constraints.
 - Checks the existence of proper foreign key constraint at the boot time.
 Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'` if you want to
-skip it in some cases. (For example, when you run migrations.)
+skip it in some cases. (For example, when you run migrations.) _Note:_ we skip it for the abstract classes.
 - It's almost two times faster because it skips unnecessary SQL query. See benchmarks
 below for details.
 
@@ -192,7 +192,7 @@ in the database also providing backward compatibility with nice validations erro
 - Ensures uniqueness because it uses unique constraints.
 - Checks the existence of proper unique index at the boot time.
 Use `ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK'] = 'true'`
-if you want to skip it in some cases. (For example, when you run migrations.)
+if you want to skip it in some cases. (For example, when you run migrations.) _Note:_ we skip it for the abstract classes.
 - It's two times faster in average because it skips unnecessary SQL query. See benchmarks below for details.
 - It has different [modes](#modes) so you can pick up the best for your needs.
 
