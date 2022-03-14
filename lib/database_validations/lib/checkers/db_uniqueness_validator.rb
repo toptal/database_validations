@@ -16,7 +16,9 @@ module DatabaseValidations
       def validate!
         validate_index_usage!
 
-        validate_indexes! unless ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
+        return if ENV['SKIP_DB_UNIQUENESS_VALIDATOR_INDEX_CHECK']
+
+        validate_indexes!(validator.klass) unless validator.klass.abstract_class?
       end
 
       private
@@ -33,8 +35,8 @@ module DatabaseValidations
         raise ArgumentError, "When index_name is provided validator can have only one attribute. See #{validator.inspect}"
       end
 
-      def validate_indexes! # rubocop:disable Metrics/AbcSize
-        adapter = Adapters::BaseAdapter.new(validator.klass)
+      def validate_indexes!(klass) # rubocop:disable Metrics/AbcSize
+        adapter = Adapters::BaseAdapter.new(klass)
 
         validator.attributes.map do |attribute|
           columns = KeyGenerator.unify_columns(attribute, validator.options[:scope])

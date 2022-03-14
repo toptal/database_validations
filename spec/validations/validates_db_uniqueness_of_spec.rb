@@ -525,6 +525,19 @@ RSpec.describe '.validates_db_uniqueness_of' do
       it_behaves_like 'ActiveRecord::Validation'
     end
 
+    context 'when klass is abstract' do
+      let(:db_uniqueness) {}
+
+      it 'does not check the index presence' do
+        expect do
+          define_class do
+            self.abstract_class = true
+            validates_db_uniqueness_of :field
+          end
+        end.not_to raise_error
+      end
+    end
+
     context 'without scope' do
       context 'without index' do
         before { define_table { |t| t.string :field } }
