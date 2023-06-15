@@ -22,16 +22,16 @@ jobs:
   rails42:
     parallelism: 3
     docker:
-      - image: cimg/ruby:2.4
+      - image: circleci/ruby:2.4
         environment:
           <<: *ruby-env
           GEMFILE_PATH: gemfiles/rails42.gemfile
 
-      - image: cimg/postgres:9.6
+      - image: circleci/postgres:9.6
         environment:
           <<: *postgres-env
 
-      - image: cimg/mysql:5.7
+      - image: circleci/mysql:5.6
         environment:
           <<: *mysql-env
 
@@ -73,16 +73,16 @@ jobs:
   rails52:
     parallelism: 3
     docker:
-      - image: cimg/ruby:2.5
+      - image: circleci/ruby:2.5
         environment:
           <<: *ruby-env
           GEMFILE_PATH: gemfiles/rails52.gemfile
 
-      - image: cimg/postgres:9.6
+      - image: circleci/postgres:9.6
         environment:
           <<: *postgres-env
 
-      - image: cimg/mysql:5.7
+      - image: circleci/mysql:5.6
         environment:
           <<: *mysql-env
 
@@ -91,16 +91,16 @@ jobs:
   rails61:
     parallelism: 3
     docker:
-      - image: cimg/ruby:2.7
+      - image: circleci/ruby:2.7
         environment:
           <<: *ruby-env
           GEMFILE_PATH: gemfiles/rails61.gemfile
 
-      - image: cimg/postgres:9.6
+      - image: circleci/postgres:9.6
         environment:
           <<: *postgres-env
 
-      - image: cimg/mysql:5.7
+      - image: circleci/mysql:5.6
         environment:
           <<: *mysql-env
 
@@ -109,16 +109,16 @@ jobs:
   railsmaster:
     parallelism: 3
     docker:
-      - image: cimg/ruby:latest
+      - image: circleci/ruby:latest
         environment:
           <<: *ruby-env
           GEMFILE_PATH: gemfiles/railsmaster.gemfile
 
-      - image: cimg/postgres:9.6
+      - image: circleci/postgres:9.6
         environment:
           <<: *postgres-env
 
-      - image: cimg/mysql:5.7
+      - image: circleci/mysql:5.6
         environment:
           <<: *mysql-env
 

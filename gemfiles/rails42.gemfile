@@ -1,3 +1,4 @@
+gem 'bundler', '~> 2.3.26'
 gem 'activerecord', '~> 4.2'
 gem 'pg', '< 1'
 gem 'mysql2', '>= 0.3.13', '< 0.6.0'
