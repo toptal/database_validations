@@ -75,6 +75,16 @@ def postgresql_configuration
   }
 end
 
+def postgresql_postgis_configuration
+  {
+    adapter: 'postgis',
+    database: 'database_validations_test',
+    host: ENV['DB_HOST'] || '127.0.0.1',
+    username: ENV['DB_USER'],
+    password: ENV['DB_PASSWORD']
+  }
+end
+
 def mysql_configuration
   {
     adapter: 'mysql2',

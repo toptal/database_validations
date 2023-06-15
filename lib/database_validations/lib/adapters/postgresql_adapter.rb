@@ -2,6 +2,7 @@ module DatabaseValidations
   module Adapters
     class PostgresqlAdapter < BaseAdapter
       ADAPTER = :postgresql
+      POSTGIS_ADAPTER = :postgis
 
       class << self
         def unique_index_name(error_message)
