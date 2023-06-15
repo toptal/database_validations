@@ -27,6 +27,7 @@ and ActiveRecord validations with better performance and consistency."
   spec.add_development_dependency 'db-query-matchers', '>= 0.9'
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'pg'
+  spec.add_development_dependency 'activerecord-postgis-adapter'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
   spec.add_development_dependency 'rubocop', '~> 0.60'

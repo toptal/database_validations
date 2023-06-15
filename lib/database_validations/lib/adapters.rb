@@ -16,7 +16,7 @@ module DatabaseValidations
 
       case database
       when SqliteAdapter::ADAPTER then SqliteAdapter
-      when PostgresqlAdapter::ADAPTER then PostgresqlAdapter
+      when PostgresqlAdapter::ADAPTER, PostgresqlAdapter::POSTGIS_ADAPTER then PostgresqlAdapter
       when MysqlAdapter::ADAPTER then MysqlAdapter
       else
         raise Errors::UnknownDatabase, database
