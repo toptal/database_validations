@@ -40,7 +40,7 @@ jobs:
 
       - run:
           name: Install bundler
-          command: gem install bundler
+          command: gem install bundler -v 2.3.26
 
       - run:
           name: Which bundler?
