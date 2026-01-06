@@ -14,17 +14,18 @@ module RuboCop
       #   validates_db_uniqueness_of :address, scope: :user_id
       #   validates_db_uniqueness_of :title
       #
-      class UniquenessOf < Cop
+      class UniquenessOf < Base
         MSG = 'Use `validates_db_uniqueness_of`.'.freeze
+        RESTRICT_ON_SEND = %i[validates validates_uniqueness_of].freeze
 
         def_node_matcher :uniquness_validation?, '(pair (sym :uniqueness) _)'
 
         def on_send(node)
           if node.method_name == :validates_uniqueness_of
-            add_offense(node, location: :selector)
+            add_offense(node.loc.selector)
           elsif node.method_name == :validates
             uniqueness(node) do |option|
-              add_offense(option)
+              add_offense(option.loc.expression)
             end
           end
         end

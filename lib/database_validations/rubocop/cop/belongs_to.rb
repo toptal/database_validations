@@ -10,8 +10,9 @@ module RuboCop
       #   # good
       #   db_belongs_to :company
       #
-      class BelongsTo < Cop
+      class BelongsTo < Base
         MSG = 'Use `db_belongs_to`.'.freeze
+        RESTRICT_ON_SEND = %i[belongs_to].freeze
 
         NON_SUPPORTED_OPTIONS = %i[
           optional
@@ -20,14 +21,12 @@ module RuboCop
           foreign_type
         ].freeze
 
-        def_node_matcher :belongs_to?, '(send nil? :belongs_to ...)'
         def_node_matcher :option_name, '(pair (sym $_) ...)'
 
         def on_send(node)
-          return unless belongs_to?(node)
           return unless supported?(node)
 
-          add_offense(node, location: :selector)
+          add_offense(node.loc.selector)
         end
 
         private
