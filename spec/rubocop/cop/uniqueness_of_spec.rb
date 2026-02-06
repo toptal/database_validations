@@ -6,28 +6,28 @@ RSpec.describe RuboCop::Cop::DatabaseValidations::UniquenessOf do # rubocop:disa
   it 'detects `uniqueness: true`' do
     expect_offense(<<-RUBY)
       validates :slug, uniqueness: true
-                       ^^^^^^^^^^^^^^^^ Use `validates_db_uniqueness_of`.
+                       ^^^^^^^^^^^^^^^^ DatabaseValidations/UniquenessOf: Use `validates_db_uniqueness_of`.
     RUBY
   end
 
   it 'detects `uniqueness` on multiple fields' do
     expect_offense(<<-RUBY)
       validates :code, :name, uniqueness: true
-                              ^^^^^^^^^^^^^^^^ Use `validates_db_uniqueness_of`.
+                              ^^^^^^^^^^^^^^^^ DatabaseValidations/UniquenessOf: Use `validates_db_uniqueness_of`.
     RUBY
   end
 
   it 'detects conditional uniqeuness valudation' do
     expect_offense(<<-RUBY)
       validates :main, uniqueness: {scope: :client_id}, if: -> { main? && main_changed? }
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ Use `validates_db_uniqueness_of`.
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ DatabaseValidations/UniquenessOf: Use `validates_db_uniqueness_of`.
     RUBY
   end
 
   it 'detects `validates_uniqueness_of`' do
     expect_offense(<<-RUBY)
       validates_uniqueness_of :title, :slug
-      ^^^^^^^^^^^^^^^^^^^^^^^ Use `validates_db_uniqueness_of`.
+      ^^^^^^^^^^^^^^^^^^^^^^^ DatabaseValidations/UniquenessOf: Use `validates_db_uniqueness_of`.
     RUBY
   end
 end

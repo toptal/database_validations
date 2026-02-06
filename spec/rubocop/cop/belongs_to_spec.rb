@@ -6,14 +6,14 @@ RSpec.describe RuboCop::Cop::DatabaseValidations::BelongsTo do # rubocop:disable
   it 'detects `belongs_to`: true``' do
     expect_offense(<<-RUBY)
       belongs_to :company
-      ^^^^^^^^^^ Use `db_belongs_to`.
+      ^^^^^^^^^^ DatabaseValidations/BelongsTo: Use `db_belongs_to`.
     RUBY
   end
 
   it 'detects `belongs_to` with an option' do
     expect_offense(<<-RUBY)
       belongs_to :company, touch: true
-      ^^^^^^^^^^ Use `db_belongs_to`.
+      ^^^^^^^^^^ DatabaseValidations/BelongsTo: Use `db_belongs_to`.
     RUBY
   end
 
