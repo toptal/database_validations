@@ -214,7 +214,7 @@ if you want to skip it in some cases. (For example, when you run migrations.) _N
 
 The validation has an option `:rescue` with two values:
 - `:default` (default option) that follows default ActiveRecord behavior. It respects `validate: false` option for `save/save!` (for example, this is being used for nested associations)
-- `:always` that catches database constraint errors and turns them to ActiveRecord validations filling `.errors` properly. 
+- `:always` that catches database constraint errors and turns them to ActiveRecord validations filling `.errors` properly.
 
 You may want to use `rescue: :always` in case you save nested associations with `accepts_nested_attributes_for` helper and you want the validation to happen automatically when a user
 provides duplicated data in the same request.
@@ -270,10 +270,25 @@ require:
 
 ## Development
 
-You need to have installed and running `postgresql` and `mysql`.
-And for each adapter manually create a database called `database_validations_test` accessible by your local user.
+The easiest way to get started is with Docker. A `docker-compose.yaml` is
+included that runs PostgreSQL and MySQL with preconfigured test databases:
 
-Then, run `rake spec` to run the tests.
+```bash
+docker compose up -d
+```
+
+Then create the test databases and run the specs:
+
+```bash
+rake db:all:create
+rake spec
+```
+
+To drop the test databases:
+
+```bash
+rake db:all:drop
+```
 
 To check the conformance with the style guides, run:
 
