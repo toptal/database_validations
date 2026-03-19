@@ -1,0 +1,17 @@
+postgresql:
+  adapter: postgresql
+  database: database_validations_test
+  host: <%= ENV['DB_HOST'] || '127.0.0.1' %>
+  username: <%= ENV['DB_USER'] || 'database_validations' %>
+  password: <%= ENV['DB_PASSWORD'] || 'database_validations' %>
+
+mysql:
+  adapter: mysql2
+  database: database_validations_test
+  host: <%= ENV['DB_HOST'] || '127.0.0.1' %>
+  username: <%= ENV['DB_USER'] || 'root' %>
+  password: <%= ENV['DB_PASSWORD'] || 'database_validations' %>
+
+sqlite:
+  adapter: sqlite3
+  database: ':memory:'

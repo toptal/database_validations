@@ -2,6 +2,7 @@ require 'bundler/setup'
 require 'database_validations'
 require 'shared/raise_index_not_found'
 require 'db-query-matchers'
+require_relative '../config/database_config'
 
 # Use this constant to enable Rails 5+ compatible specs
 RAILS_5 = ActiveRecord::VERSION::MAJOR >= 5
@@ -69,29 +70,16 @@ rescue ActiveRecord::RecordInvalid => e
   e.message
 end
 
+DATABASE_CONFIGURATIONS = DatabaseConfig.load(symbolize_keys: true)
+
 def postgresql_configuration
-  {
-    adapter: 'postgresql',
-    database: 'database_validations_test',
-    host: ENV['DB_HOST'] || '127.0.0.1',
-    username: ENV['DB_USER'] || 'database_validations',
-    password: ENV['DB_PASSWORD'] || 'database_validations'
-  }
+  DATABASE_CONFIGURATIONS['postgresql']
 end
 
 def mysql_configuration
-  {
-    adapter: 'mysql2',
-    database: 'database_validations_test',
-    host: ENV['DB_HOST'] || '127.0.0.1',
-    username: ENV['DB_USER'] || 'root',
-    password: ENV['DB_PASSWORD'] || 'database_validations'
-  }
+  DATABASE_CONFIGURATIONS['mysql']
 end
 
 def sqlite_configuration
-  {
-    adapter: 'sqlite3',
-    database: ':memory:'
-  }
+  DATABASE_CONFIGURATIONS['sqlite']
 end
