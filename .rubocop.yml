@@ -6,7 +6,7 @@ AllCops:
   NewCops: disable
   SuggestExtensions: false
   DisplayCopNames: true
-  TargetRubyVersion: 3.4
+  TargetRubyVersion: 3.0
   Include:
     - '**/*.rb'
     - 'Gemfile'

@@ -19,6 +19,7 @@ and ActiveRecord validations with better performance and consistency."
   spec.license       = 'MIT'
   spec.files         = Dir['lib/**/*']
   spec.require_paths = ['lib']
+  spec.required_ruby_version = '>= 3.0.0'
 
   spec.add_dependency 'activerecord', '>= 4.2.0'
 
