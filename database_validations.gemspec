@@ -22,14 +22,14 @@ and ActiveRecord validations with better performance and consistency."
 
   spec.add_dependency 'activerecord', '>= 4.2.0'
 
-  spec.add_development_dependency 'benchmark-ips', '~> 2.7'
-  spec.add_development_dependency 'bundler', '>= 2.0'
-  spec.add_development_dependency 'db-query-matchers', '>= 0.9'
+  spec.add_development_dependency 'benchmark-ips'
+  spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'db-query-matchers'
   spec.add_development_dependency 'mysql2'
   spec.add_development_dependency 'pg'
-  spec.add_development_dependency 'rake', '~> 13.0'
-  spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'rubocop', '~> 1.80'
-  spec.add_development_dependency 'rubocop-rspec', '~> 3.8'
+  spec.add_development_dependency 'rake'
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'rubocop'
+  spec.add_development_dependency 'rubocop-rspec'
   spec.add_development_dependency 'sqlite3'
 end
