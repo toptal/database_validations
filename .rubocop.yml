@@ -4,7 +4,7 @@ require:
 
 AllCops:
   DisplayCopNames: true
-  TargetRubyVersion: 2.5
+  TargetRubyVersion: 3.3
   Include:
     - '**/*.rb'
     - 'Gemfile'
