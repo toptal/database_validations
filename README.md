@@ -1,8 +1,7 @@
 # DatabaseValidations
 
-[![CircleCI](https://circleci.com/gh/toptal/database_validations/tree/master.svg?style=svg)](https://circleci.com/gh/toptal/database_validations/tree/master)
-[![Gem Version](https://badge.fury.io/rb/database_validations.svg)](https://badge.fury.io/rb/database_validations)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a7df40a29c63f7ba518b/maintainability)](https://codeclimate.com/github/toptal/database_validations/maintainability)
+[![CI](https://github.com/djezzzl/database_validations/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/djezzzl/database_validations/actions/workflows/ci.yml?query=branch%3Amaster)
+[![](https://badge.fury.io/rb/database_validations.svg)](https://badge.fury.io/rb/database_validations)
 
 DatabaseValidations helps you to keep the database consistency with better performance.
 Right now, it supports only ActiveRecord.

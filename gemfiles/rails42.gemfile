@@ -1,4 +1,0 @@
-gem 'activerecord', '~> 4.2'
-gem 'pg', '< 1'
-gem 'mysql2', '>= 0.3.13', '< 0.6.0'
-gem 'sqlite3', '< 1.4'

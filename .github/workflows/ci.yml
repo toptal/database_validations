@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        include:
+          - ruby: '2.7'
+            gemfile: rails61
+          - ruby: '3.0'
+            gemfile: rails70
+          - ruby: '3.4'
+            gemfile: rails80
+          - ruby: '4.0'
+            gemfile: railsmaster
+
+    services:
+      postgres:
+        image: postgres:9.6
+        env:
+          POSTGRES_USER: root
+          POSTGRES_DB: database_validations_test
+          POSTGRES_PASSWORD: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      mysql:
+        image: mysql:5.6
+        env:
+          MYSQL_ROOT_HOST: '%'
+          MYSQL_ROOT_PASSWORD: test
+          MYSQL_DATABASE: database_validations_test
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 3306:3306
+
+    env:
+      BUNDLE_JOBS: 3
+      BUNDLE_RETRY: 3
+      BUNDLE_PATH: vendor/bundle
+      DB_HOST: 127.0.0.1
+      DB_USER: root
+      DB_PASSWORD: test
+      BUNDLE_GEMFILE: gemfiles/${{ matrix.gemfile }}.gemfile
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Use ${{ matrix.gemfile }} as the Gemfile
+        run: bundle config --global gemfile ${{ matrix.gemfile }}
+
+      - name: Run tests
+        run: bundle exec rspec

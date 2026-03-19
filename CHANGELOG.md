@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.2.0] - 07-02-2025
+### Improvements
+
+- Fix RuboCop integration. Thank to [Evgeny Matveyev](https://github.com/evgeny-matveev) for fixing it.
+
 ## [1.1.1] - 14-03-2022
 ### Improvements
 
