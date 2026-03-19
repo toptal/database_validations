@@ -61,7 +61,7 @@ module DatabaseValidations
 
       belongs_to(name, scope, **options)
 
-      validates_with DatabaseValidations::DbPresenceValidator, _merge_attributes([name, message: DatabaseValidations::DbPresenceValidator::REFLECTION_MESSAGE]) # rubocop:disable Metrics/LineLength
+      validates_with DatabaseValidations::DbPresenceValidator, _merge_attributes([name, { message: DatabaseValidations::DbPresenceValidator::REFLECTION_MESSAGE }]) # rubocop:disable Layout/LineLength
     end
   end
 end

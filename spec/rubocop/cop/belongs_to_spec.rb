@@ -1,6 +1,6 @@
 require 'rubocop/spec_helper'
 
-RSpec.describe RuboCop::Cop::DatabaseValidations::BelongsTo do # rubocop:disable RSpec/FilePath
+RSpec.describe RuboCop::Cop::DatabaseValidations::BelongsTo do
   subject(:cop) { described_class.new }
 
   it 'detects `belongs_to`: true``' do
