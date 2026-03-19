@@ -1,43 +1,24 @@
 require 'bundler/gem_tasks'
 require 'rspec/core/rake_task'
 require 'active_record'
+require_relative 'config/database_config'
 
 RSpec::Core::RakeTask.new(:spec)
 
 task default: :spec
 
-def database_configurations
-  configs = {}
-
-  configs['postgresql'] = {
-    'adapter' => 'postgresql',
-    'database' => 'database_validations_test',
-    'host' => ENV['DB_HOST'] || '127.0.0.1',
-    'username' => ENV['DB_USER'] || 'database_validations',
-    'password' => ENV['DB_PASSWORD'] || 'database_validations'
-  }
-
-  configs['mysql'] = {
-    'adapter' => 'mysql2',
-    'database' => 'database_validations_test',
-    'host' => ENV['DB_HOST'] || '127.0.0.1',
-    'username' => ENV['MYSQL_USER'] || 'root',
-    'password' => ENV['MYSQL_PASSWORD'] || 'database_validations'
-  }
-
-  configs
-end
+DATABASE_CONFIGURATIONS = DatabaseConfig.load
 
 include ActiveRecord::Tasks
 
-DatabaseTasks.database_configuration = database_configurations
+DatabaseTasks.database_configuration = DATABASE_CONFIGURATIONS
 DatabaseTasks.db_dir = 'db'
 DatabaseTasks.migrations_paths = []
 DatabaseTasks.root = File.dirname(__FILE__)
 DatabaseTasks.env = ENV.fetch('DB', 'postgresql')
 
 task :environment do
-  ActiveRecord::Base.configurations = database_configurations
+  ActiveRecord::Base.configurations = DATABASE_CONFIGURATIONS
   ActiveRecord::Base.establish_connection(DatabaseTasks.env.to_sym)
 end
 
@@ -48,7 +29,9 @@ namespace :db do
     desc 'Create both PostgreSQL and MySQL test databases'
     task :create do
       failures = []
-      database_configurations.each do |name, config|
+      DATABASE_CONFIGURATIONS.each do |name, config|
+        next if config['adapter'] == 'sqlite3'
+
         puts "Creating #{name} database..."
         ActiveRecord::Tasks::DatabaseTasks.create(config)
       rescue StandardError => e
@@ -61,7 +44,9 @@ namespace :db do
     desc 'Drop both PostgreSQL and MySQL test databases'
     task :drop do
       failures = []
-      database_configurations.each do |name, config|
+      DATABASE_CONFIGURATIONS.each do |name, config|
+        next if config['adapter'] == 'sqlite3'
+
         puts "Dropping #{name} database..."
         ActiveRecord::Tasks::DatabaseTasks.drop(config)
       rescue StandardError => e
