@@ -1,10 +1,12 @@
 inherit_from: .rubocop-todo.yml
-require:
+plugins:
   - rubocop-rspec
 
 AllCops:
+  NewCops: disable
+  SuggestExtensions: false
   DisplayCopNames: true
-  TargetRubyVersion: 3.3
+  TargetRubyVersion: 3.4
   Include:
     - '**/*.rb'
     - 'Gemfile'
@@ -24,3 +26,14 @@ Style/FrozenStringLiteralComment:
 
 RSpec/MultipleExpectations:
   Enabled: false
+
+Naming/VariableNumber:
+  Enabled: false
+
+RSpec/ExampleWording:
+  Enabled: false
+
+
+Lint/ConstantDefinitionInBlock:
+  Exclude:
+    - 'benchmarks/*.rb'
