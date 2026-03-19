@@ -233,7 +233,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
             context 'when proc returns false' do
               let(:klass) do
                 define_class do
-                  validates_db_uniqueness_of :field, if: lambda(&:nil?)
+                  validates_db_uniqueness_of :field, if: ->(entity) { entity.nil? } # rubocop:disable Style/SymbolProc
                 end
               end
 
@@ -315,7 +315,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
             context 'when proc returns false' do
               let(:klass) do
                 define_class do
-                  validates_db_uniqueness_of :field, unless: lambda(&:nil?)
+                  validates_db_uniqueness_of :field, unless: ->(entity) { entity.nil? } # rubocop:disable Style/SymbolProc
                 end
               end
 
