@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.0] - 07-02-2025
+## [x.x.x] - DD-MM-YYY
 ### Improvements
 
 - Fix RuboCop integration. Thank to [Evgeny Matveyev](https://github.com/evgeny-matveev) for fixing it.
@@ -38,7 +38,7 @@
 ## [0.9.2] - 16-09-20
 ### Improvements
 
-- Fix a warning message from newest Ruby version 
+- Fix a warning message from newest Ruby version
 
 ## [0.9.1] - 24-06-20
 ### Improvements
@@ -56,14 +56,14 @@
 
 ## [0.8.10] - 21-02-19
 ### Improvements
-- Internal improvements 
+- Internal improvements
 - We raise an error if `scope` or `where` options are missed for the `validates_db_uniqueness_of`
 
 ## [0.8.9] - 13-02-19
 ### Bugs
 - Hot-fix for `validate_db_uniqueness_of` RSpec matcher
 
-## (removed) [0.8.8] - 13-02-19 
+## (removed) [0.8.8] - 13-02-19
 ### Bugs
 - Hot-fix for `validates_db_uniqueness_of`
 
@@ -89,7 +89,7 @@
 
 ## [0.8.2] - 10-01-18
 ### Bugs
-- Fix RuboCop cop for `validates_db_uniqueness_of` to catch `validates_uniqueness_of` definition too. 
+- Fix RuboCop cop for `validates_db_uniqueness_of` to catch `validates_uniqueness_of` definition too.
 
 ## [0.8.1] - 09-01-18
 ### Features
@@ -97,7 +97,7 @@
 
 ## [0.8.0] - 30-11-18
 ### Features
-- Add `db_belongs_to` 
+- Add `db_belongs_to`
 
 ## [0.7.3] - 2018-10-18
 ### Features
