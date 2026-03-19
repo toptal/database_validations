@@ -1,15 +1,18 @@
-Metrics/LineLength:
+Layout/LineLength:
   Max: 140
   Exclude:
     - 'benchmarks/*.rb'
 
 Metrics/MethodLength:
   Max: 15
+  Exclude:
+    - Rakefile
 
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*_spec.rb'
     - 'benchmarks/*.rb'
+    - Rakefile
 
 Style/Documentation:
   Enabled: false
@@ -30,3 +33,7 @@ Style/Semicolon:
 Style/NumericPredicate:
   Exclude:
     - 'benchmarks/*.rb'
+
+Style/MixinUsage:
+  Exclude:
+    - Rakefile
