@@ -15,8 +15,6 @@ jobs:
 
       matrix:
         include:
-          - ruby: '2.7'
-            gemfile: rails61
           - ruby: '3.0'
             gemfile: rails70
           - ruby: '3.4'
@@ -72,6 +70,7 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
+          bundler: latest
 
       - name: Run tests
         run: bundle exec rspec

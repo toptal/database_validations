@@ -21,7 +21,7 @@ and ActiveRecord validations with better performance and consistency."
   spec.require_paths = ['lib']
   spec.required_ruby_version = '>= 3.0.0'
 
-  spec.add_dependency 'activerecord', '>= 4.2.0'
+  spec.add_dependency 'activerecord', '>= 7.0.0'
 
   spec.add_development_dependency 'benchmark-ips'
   spec.add_development_dependency 'bundler'
