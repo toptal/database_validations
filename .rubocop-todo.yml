@@ -37,3 +37,7 @@ Style/NumericPredicate:
 Style/MixinUsage:
   Exclude:
     - Rakefile
+
+RSpec/SpecFilePathFormat:
+  Exclude:
+    - spec/rubocop/**/*.rb

@@ -49,8 +49,12 @@ def define_class(parent = ActiveRecord::Base, table_name = :entities, &block)
   Class.new(parent) do |klass|
     self.table_name = table_name
 
+    def self.name
+      'Temp'
+    end
+
     def self.model_name
-      ActiveModel::Name.new(self, nil, 'temp')
+      ActiveModel::Name.new(self, nil, 'Temp')
     end
 
     reset_column_information
