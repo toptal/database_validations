@@ -1,7 +1,11 @@
 RSpec.describe 'db_belongs_to' do
-  class Company < ActiveRecord::Base; end # rubocop:disable RSpec/LeakyConstantDeclaration
-  class BelongsUser < ActiveRecord::Base; end # rubocop:disable RSpec/LeakyConstantDeclaration
-  class DbBelongsUser < ActiveRecord::Base; end # rubocop:disable RSpec/LeakyConstantDeclaration
+  # rubocop:disable RSpec/LeakyConstantDeclaration
+  # rubocop:disable Lint/ConstantDefinitionInBlock
+  class Company < ActiveRecord::Base; end
+  class BelongsUser < ActiveRecord::Base; end
+  class DbBelongsUser < ActiveRecord::Base; end
+  # rubocop:enable RSpec/LeakyConstantDeclaration
+  # rubocop:enable Lint/ConstantDefinitionInBlock
 
   let(:company_klass) { define_class(Company, :companies) }
 
@@ -59,7 +63,7 @@ RSpec.describe 'db_belongs_to' do
 
   shared_examples 'works as belongs_to' do
     shared_examples 'with company_id provided' do |method, field, company_id|
-      context "#{method} on #{field} with #{company_id.inspect}" do
+      context "when '#{method}' on '#{field}' with '#{company_id.inspect}'" do
         specify do
           # Hack
           validate_db_queries = !(method == :valid? && [:existing_id, -1].include?(company_id))

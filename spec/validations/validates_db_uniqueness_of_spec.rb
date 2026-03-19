@@ -466,13 +466,13 @@ RSpec.describe '.validates_db_uniqueness_of' do
 
       it_behaves_like 'ActiveRecord::Validation'
 
-      context do
+      context do # rubocop:disable RSpec/MissingExampleGroupArgument
         define_negated_matcher :not_change, :change
 
         before { parent_class.create!(persisted_attrs) }
 
         it "doesn't rescue from the constraint violation" do
-          expect_any_instance_of(ActiveRecord::Validations::UniquenessValidator)
+          expect_any_instance_of(ActiveRecord::Validations::UniquenessValidator) # rubocop:disable RSpec/AnyInstance
             .to receive(:scope_relation).twice.and_return(RAILS_5 ? app_uniqueness.none : '1=0')
 
           expect { app_uniqueness.create(persisted_attrs) }
@@ -502,7 +502,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
       it_behaves_like 'ActiveRecord::Validation'
     end
 
-    context 'when parent class set validation of flow' do
+    context 'when parent class set validation of flow' do # rubocop:disable RSpec/MultipleMemoizedHelpers
       before do
         define_table do |t|
           t.string :field
