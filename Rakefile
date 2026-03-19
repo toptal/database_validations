@@ -51,7 +51,7 @@ namespace :db do
       database_configurations.each do |name, config|
         puts "Creating #{name} database..."
         ActiveRecord::Tasks::DatabaseTasks.create(config)
-      rescue => e
+      rescue StandardError => e
         failures << name
         warn "  Failed to create #{name}: #{e.message}"
       end
@@ -64,7 +64,7 @@ namespace :db do
       database_configurations.each do |name, config|
         puts "Dropping #{name} database..."
         ActiveRecord::Tasks::DatabaseTasks.drop(config)
-      rescue => e
+      rescue StandardError => e
         failures << name
         warn "  Failed to drop #{name}: #{e.message}"
       end

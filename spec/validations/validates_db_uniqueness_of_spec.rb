@@ -17,8 +17,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
         end
 
         it 'returns false' do
-          expect(db_uniqueness.new(persisted_attrs).valid?).to eq(false)
-          expect(app_uniqueness.new(persisted_attrs).valid?).to eq(false)
+          expect(db_uniqueness.new(persisted_attrs).valid?).to be(false)
+          expect(app_uniqueness.new(persisted_attrs).valid?).to be(false)
         end
 
         it 'has exactly the same errors' do
@@ -233,7 +233,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
             context 'when proc returns false' do
               let(:klass) do
                 define_class do
-                  validates_db_uniqueness_of :field, if: ->(entity) { entity.nil? }
+                  validates_db_uniqueness_of :field, if: lambda(&:nil?)
                 end
               end
 
@@ -315,7 +315,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
             context 'when proc returns false' do
               let(:klass) do
                 define_class do
-                  validates_db_uniqueness_of :field, unless: ->(entity) { entity.nil? }
+                  validates_db_uniqueness_of :field, unless: lambda(&:nil?)
                 end
               end
 
@@ -390,8 +390,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
           nil
         end
         expect(parent_class.count).to eq(0)
-        expect(new.persisted?).to eq(false)
-        expect(old.persisted?).to eq(false)
+        expect(new.persisted?).to be(false)
+        expect(old.persisted?).to be(false)
       end
     end
 
@@ -715,8 +715,8 @@ RSpec.describe '.validates_db_uniqueness_of' do
 
           describe '#valid?' do
             it 'works' do
-              expect(db_uniqueness.new(persisted_attrs).valid?).to eq(true)
-              expect(app_uniqueness.new(persisted_attrs).valid?).to eq(true)
+              expect(db_uniqueness.new(persisted_attrs).valid?).to be(true)
+              expect(app_uniqueness.new(persisted_attrs).valid?).to be(true)
             end
           end
 

@@ -1,6 +1,6 @@
 require 'rubocop/spec_helper'
 
-RSpec.describe RuboCop::Cop::DatabaseValidations::UniquenessOf do # rubocop:disable RSpec/FilePath
+RSpec.describe RuboCop::Cop::DatabaseValidations::UniquenessOf do
   subject(:cop) { described_class.new }
 
   it 'detects `uniqueness: true`' do
