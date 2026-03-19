@@ -22,5 +22,4 @@ example/log
 example/Gemfile.lock
 example/config/database.yml
 
-.ruby-version
 .ruby-gemset
