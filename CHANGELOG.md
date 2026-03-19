@@ -3,6 +3,12 @@
 ## [x.x.x] - DD-MM-YYY
 ### Improvements
 
+- Add Rails 8.1 support
+- Set minimum Ruby version to 3.0
+- Loosen gemspec development dependency version constraints
+- Modernize CI configuration and add dedicated RuboCop workflow
+- Consolidate database configuration into `config/database.yml`
+- Add local development database setup with Docker Compose
 - Fix RuboCop integration. Thank to [Evgeny Matveyev](https://github.com/evgeny-matveev) for fixing it.
 
 ## [1.1.1] - 14-03-2022
