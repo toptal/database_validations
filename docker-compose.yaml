@@ -1,0 +1,27 @@
+services:
+  postgresql:
+    container_name: "database_validations_postgresql"
+    image: postgres
+    environment:
+      POSTGRES_USER: database_validations
+      POSTGRES_PASSWORD: database_validations
+      POSTGRES_DB: database_validations_test
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql
+
+  mysql:
+    container_name: "database_validations_mysql"
+    image: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: database_validations
+      MYSQL_DATABASE: database_validations_test
+    ports:
+      - 3306:3306
+    volumes:
+      - mysqldata:/var/lib/mysql
+
+volumes:
+  pgdata:
+  mysqldata:

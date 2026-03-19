@@ -70,8 +70,8 @@ def postgresql_configuration
     adapter: 'postgresql',
     database: 'database_validations_test',
     host: ENV['DB_HOST'] || '127.0.0.1',
-    username: ENV['DB_USER'],
-    password: ENV['DB_PASSWORD']
+    username: ENV['DB_USER'] || 'database_validations',
+    password: ENV['DB_PASSWORD'] || 'database_validations'
   }
 end
 
@@ -80,8 +80,8 @@ def mysql_configuration
     adapter: 'mysql2',
     database: 'database_validations_test',
     host: ENV['DB_HOST'] || '127.0.0.1',
-    username: ENV['DB_USER'],
-    password: ENV['DB_PASSWORD']
+    username: ENV['DB_USER'] || 'root',
+    password: ENV['DB_PASSWORD'] || 'database_validations'
   }
 end
 
