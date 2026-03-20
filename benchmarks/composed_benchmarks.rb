@@ -4,7 +4,7 @@ require_relative 'configurations'
 require_relative 'gc_suite'
 require_relative 'database_cleaner'
 
-[postgresql_configuration, mysql_configuration].each do |database_configuration|
+[sqlite_configuration, postgresql_configuration, mysql_configuration].each do |database_configuration|
   ActiveRecord::Base.establish_connection(database_configuration)
   clear_database!(database_configuration)
 
