@@ -1,6 +1,6 @@
 module DatabaseValidations
   class DbPresenceValidator < ActiveRecord::Validations::PresenceValidator
-    REFLECTION_MESSAGE = ActiveRecord::VERSION::MAJOR < 5 ? :blank : :required
+    REFLECTION_MESSAGE = :required
 
     attr_reader :klass
 
@@ -53,11 +53,7 @@ module DatabaseValidations
     end
 
     def db_belongs_to(name, scope = nil, **options)
-      if ActiveRecord::VERSION::MAJOR < 5
-        options[:required] = false
-      else
-        options[:optional] = true
-      end
+      options[:optional] = true
 
       belongs_to(name, scope, **options)
 
