@@ -1,22 +1,15 @@
+require_relative '../config/database_config'
+
+DATABASE_CONFIGURATIONS = DatabaseConfig.load(symbolize_keys: true)
+
 def postgresql_configuration
-  {
-    adapter: 'postgresql',
-    database: 'database_validations_test',
-    host: ENV['PGHOST'] || '127.0.0.1'
-  }
+  DATABASE_CONFIGURATIONS['postgresql']
 end
 
 def mysql_configuration
-  {
-    adapter: 'mysql2',
-    database: 'database_validations_test',
-    host: ENV['MYSQLHOST'] || '127.0.0.1'
-  }
+  DATABASE_CONFIGURATIONS['mysql']
 end
 
 def sqlite_configuration
-  {
-    adapter: 'sqlite3',
-    database: ':memory:'
-  }
+  DATABASE_CONFIGURATIONS['sqlite']
 end
