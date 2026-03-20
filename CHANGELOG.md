@@ -11,6 +11,8 @@
 - Consolidate database configuration into `config/database.yml`
 - Add local development database setup with Docker Compose
 - Fix RuboCop integration. Thank to [Evgeny Matveyev](https://github.com/evgeny-matveev) for fixing it.
+- Add SQLite support for `db_belongs_to` validation
+- Add SQLite support for `validates_db_uniqueness_of` options: `index_name`, `where`, and complex indexes
 
 ## [1.1.1] - 14-03-2022
 ### Improvements
