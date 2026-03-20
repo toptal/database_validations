@@ -26,7 +26,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
           old = app_uniqueness.new(persisted_attrs).tap(&:valid?)
 
           expect(old.errors.messages.sort).to eq(new.errors.messages.sort)
-          RAILS_5 && (expect(old.errors.details.sort).to eq(new.errors.details.sort))
+          expect(old.errors.details.sort).to eq(new.errors.details.sort)
         end
 
         context 'when wrapped by transaction' do
@@ -40,7 +40,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
             end
 
             expect(old.errors.messages.sort).to eq(new.errors.messages.sort)
-            RAILS_5 && (expect(old.errors.details.sort).to eq(new.errors.details.sort))
+            expect(old.errors.details.sort).to eq(new.errors.details.sort)
           end
         end
       end
@@ -55,15 +55,13 @@ RSpec.describe '.validates_db_uniqueness_of' do
             .and not_change(parent_class, :count)
         end
 
-        if RAILS_5
-          it 'respects validate: false' do
-            expect { db_uniqueness.new(persisted_attrs).save(validate: false) }
-              .to raise_error(ActiveRecord::RecordNotUnique)
-              .and not_change(parent_class, :count)
-            expect { app_uniqueness.new(persisted_attrs).save(validate: false) }
-              .to raise_error(ActiveRecord::RecordNotUnique)
-              .and not_change(parent_class, :count)
-          end
+        it 'respects validate: false' do
+          expect { db_uniqueness.new(persisted_attrs).save(validate: false) }
+            .to raise_error(ActiveRecord::RecordNotUnique)
+            .and not_change(parent_class, :count)
+          expect { app_uniqueness.new(persisted_attrs).save(validate: false) }
+            .to raise_error(ActiveRecord::RecordNotUnique)
+            .and not_change(parent_class, :count)
         end
 
         # Database raise only one unique constraint error per query
@@ -73,10 +71,10 @@ RSpec.describe '.validates_db_uniqueness_of' do
           old = app_uniqueness.create(persisted_attrs)
 
           expect(new.errors.messages).to be_present
-          RAILS_5 && (expect(new.errors.details).to be_present)
+          expect(new.errors.details).to be_present
 
           expect(old.errors.messages.to_h).to include(new.errors.messages.to_h)
-          RAILS_5 && (expect(old.errors.details.to_h).to include(new.errors.details.to_h))
+          expect(old.errors.details.to_h).to include(new.errors.details.to_h)
         end
 
         context 'when wrapped by transaction' do
@@ -90,10 +88,10 @@ RSpec.describe '.validates_db_uniqueness_of' do
             end
 
             expect(new.errors.messages).to be_present
-            RAILS_5 && (expect(new.errors.details).to be_present)
+            expect(new.errors.details).to be_present
 
             expect(old.errors.messages.to_h).to include(new.errors.messages.to_h)
-            RAILS_5 && (expect(old.errors.details.to_h).to include(new.errors.details.to_h))
+            expect(old.errors.details.to_h).to include(new.errors.details.to_h)
           end
         end
       end
@@ -111,15 +109,13 @@ RSpec.describe '.validates_db_uniqueness_of' do
             .and not_change(parent_class, :count)
         end
 
-        if RAILS_5
-          it 'respects validate: false' do
-            expect { db_uniqueness.new(persisted_attrs).save!(validate: false) }
-              .to raise_error(ActiveRecord::RecordNotUnique)
-              .and not_change(parent_class, :count)
-            expect { app_uniqueness.new(persisted_attrs).save!(validate: false) }
-              .to raise_error(ActiveRecord::RecordNotUnique)
-              .and not_change(parent_class, :count)
-          end
+        it 'respects validate: false' do
+          expect { db_uniqueness.new(persisted_attrs).save!(validate: false) }
+            .to raise_error(ActiveRecord::RecordNotUnique)
+            .and not_change(parent_class, :count)
+          expect { app_uniqueness.new(persisted_attrs).save!(validate: false) }
+            .to raise_error(ActiveRecord::RecordNotUnique)
+            .and not_change(parent_class, :count)
         end
 
         def catch_error_message
@@ -473,7 +469,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
 
         it "doesn't rescue from the constraint violation" do
           expect_any_instance_of(ActiveRecord::Validations::UniquenessValidator) # rubocop:disable RSpec/AnyInstance
-            .to receive(:scope_relation).twice.and_return(RAILS_5 ? app_uniqueness.none : '1=0')
+            .to receive(:scope_relation).twice.and_return(app_uniqueness.none)
 
           expect { app_uniqueness.create(persisted_attrs) }
             .to raise_error(ActiveRecord::RecordNotUnique)
@@ -831,8 +827,6 @@ RSpec.describe '.validates_db_uniqueness_of' do
   end
 
   shared_examples 'supports complex indexes' do
-    next unless RAILS_5
-
     context 'with index_name option' do
       let(:app_uniqueness) { define_class { validates_uniqueness_of :field, case_sensitive: false } }
       let(:db_uniqueness) { define_class { validates_db_uniqueness_of :field, index_name: :unique_index, case_sensitive: false } }

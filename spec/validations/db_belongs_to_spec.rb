@@ -15,11 +15,7 @@ RSpec.describe 'db_belongs_to' do
         'BelongsToUserTemp'
       end
 
-      if RAILS_5
-        belongs_to :company, optional: false
-      else
-        belongs_to :company, required: true
-      end
+      belongs_to :company, optional: false
     end
   end
 
@@ -29,11 +25,7 @@ RSpec.describe 'db_belongs_to' do
         'BelongsToUserWithFKTemp'
       end
 
-      if RAILS_5
-        belongs_to :company, optional: false
-      else
-        belongs_to :company, required: true
-      end
+      belongs_to :company, optional: false
     end
   end
 
@@ -108,26 +100,22 @@ RSpec.describe 'db_belongs_to' do
     describe 'save' do
       include_examples 'pack', :save
 
-      if RAILS_5
-        it 'respects validate: false' do
-          expect { belongs_to_user_with_fk_klass.new(company_id: -1).save(validate: false) }
-            .to raise_error(ActiveRecord::InvalidForeignKey)
-          expect { db_belongs_to_user_klass.new(company_id: -1).save(validate: false) }
-            .to raise_error(ActiveRecord::InvalidForeignKey)
-        end
+      it 'respects validate: false' do
+        expect { belongs_to_user_with_fk_klass.new(company_id: -1).save(validate: false) }
+          .to raise_error(ActiveRecord::InvalidForeignKey)
+        expect { db_belongs_to_user_klass.new(company_id: -1).save(validate: false) }
+          .to raise_error(ActiveRecord::InvalidForeignKey)
       end
     end
 
     describe 'save!' do
       include_examples 'pack', :save!
 
-      if RAILS_5
-        it 'respects validate: false' do
-          expect { belongs_to_user_with_fk_klass.new(company_id: -1).save!(validate: false) }
-            .to raise_error(ActiveRecord::InvalidForeignKey)
-          expect { db_belongs_to_user_klass.new(company_id: -1).save!(validate: false) }
-            .to raise_error(ActiveRecord::InvalidForeignKey)
-        end
+      it 'respects validate: false' do
+        expect { belongs_to_user_with_fk_klass.new(company_id: -1).save!(validate: false) }
+          .to raise_error(ActiveRecord::InvalidForeignKey)
+        expect { db_belongs_to_user_klass.new(company_id: -1).save!(validate: false) }
+          .to raise_error(ActiveRecord::InvalidForeignKey)
       end
     end
 

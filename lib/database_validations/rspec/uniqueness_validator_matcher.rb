@@ -63,15 +63,13 @@ RSpec::Matchers.define :validate_db_uniqueness_of do |field| # rubocop:disable M
       end
     end
 
-    case_sensitive_default = ActiveRecord::VERSION::MAJOR >= 6 ? nil : true
-
     @validators.include?(
       field: field,
       scope: Array.wrap(@scope),
       where: @where,
       message: @message,
       index_name: @index_name,
-      case_sensitive: @case_sensitive.nil? ? case_sensitive_default : @case_sensitive
+      case_sensitive: @case_sensitive.nil? ? nil : @case_sensitive
     )
   end
 

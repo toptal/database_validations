@@ -4,9 +4,6 @@ require 'shared/raise_index_not_found'
 require 'db-query-matchers'
 require_relative '../config/database_config'
 
-# Use this constant to enable Rails 5+ compatible specs
-RAILS_5 = ActiveRecord::VERSION::MAJOR >= 5
-
 DBQueryMatchers.configure do |config|
   config.schemaless = true
 end
