@@ -1,6 +1,6 @@
 # Changelog
 
-## [x.x.x] - DD-MM-YYY
+## [2.0.0] - 20-03-2026
 ### Improvements
 
 - Add Rails 8.1 support
