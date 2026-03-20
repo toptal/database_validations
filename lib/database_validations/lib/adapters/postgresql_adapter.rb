@@ -4,16 +4,17 @@ module DatabaseValidations
       ADAPTER = :postgresql
 
       class << self
-        def unique_index_name(error_message)
-          error_message[/unique constraint "([^"]+)"/, 1]
+        def unique_index_name(error)
+          error.message[/unique constraint "([^"]+)"/, 1]
         end
 
-        def unique_error_columns(error_message)
-          error_message[/Key \((.+)\)=/, 1].split(', ')
+        def unique_error_columns(error)
+          error.message[/Key \((.+)\)=/, 1].split(', ')
         end
 
-        def foreign_key_error_column(error_message)
-          error_message[/Key \(([^)]+)\)/, 1]
+        def foreign_key_error_column(error)
+          column = error.message[/Key \(([^)]+)\)/, 1]
+          column ? [column] : []
         end
       end
     end
