@@ -889,6 +889,11 @@ RSpec.describe '.validates_db_uniqueness_of' do
     before { define_database(sqlite_configuration) }
 
     include_examples 'works as expected'
+    include_examples 'supports condition option'
+    include_examples 'supports index_name option'
+    include_examples 'supports complex indexes'
+    include_examples 'supports index_name with where option'
+    include_examples 'supports index_name with scope option'
     include_examples 'when index_name is passed only one attribute can be provided'
   end
 
