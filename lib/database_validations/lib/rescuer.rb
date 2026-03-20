@@ -15,9 +15,17 @@ module DatabaseValidations
     end
 
     def process(validate, instance, error, key_types)
+      keys = resolve_keys(instance, error, key_types)
+      attribute_validator = find_matching_validator(instance, keys)
+      return false unless attribute_validator
+
+      process_validator(validate, instance, attribute_validator)
+    end
+
+    def resolve_keys(instance, error, key_types)
       adapter = Adapters.factory(instance.class)
 
-      keys = key_types.flat_map do |key_generator, error_processor|
+      key_types.flat_map do |key_generator, error_processor|
         result = adapter.public_send(error_processor, error)
 
         # FK adapters return an array of candidate columns, each generating a
@@ -29,7 +37,9 @@ module DatabaseValidations
           [KeyGenerator.public_send(key_generator, result)]
         end
       end
+    end
 
+    def find_matching_validator(instance, keys)
       first_match = nil
 
       keys.each do |key|
@@ -38,18 +48,14 @@ module DatabaseValidations
 
         first_match ||= attribute_validator
 
-        if keys.size > 1
-          next unless foreign_key_invalid?(instance, attribute_validator)
-        end
+        next if (keys.size > 1) && !foreign_key_invalid?(instance, attribute_validator)
 
-        return process_validator(validate, instance, attribute_validator)
+        return attribute_validator
       end
 
       # TOCTOU fallback: if disambiguate queries all passed (concurrent insert),
       # use the first matching validator rather than leaving the error unhandled.
-      return process_validator(validate, instance, first_match) if first_match
-
-      false
+      first_match
     end
 
     def foreign_key_invalid?(instance, attribute_validator)
