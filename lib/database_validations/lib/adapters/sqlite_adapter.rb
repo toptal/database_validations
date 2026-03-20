@@ -5,8 +5,8 @@ module DatabaseValidations
 
       class << self
         def unique_index_name(error)
-        error.message[/UNIQUE constraint failed: index '([^']+)'/, 1]
-      end
+          error.message[/UNIQUE constraint failed: index '([^']+)'/, 1]
+        end
 
         def unique_error_columns(error)
           error.message.scan(/\w+\.([^,:]+)/).flatten
