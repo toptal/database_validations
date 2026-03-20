@@ -4,7 +4,8 @@
 ### Improvements
 
 - Add Rails 8.1 support
-- Set minimum Ruby version to 3.0
+- Set minimum Ruby version to 3.2 and minimum Rails version to 7.2
+- Remove Rails 5 compatibility code
 - Loosen gemspec development dependency version constraints
 - Modernize CI configuration and add dedicated RuboCop workflow
 - Consolidate database configuration into `config/database.yml`
