@@ -64,16 +64,9 @@ you will get the following performance improvement:
 
 ![](benchmarks/composed.png)
 
-## Caveats
-
-- `db_belongs_to` doesn't work with SQLite due to a poor error message.
-- In Rails 4, the gem validations work differently than the ActiveRecord ones when `validate: false` option is passed to `save`/`save!`. They incorrectly return a validation message instead of raising a proper constraint violation exception. In Rails >= 5 they correctly raise the exceptions they supposed to.
-
 ## db_belongs_to
 
-Supported databases are `PostgreSQL` and `MySQL`.
-**Note**: Unfortunately, `SQLite` raises a poor error message
-by which we can not determine exact foreign key which raised an error.
+Supported databases are `PostgreSQL`, `MySQL`, and `SQLite`.
 
 ### Usage
 

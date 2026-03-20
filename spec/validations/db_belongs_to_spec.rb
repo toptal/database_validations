@@ -4,6 +4,8 @@ RSpec.describe 'db_belongs_to' do
   class Company < ActiveRecord::Base; end
   class BelongsUser < ActiveRecord::Base; end
   class DbBelongsUser < ActiveRecord::Base; end
+  class Department < ActiveRecord::Base; end
+  class MultiFkUser < ActiveRecord::Base; end
   # rubocop:enable RSpec/LeakyConstantDeclaration
   # rubocop:enable Lint/ConstantDefinitionInBlock
 
@@ -138,6 +140,53 @@ RSpec.describe 'db_belongs_to' do
         end
       end
     end
+
+    describe 'multiple db_belongs_to associations' do
+      let(:department_klass) { define_class(Department, :departments) }
+
+      let(:multi_fk_klass) do
+        define_class(MultiFkUser, :multi_fk_users) do
+          db_belongs_to :company
+          db_belongs_to :department
+        end
+      end
+
+      before do
+        ActiveRecord::Schema.define(version: 2) do
+          create_table :departments
+          create_table :multi_fk_users do |t|
+            t.belongs_to :company, foreign_key: true
+            t.belongs_to :department, foreign_key: true
+          end
+        end
+      end
+
+      it 'handles invalid company_id with valid department_id' do
+        company_klass
+        department = department_klass.create!
+        record = multi_fk_klass.new(company_id: -1, department_id: department.id)
+        expect(record.save).to be false
+        expect(record.errors[:company]).to be_present
+        expect(record.errors[:department]).to be_empty
+      end
+
+      it 'handles valid company_id with invalid department_id' do
+        company = company_klass.create!
+        department_klass
+        record = multi_fk_klass.new(company_id: company.id, department_id: -1)
+        expect(record.save).to be false
+        expect(record.errors[:department]).to be_present
+        expect(record.errors[:company]).to be_empty
+      end
+
+      it 'handles both invalid' do
+        company_klass
+        department_klass
+        record = multi_fk_klass.new(company_id: -1, department_id: -1)
+        expect(record.save).to be false
+        expect(record.errors.messages.keys).to include(:company).or include(:department)
+      end
+    end
   end
 
   describe 'postgresql' do
@@ -149,17 +198,14 @@ RSpec.describe 'db_belongs_to' do
     include_examples 'works as belongs_to'
   end
 
-  # TODO: validate options
-  # describe 'sqlite3' do
-  #   before do
-  #     define_database(sqlite_configuration)
-  #     define_tables
-  #   end
-  #
-  #   specify do
-  #     expect { db_belongs_to_user_klass }.to raise_error DatabaseValidations::Errors::UnsupportedDatabase
-  #   end
-  # end
+  describe 'sqlite3' do
+    before do
+      define_database(sqlite_configuration)
+      define_tables
+    end
+
+    include_examples 'works as belongs_to'
+  end
 
   describe 'mysql' do
     before do
