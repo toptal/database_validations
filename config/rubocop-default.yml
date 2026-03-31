@@ -1,0 +1,5 @@
+DatabaseValidations/BelongsTo:
+  Enabled: true
+
+DatabaseValidations/UniquenessOf:
+  Enabled: true
