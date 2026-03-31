@@ -24,7 +24,6 @@ and ActiveRecord validations with better performance and consistency."
   spec.metadata['default_lint_roller_plugin'] = 'RuboCop::DatabaseValidations::Plugin'
 
   spec.add_dependency 'activerecord', '>= 7.2.0'
-  spec.add_dependency 'lint_roller'
 
   spec.add_development_dependency 'benchmark-ips'
   spec.add_development_dependency 'bundler'
