@@ -1,4 +1,5 @@
 require 'lint_roller'
+require 'database_validations/version'
 
 module RuboCop
   module DatabaseValidations
