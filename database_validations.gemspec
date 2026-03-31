@@ -17,11 +17,14 @@ The main goal of the gem is to provide compatibility between database constraint
 and ActiveRecord validations with better performance and consistency."
   spec.homepage      = 'https://github.com/toptal/database_validations'
   spec.license       = 'MIT'
-  spec.files         = Dir['lib/**/*']
+  spec.files         = Dir['lib/**/*', 'config/**/*']
   spec.require_paths = ['lib']
   spec.required_ruby_version = '>= 3.2.0'
 
+  spec.metadata['default_lint_roller_plugin'] = 'RuboCop::DatabaseValidations::Plugin'
+
   spec.add_dependency 'activerecord', '>= 7.2.0'
+  spec.add_dependency 'lint_roller'
 
   spec.add_development_dependency 'benchmark-ips'
   spec.add_development_dependency 'bundler'

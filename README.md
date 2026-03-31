@@ -247,18 +247,20 @@ end
 ## Using with RuboCop
 
 DatabaseValidations provides custom cops for RuboCop to help you consistently apply the improvements.
-To use all of them, use `rubocop --require database_validations/rubocop/cops` or add to your `.rubocop.yml` file:
+
+For RuboCop >= 1.72, add the plugin to your `.rubocop.yml` file:
+
+```yaml
+plugins:
+  - database_validations:
+      require_path: rubocop-database_validations
+```
+
+For older versions of RuboCop, use `require` instead:
 
 ```yaml
 require:
   - database_validations/rubocop/cops
-```
-
-Or you case use some specific cop directly:
-```yaml
-require:
-  - database_validations/rubocop/cop/belongs_to
-  - database_validations/rubocop/cop/uniqueness_of
 ```
 
 ## Development

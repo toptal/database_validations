@@ -1,4 +1,4 @@
-require 'rubocop'
+require 'rubocop-database_validations'
 require 'rubocop/rspec/support'
 require 'database_validations/rubocop/cops'
 
