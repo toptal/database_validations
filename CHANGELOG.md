@@ -1,6 +1,10 @@
 # Changelog
 
-## [2.0.0] - 20-03-2026
+## Unreleased - xxxx-xx-xx
+
+- Add RuboCop plugin system via LintRoller for RuboCop >= 1.72
+
+## [2.0.0] - 2026-03-20
 ### Improvements
 
 - Add Rails 8.1 support
