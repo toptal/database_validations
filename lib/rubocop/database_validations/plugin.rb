@@ -16,7 +16,7 @@ module RuboCop
         context.engine == :rubocop
       end
 
-      def rules(context)
+      def rules(_context)
         LintRoller::Rules.new(
           type: :path,
           config_format: :rubocop,

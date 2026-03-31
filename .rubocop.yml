@@ -18,6 +18,7 @@ AllCops:
 
 Naming/FileName:
   Exclude:
+    - 'lib/rubocop-database_validations.rb'
     - 'example/Gemfile'
     - 'example/Rakefile'
 
