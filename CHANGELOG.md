@@ -2,6 +2,7 @@
 
 ## Unreleased - xxxx-xx-xx
 
+## [2.1.0] - 2026-03-31
 - Add RuboCop plugin system via LintRoller for RuboCop >= 1.72
 
 ## [2.0.0] - 2026-03-20
