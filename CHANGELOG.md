@@ -2,6 +2,9 @@
 
 ## Unreleased - xxxx-xx-xx
 
+## [2.1.1] - 2026-03-31
+- `lint_roller` is removed as dependency. It is not needed
+
 ## [2.1.0] - 2026-03-31
 - Add RuboCop plugin system via LintRoller for RuboCop >= 1.72
 
