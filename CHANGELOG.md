@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased - xxxx-xx-xx
+- Fix `validates_db_uniqueness_of` raising `NoMethodError` on PostgreSQL when the table has row-level security. PostgreSQL omits the `Key (...)=(...)` detail from the unique violation there, so the error is now matched by its index name only
 
 ## [2.1.1] - 2026-03-31
 - `lint_roller` is removed as dependency. It is not needed
