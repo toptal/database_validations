@@ -13,8 +13,6 @@ RSpec.describe 'Adapter.unique_error_columns' do
       expect(described_class.unique_error_columns(error)).to eq(%w[a b])
     end
 
-    # PostgreSQL leaves the detail out when row-level security applies to the table. The index name is still in
-    # the message, and that is what the validators are found by.
     it 'returns nil when the error has no detail' do
       error = build_error(
         'PG::UniqueViolation: ERROR:  duplicate key value violates unique constraint "index_entities_on_a_and_b"'

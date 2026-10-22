@@ -1,7 +1,5 @@
 RSpec.describe '.validates_db_uniqueness_of with PostgreSQL row-level security' do
-  # PostgreSQL leaves the `DETAIL:  Key (...)=(...) already exists.` line out of a unique violation on a table
-  # that the current role is subject to row-level security on, because the values could belong to a row the role
-  # cannot see. Such an error can only be matched by the name of the index.
+  # End to end for a unique violation that carries no `DETAIL` line: see `PostgresqlAdapter.unique_error_columns`.
   let(:role) { 'database_validations_rls_probe' }
   let(:connection) { ActiveRecord::Base.connection }
 
