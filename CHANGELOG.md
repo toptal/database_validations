@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased - xxxx-xx-xx
+- `db_belongs_to` handles a violated composite foreign key on PostgreSQL. Its error names every column of the key, `Key (tenant_id, company_id)`; each is now a candidate, so the association's `must exist` error is added instead of the exception being raised
 - Fix `validates_db_uniqueness_of` raising `NoMethodError` on PostgreSQL when the table has row-level security. PostgreSQL omits the `Key (...)=(...)` detail from the unique violation there, so the error is now matched by its index name only
 
 ## [2.1.1] - 2026-03-31

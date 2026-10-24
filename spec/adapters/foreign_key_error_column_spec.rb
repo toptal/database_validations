@@ -13,6 +13,15 @@ RSpec.describe 'Adapter.foreign_key_error_column' do
       )
       expect(described_class.foreign_key_error_column(error)).to eq(['company_id'])
     end
+
+    it 'extracts every column of a composite key' do
+      error = build_error(
+        message: 'PG::ForeignKeyViolation: ERROR:  insert or update on table "db_belongs_users" violates ' \
+                 'foreign key constraint "fk_tenant_company" DETAIL:  Key (tenant_id, company_id)=(2, 1) is not ' \
+                 'present in table "companies".'
+      )
+      expect(described_class.foreign_key_error_column(error)).to eq(%w[tenant_id company_id])
+    end
   end
 
   describe DatabaseValidations::Adapters::MysqlAdapter do

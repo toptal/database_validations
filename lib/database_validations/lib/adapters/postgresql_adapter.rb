@@ -15,9 +15,11 @@ module DatabaseValidations
           error.message[/Key \((.+)\)=/, 1]&.split(', ')
         end
 
+        # A composite key reports every column, `Key (tenant_id, company_id)=(1, 2)`; each is a candidate, and the
+        # rescuer picks the one with a matching `db_belongs_to`.
         def foreign_key_error_column(error)
-          column = error.message[/Key \(([^)]+)\)/, 1]
-          column ? [column] : []
+          columns = error.message[/Key \(([^)]+)\)/, 1]
+          columns ? columns.split(', ') : []
         end
       end
     end
