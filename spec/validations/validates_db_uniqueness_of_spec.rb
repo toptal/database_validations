@@ -8,6 +8,13 @@ RSpec.describe '.validates_db_uniqueness_of' do
 
       before { parent_class.create!(persisted_attrs) unless skip_persisted }
 
+      # Rails main (8.2.0.alpha) adds the conflicting record's id to uniqueness error details as `existing_id`.
+      # db_uniqueness's error on save comes from the unique violation, which carries no id, so the id is taken out
+      # of app_uniqueness's details before comparing.
+      def details_without_existing_id(record)
+        record.errors.details.to_h.transform_values { |details| details.map { |detail| detail.except(:existing_id) } }
+      end
+
       describe 'valid?' do
         it 'makes a query for validation' do
           expect { db_uniqueness.new(persisted_attrs).valid? }
@@ -74,7 +81,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
           expect(new.errors.details).to be_present
 
           expect(old.errors.messages.to_h).to include(new.errors.messages.to_h)
-          expect(old.errors.details.to_h).to include(new.errors.details.to_h)
+          expect(details_without_existing_id(old)).to include(new.errors.details.to_h)
         end
 
         context 'when wrapped by transaction' do
@@ -91,7 +98,7 @@ RSpec.describe '.validates_db_uniqueness_of' do
             expect(new.errors.details).to be_present
 
             expect(old.errors.messages.to_h).to include(new.errors.messages.to_h)
-            expect(old.errors.details.to_h).to include(new.errors.details.to_h)
+            expect(details_without_existing_id(old)).to include(new.errors.details.to_h)
           end
         end
       end

@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ['lawliet.djez@gmail.com']
   spec.summary       = 'Provide compatibility between database constraints
 and ActiveRecord validations with better performance and consistency.'
-  spec.description   = "ActiveRecord provides validations on app level but it won't guarantee the
+  spec.description = "ActiveRecord provides validations on app level but it won't guarantee the
 consistent. In some cases, like `validates_uniqueness_of` it executes
 additional SQL query to the database and that is not very efficient.
 

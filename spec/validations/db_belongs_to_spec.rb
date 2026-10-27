@@ -142,7 +142,7 @@ RSpec.describe 'db_belongs_to' do
       end
     end
 
-    describe 'multiple db_belongs_to associations' do # rubocop:disable RSpec/MultipleMemoizedHelpers:
+    describe 'multiple db_belongs_to associations' do # rubocop:disable RSpec/MultipleMemoizedHelpers
       let(:department_klass) { define_class(Department, :departments) }
 
       let(:multi_fk_klass) do
