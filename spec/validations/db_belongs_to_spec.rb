@@ -6,6 +6,7 @@ RSpec.describe 'db_belongs_to' do
   class DbBelongsUser < ActiveRecord::Base; end
   class Department < ActiveRecord::Base; end
   class MultiFkUser < ActiveRecord::Base; end
+  class TenantUser < ActiveRecord::Base; end
   # rubocop:enable RSpec/LeakyConstantDeclaration
   # rubocop:enable Lint/ConstantDefinitionInBlock
 
@@ -196,6 +197,34 @@ RSpec.describe 'db_belongs_to' do
     end
 
     include_examples 'works as belongs_to'
+
+    describe 'a composite foreign key that leads with a tenant column' do
+      let(:tenant_user_klass) do
+        define_class(TenantUser, :tenant_users) do
+          db_belongs_to :company
+        end
+      end
+
+      before do
+        ActiveRecord::Schema.define(version: 3) do
+          add_column :companies, :tenant_id, :integer, null: false, default: 1
+          add_index :companies, %i[id tenant_id], unique: true
+          create_table :tenant_users do |t|
+            t.integer :tenant_id, null: false, default: 1
+            t.belongs_to :company, foreign_key: true
+          end
+          add_foreign_key :tenant_users, :companies, column: %i[tenant_id company_id], primary_key: %i[tenant_id id]
+        end
+      end
+
+      it "adds the association's error for a parent of another tenant" do
+        company = company_klass.create!(tenant_id: 1)
+        record = tenant_user_klass.new(company_id: company.id, tenant_id: 2)
+
+        expect(record.save).to be false
+        expect(record.errors[:company]).to be_present
+      end
+    end
   end
 
   describe 'sqlite3' do
