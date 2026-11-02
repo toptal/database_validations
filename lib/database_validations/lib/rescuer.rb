@@ -50,22 +50,23 @@ module DatabaseValidations
     end
 
     def find_matching_validator(instance, keys)
-      first_match = nil
+      last_match = nil
 
       keys.each do |key|
         attribute_validator = instance._db_validators[key]
         next unless attribute_validator
 
-        first_match ||= attribute_validator
+        last_match = attribute_validator
 
         next if (keys.size > 1) && !foreign_key_invalid?(instance, attribute_validator)
 
         return attribute_validator
       end
 
-      # TOCTOU fallback: if disambiguate queries all passed (concurrent insert),
-      # use the first matching validator rather than leaving the error unhandled.
-      first_match
+      # Every candidate's row exists: the key refuses the combination, as a composite key that leads with a tenant
+      # column does for a parent of another tenant, or a concurrent change removed the row (TOCTOU). The last
+      # matching column is the parent's in such a key, not the tenant's, so its association gets the error.
+      last_match
     end
 
     def foreign_key_invalid?(instance, attribute_validator)

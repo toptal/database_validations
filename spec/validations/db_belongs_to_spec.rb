@@ -8,6 +8,7 @@ RSpec.describe 'db_belongs_to' do
   class MultiFkUser < ActiveRecord::Base; end
   class TenantUser < ActiveRecord::Base; end
   class TenantAccount < ActiveRecord::Base; end
+  class Tenant < ActiveRecord::Base; end
   # rubocop:enable RSpec/LeakyConstantDeclaration
   # rubocop:enable Lint/ConstantDefinitionInBlock
 
@@ -224,6 +225,31 @@ RSpec.describe 'db_belongs_to' do
 
         expect(record.save).to be false
         expect(record.errors[:company]).to be_present
+      end
+
+      describe 'with the tenant declared too' do
+        before do
+          ActiveRecord::Schema.define(version: 5) do
+            create_table :tenants
+            add_foreign_key :tenant_users, :tenants, column: :tenant_id
+          end
+          Tenant.reset_column_information
+          Tenant.create!(id: 1)
+          Tenant.create!(id: 2)
+        end
+
+        it "adds the parent's error, not the tenant's, for a parent of another tenant" do
+          record_klass = define_class(TenantUser, :tenant_users) do
+            db_belongs_to :tenant
+            db_belongs_to :company
+          end
+          company = company_klass.create!(tenant_id: 1)
+          record = record_klass.new(company_id: company.id, tenant_id: 2)
+
+          expect(record.save).to be false
+          expect(record.errors[:company]).to be_present
+          expect(record.errors[:tenant]).to be_empty
+        end
       end
 
       describe "a child's key failing inside the record's save" do
