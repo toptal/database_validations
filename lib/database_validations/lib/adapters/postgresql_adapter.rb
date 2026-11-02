@@ -21,6 +21,11 @@ module DatabaseValidations
           columns = error.message[/Key \(([^)]+)\)/, 1]
           columns ? columns.split(', ') : []
         end
+
+        # `insert or update on table "tenant_users" violates foreign key constraint ...`
+        def foreign_key_error_table(error)
+          error.message[/on table "([^"]+)"/, 1]
+        end
       end
     end
   end

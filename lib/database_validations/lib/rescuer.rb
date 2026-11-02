@@ -9,9 +9,19 @@ module DatabaseValidations
       when ActiveRecord::RecordNotUnique
         process(validate, instance, error, for_unique_index: :unique_index_name, for_db_uniqueness: :unique_error_columns)
       when ActiveRecord::InvalidForeignKey
+        return false unless own_table?(instance, error)
+
         process(validate, instance, error, for_db_presence: :foreign_key_error_column)
       else false
       end
+    end
+
+    # A foreign key of another table, a child saved along with the instance, is not the instance's to report: a
+    # composite key shares columns with the instance's own associations (`tenant_id`), so matching by column alone
+    # would pin the child's failure on one of them. A table the adapter cannot read is not ruled out.
+    def own_table?(instance, error)
+      table = Adapters.factory(instance.class).foreign_key_error_table(error)
+      table.nil? || table == instance.class.table_name.to_s.split('.').last
     end
 
     def process(validate, instance, error, key_types)
