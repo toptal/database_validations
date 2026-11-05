@@ -26,6 +26,13 @@ module DatabaseValidations
         def foreign_key_error_table(error)
           error.message[/on table "([^"]+)"/, 1]
         end
+
+        # PostgreSQL leaves the columns out, `DETAIL:  Key is not present in table "companies".`, when the table the
+        # key is on has row-level security for the current role, because the values could belong to a row the role
+        # cannot see. The constraint is still named, and its columns are the table's to answer.
+        def foreign_key_error_constraint(error)
+          error.message[/violates foreign key constraint "([^"]+)"/, 1]
+        end
       end
     end
   end

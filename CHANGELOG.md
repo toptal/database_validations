@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased - xxxx-xx-xx
+- Fix `db_belongs_to` raising `ActiveRecord::InvalidForeignKey` on PostgreSQL when the table the key is on has row-level security. PostgreSQL omits the `Key (...)=(...)` values from the violation there, `Key is not present in table "companies"`, so the columns are now read from the constraint the message names
 - Fix `db_belongs_to` reporting a composite key's tenant association instead of the parent's. When every column's row exists, the key refuses the combination (a parent of another tenant); the error went to the first matching association, the tenant's in a key that leads with it, and now goes to the last, the parent's
 - Fix `db_belongs_to` reporting a foreign key violated by another table as the record's own. A child saved inside the record's save (a callback, an autosaved association) whose key shares a column with one of the record's `db_belongs_to` associations, such as a composite key's tenant column, had its failure added as that association's `must exist` error, so `save` returned `false` instead of raising. The violation is now handled only when its table is the record's: PostgreSQL and MySQL name it in the message, SQLite in the failed statement; when it cannot be read, as before
 

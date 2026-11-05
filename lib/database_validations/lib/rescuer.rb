@@ -11,7 +11,8 @@ module DatabaseValidations
       when ActiveRecord::InvalidForeignKey
         return false unless own_table?(instance, error)
 
-        process(validate, instance, error, for_db_presence: :foreign_key_error_column)
+        keys = foreign_key_columns(instance, error).map { |column| KeyGenerator.for_db_presence(column) }
+        process_keys(validate, instance, keys)
       else false
       end
     end
@@ -24,8 +25,25 @@ module DatabaseValidations
       table.nil? || table == instance.class.table_name.to_s.split('.').last
     end
 
+    # The columns the error names, or, where the message leaves them out, the columns of the constraint it names.
+    def foreign_key_columns(instance, error)
+      adapter = Adapters.factory(instance.class)
+      columns = adapter.foreign_key_error_column(error)
+      return columns if columns.any? || !adapter.respond_to?(:foreign_key_error_constraint)
+
+      key = foreign_key_named(instance, adapter.foreign_key_error_constraint(error))
+      key ? Array(key.column).map(&:to_s) : []
+    end
+
+    def foreign_key_named(instance, name)
+      name && instance.class.connection.foreign_keys(instance.class.table_name).find { |key| key.name == name }
+    end
+
     def process(validate, instance, error, key_types)
-      keys = resolve_keys(instance, error, key_types)
+      process_keys(validate, instance, resolve_keys(instance, error, key_types))
+    end
+
+    def process_keys(validate, instance, keys)
       attribute_validator = find_matching_validator(instance, keys)
       return false unless attribute_validator
 
@@ -35,17 +53,10 @@ module DatabaseValidations
     def resolve_keys(instance, error, key_types)
       adapter = Adapters.factory(instance.class)
 
-      key_types.flat_map do |key_generator, error_processor|
-        result = adapter.public_send(error_processor, error)
-
-        # FK adapters return an array of candidate columns, each generating a
-        # separate key. Uniqueness adapters return columns that form a single
-        # composite key, passed together to the key generator.
-        if key_generator == :for_db_presence
-          Array(result).map { |column| KeyGenerator.public_send(key_generator, column) }
-        else
-          [KeyGenerator.public_send(key_generator, result)]
-        end
+      # Uniqueness adapters return the columns of a single composite key, passed together to the key generator. A
+      # foreign key's candidate columns each make a key of their own (`foreign_key_columns`).
+      key_types.map do |key_generator, error_processor|
+        KeyGenerator.public_send(key_generator, adapter.public_send(error_processor, error))
       end
     end
 
