@@ -14,6 +14,11 @@ module DatabaseValidations
           column = error.message[/FOREIGN KEY \(`([^`]+)`\)/, 1]
           column ? [column] : []
         end
+
+        # `a foreign key constraint fails (`db`.`tenant_users`, CONSTRAINT ...`
+        def foreign_key_error_table(error)
+          error.message[/fails \(`[^`]+`\.`([^`]+)`/, 1]
+        end
       end
     end
   end
