@@ -9,13 +9,41 @@ module DatabaseValidations
       when ActiveRecord::RecordNotUnique
         process(validate, instance, error, for_unique_index: :unique_index_name, for_db_uniqueness: :unique_error_columns)
       when ActiveRecord::InvalidForeignKey
-        process(validate, instance, error, for_db_presence: :foreign_key_error_column)
+        return false unless own_table?(instance, error)
+
+        keys = foreign_key_columns(instance, error).map { |column| KeyGenerator.for_db_presence(column) }
+        process_keys(validate, instance, keys)
       else false
       end
     end
 
+    # A foreign key of another table, a child saved along with the instance, is not the instance's to report: a
+    # composite key shares columns with the instance's own associations (`tenant_id`), so matching by column alone
+    # would pin the child's failure on one of them. A table the adapter cannot read is not ruled out.
+    def own_table?(instance, error)
+      table = Adapters.factory(instance.class).foreign_key_error_table(error)
+      table.nil? || table == instance.class.table_name.to_s.split('.').last
+    end
+
+    # The columns the error names, or, where the message leaves them out, the columns of the constraint it names.
+    def foreign_key_columns(instance, error)
+      adapter = Adapters.factory(instance.class)
+      columns = adapter.foreign_key_error_column(error)
+      return columns if columns.any? || !adapter.respond_to?(:foreign_key_error_constraint)
+
+      key = foreign_key_named(instance, adapter.foreign_key_error_constraint(error))
+      key ? Array(key.column).map(&:to_s) : []
+    end
+
+    def foreign_key_named(instance, name)
+      name && instance.class.connection.foreign_keys(instance.class.table_name).find { |key| key.name == name }
+    end
+
     def process(validate, instance, error, key_types)
-      keys = resolve_keys(instance, error, key_types)
+      process_keys(validate, instance, resolve_keys(instance, error, key_types))
+    end
+
+    def process_keys(validate, instance, keys)
       attribute_validator = find_matching_validator(instance, keys)
       return false unless attribute_validator
 
@@ -25,37 +53,31 @@ module DatabaseValidations
     def resolve_keys(instance, error, key_types)
       adapter = Adapters.factory(instance.class)
 
-      key_types.flat_map do |key_generator, error_processor|
-        result = adapter.public_send(error_processor, error)
-
-        # FK adapters return an array of candidate columns, each generating a
-        # separate key. Uniqueness adapters return columns that form a single
-        # composite key, passed together to the key generator.
-        if key_generator == :for_db_presence
-          Array(result).map { |column| KeyGenerator.public_send(key_generator, column) }
-        else
-          [KeyGenerator.public_send(key_generator, result)]
-        end
+      # Uniqueness adapters return the columns of a single composite key, passed together to the key generator. A
+      # foreign key's candidate columns each make a key of their own (`foreign_key_columns`).
+      key_types.map do |key_generator, error_processor|
+        KeyGenerator.public_send(key_generator, adapter.public_send(error_processor, error))
       end
     end
 
     def find_matching_validator(instance, keys)
-      first_match = nil
+      last_match = nil
 
       keys.each do |key|
         attribute_validator = instance._db_validators[key]
         next unless attribute_validator
 
-        first_match ||= attribute_validator
+        last_match = attribute_validator
 
         next if (keys.size > 1) && !foreign_key_invalid?(instance, attribute_validator)
 
         return attribute_validator
       end
 
-      # TOCTOU fallback: if disambiguate queries all passed (concurrent insert),
-      # use the first matching validator rather than leaving the error unhandled.
-      first_match
+      # Every candidate's row exists: the key refuses the combination, as a composite key that leads with a tenant
+      # column does for a parent of another tenant, or a concurrent change removed the row (TOCTOU). The last
+      # matching column is the parent's in such a key, not the tenant's, so its association gets the error.
+      last_match
     end
 
     def foreign_key_invalid?(instance, attribute_validator)

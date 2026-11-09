@@ -12,6 +12,13 @@ module DatabaseValidations
           error.message.scan(/\w+\.([^,:]+)/).flatten
         end
 
+        # SQLite's message names no table; the failed statement does.
+        def foreign_key_error_table(error)
+          return unless error.respond_to?(:sql) && error.sql
+
+          error.sql[/\A\s*(?:INSERT\s+INTO|UPDATE)\s+"?([^"\s(]+)"?/i, 1]
+        end
+
         def foreign_key_error_column(error)
           return [] unless error.respond_to?(:sql) && error.sql
 
